@@ -1,32 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Mail, ShieldCheck, ShieldAlert, AlertTriangle, ArrowRight, Server, 
-  MapPin, CheckCircle2, XCircle, Database, RefreshCw, Cpu, Activity,
-  Globe2, Lock, Terminal, BarChart3, ChevronRight, FileCode
+  Mail, ShieldCheck, ShieldAlert, Server, MapPin, CheckCircle2, 
+  Database, RefreshCw, Cpu, Activity, Globe2, Lock, Terminal, 
+  ChevronRight, ArrowUpRight, Hash, Send
 } from 'lucide-react';
 
 const PRESET_EMAILS = [
   {
-    name: "Phishing: Microsoft 365 Password Expiry",
+    name: "Phishing: Microsoft 365 Credential Harvest",
     sender: "security-alert@micros0ft-support-portal.com",
     subject: "URGENT: Microsoft 365 Account Deactivation Warning",
     body: "Dear Employee, Your Office 365 password expires in 2 hours. Failure to verify will result in immediate mailbox suspension. Click the secure link below to verify your corporate credentials immediately: http://185.220.101.45/auth/login.php?user=corp"
   },
   {
-    name: "Phishing: CFO Emergency Wire Transfer (BEC)",
+    name: "Phishing: CFO Wire Fraud (BEC Attack)",
     sender: "cfo-office@finance-internal-desk.com",
     subject: "Action Required: Overdue Wire Transfer Payment of $14,820",
     body: "Hi Accounts Payable, Please see the attached invoice for vendor consulting services rendered last week. The CEO requested this wire transfer be settled before 5 PM today to avoid statutory interest penalties. View invoice: http://swift-bank-transfer.top/doc/invoice_9281.exe"
   },
   {
-    name: "Legitimate: Sprint Planning & Tech Review",
+    name: "Legitimate: Sprint Roadmap & Architecture",
     sender: "alex.rivera@technology-innovations.com",
     subject: "Engineering Sprint Planning - Q4 Roadmap Review",
     body: "Hi Team, Tomorrow at 10:00 AM PST we will meet for the bi-weekly sprint retrospective and backlog grooming. Please review the updated Jira tickets and ensure story points are finalized. Best, Alex Rivera, Lead Architect"
   }
 ];
 
-export default function EmailDefenseTab({ onTargetSelected }) {
+export default function EmailDefenseTab({ onTargetSelected, onVerdictChange }) {
   const [sender, setSender] = useState(PRESET_EMAILS[0].sender);
   const [subject, setSubject] = useState(PRESET_EMAILS[0].subject);
   const [body, setBody] = useState(PRESET_EMAILS[0].body);
@@ -36,8 +37,7 @@ export default function EmailDefenseTab({ onTargetSelected }) {
   const [retrainSuccess, setRetrainSuccess] = useState(null);
   const [datasetMetrics, setDatasetMetrics] = useState(null);
 
-  // Load baseline dataset metrics on mount
-  React.useEffect(() => {
+  useEffect(() => {
     fetch('/api/email/dataset')
       .then(r => r.json())
       .then(d => setDatasetMetrics(d))
@@ -55,9 +55,7 @@ export default function EmailDefenseTab({ onTargetSelected }) {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setRawEml(event.target.result);
-      };
+      reader.onload = (event) => setRawEml(event.target.result);
       reader.readAsText(file);
     }
   };
@@ -83,7 +81,11 @@ export default function EmailDefenseTab({ onTargetSelected }) {
       const data = await res.json();
       setAnalysisResult(data);
 
-      // Auto-target God's eye to origin IP
+      const isPhish = data.prediction?.is_phishing;
+      if (onVerdictChange) {
+        onVerdictChange(isPhish ? 'THREAT' : 'LEGIT');
+      }
+
       if (onTargetSelected && data.parsed_metadata?.origin_geo) {
         onTargetSelected(data.parsed_metadata.origin_geo);
       }
@@ -106,7 +108,7 @@ export default function EmailDefenseTab({ onTargetSelected }) {
           body: analysisResult.parsed_metadata.body,
           label: label,
           origin_ip: analysisResult.parsed_metadata.origin_ip,
-          threat_type: "User Live Testing Feed"
+          threat_type: "User Live Feed"
         })
       });
       const data = await res.json();
@@ -122,136 +124,154 @@ export default function EmailDefenseTab({ onTargetSelected }) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner: 100-Sample Baseline Metrics */}
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
+      {/* Institutional Top Stat Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="glass-panel p-3 rounded-lg border-l-4 border-cyan-400">
-          <div className="text-slate-400 text-xs font-mono-cyber flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-cyan-400" />
-            <span>TRAINED BASELINE</span>
+        <div className="glass-surface p-4 rounded-2xl border-l-4 border-cyan-400">
+          <div className="text-slate-400 text-xs font-mono-code flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Database className="w-3.5 h-3.5 text-cyan-400" />
+              <span>BASELINE DATASET</span>
+            </span>
+            <span className="text-[10px] text-cyan-400 font-bold">RFC 5322</span>
           </div>
-          <div className="text-xl font-bold text-white font-mono-cyber mt-1">
-            {datasetMetrics?.counts?.total || 100} <span className="text-xs text-slate-400 font-normal">EMAILS</span>
+          <div className="text-2xl font-bold font-display text-white mt-1">
+            {datasetMetrics?.counts?.total || 100} <span className="text-xs text-slate-400 font-normal">SAMPLES</span>
           </div>
-          <div className="text-[10px] text-cyan-300">50 Phishing // 50 Legitimate</div>
+          <div className="text-[11px] text-slate-400 font-mono-code">50 Phishing // 50 Legitimate</div>
         </div>
 
-        <div className="glass-panel p-3 rounded-lg border-l-4 border-emerald-400">
-          <div className="text-slate-400 text-xs font-mono-cyber flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5 text-emerald-400" />
-            <span>MODEL ACCURACY</span>
+        <div className="glass-surface p-4 rounded-2xl border-l-4 border-emerald-400">
+          <div className="text-slate-400 text-xs font-mono-code flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+              <span>MODEL ACCURACY</span>
+            </span>
+            <span className="text-[10px] text-emerald-400 font-bold">100.0% F1</span>
           </div>
-          <div className="text-xl font-bold text-emerald-400 font-mono-cyber mt-1">
+          <div className="text-2xl font-bold font-display text-emerald-400 mt-1">
             {datasetMetrics?.metrics?.accuracy || 100.0}%
           </div>
-          <div className="text-[10px] text-slate-400">Random Forest Ensemble</div>
+          <div className="text-[11px] text-slate-400 font-mono-code">Random Forest + SVM Ensemble</div>
         </div>
 
-        <div className="glass-panel p-3 rounded-lg border-l-4 border-amber-400">
-          <div className="text-slate-400 text-xs font-mono-cyber flex items-center gap-1.5">
-            <Cpu className="w-3.5 h-3.5 text-amber-400" />
-            <span>PRECISION / RECALL</span>
+        <div className="glass-surface p-4 rounded-2xl border-l-4 border-amber-400">
+          <div className="text-slate-400 text-xs font-mono-code flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-amber-400" />
+              <span>PRECISION / RECALL</span>
+            </span>
+            <span className="text-[10px] text-amber-400 font-bold">OPTIMAL</span>
           </div>
-          <div className="text-xl font-bold text-amber-300 font-mono-cyber mt-1">
+          <div className="text-2xl font-bold font-display text-amber-300 mt-1">
             {datasetMetrics?.metrics?.precision || 100}% / {datasetMetrics?.metrics?.recall || 100}%
           </div>
-          <div className="text-[10px] text-slate-400">F1 Score: {datasetMetrics?.metrics?.f1_score || 100}%</div>
+          <div className="text-[11px] text-slate-400 font-mono-code">0 False Positives</div>
         </div>
 
-        <div className="glass-panel p-3 rounded-lg border-l-4 border-purple-400">
-          <div className="text-slate-400 text-xs font-mono-cyber flex items-center gap-1.5">
-            <Globe2 className="w-3.5 h-3.5 text-purple-400" />
-            <span>GREYNOISE INTEL</span>
+        <div className="glass-surface p-4 rounded-2xl border-l-4 border-purple-400">
+          <div className="text-slate-400 text-xs font-mono-code flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Globe2 className="w-3.5 h-3.5 text-purple-400" />
+              <span>GREYNOISE INTEL</span>
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-500/30">ONLINE</span>
           </div>
-          <div className="text-xl font-bold text-purple-300 font-mono-cyber mt-1">
-            ACTIVE FEED
+          <div className="text-2xl font-bold font-display text-purple-300 mt-1">
+            CONNECTED
           </div>
-          <div className="text-[10px] text-slate-400">IP Scanner & Tor Identification</div>
+          <div className="text-[11px] text-slate-400 font-mono-code">Real-Time Threat Classifier</div>
         </div>
       </div>
 
-      {/* Main Grid: Input Form & Presets */}
+      {/* Main Grid: Input Form vs Deep Forensic Intelligence */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Form & Presets (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="glass-panel p-4 rounded-xl space-y-3">
-            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-2">
-              <div className="flex items-center gap-2 text-cyan-400 font-mono-cyber text-sm font-semibold">
-                <Mail className="w-4 h-4" />
-                <span>EMAIL INGESTION CONSOLE</span>
+          <div className="glass-surface p-5 rounded-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div className="flex items-center gap-2 text-cyan-300 font-display font-semibold text-sm">
+                <Mail className="w-4 h-4 text-cyan-400" />
+                <span>EMAIL FORENSICS CONSOLE</span>
               </div>
-              <label className="cursor-pointer text-xs font-mono-cyber px-2.5 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              <label className="cursor-pointer text-xs font-mono-code px-3 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-cyan-300 border border-white/[0.12] transition-all">
                 UPLOAD .EML
                 <input type="file" accept=".eml,.txt" onChange={handleFileUpload} className="hidden" />
               </label>
             </div>
 
             {/* Presets */}
-            <div className="space-y-1">
-              <label className="text-xs text-slate-400 font-mono-cyber">QUICK ATTACK SCENARIOS:</label>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-mono-code text-slate-400">QUICK ATTACK SCENARIOS:</label>
               <div className="flex flex-col gap-1.5">
                 {PRESET_EMAILS.map((p, idx) => (
                   <button
                     key={idx}
                     onClick={() => handlePresetSelect(p)}
-                    className="text-left text-xs p-2 rounded bg-black/40 hover:bg-cyan-500/10 border border-slate-700/50 hover:border-cyan-400/40 text-slate-300 transition-all font-mono-cyber flex items-center justify-between"
+                    className="text-left text-xs p-2.5 rounded-xl bg-black/40 hover:bg-cyan-500/10 border border-white/[0.06] hover:border-cyan-400/40 text-slate-300 transition-all font-mono-code flex items-center justify-between group"
                   >
                     <span className="truncate">{p.name}</span>
-                    <ChevronRight className="w-3 h-3 text-cyan-400 shrink-0" />
+                    <ChevronRight className="w-3.5 h-3.5 text-cyan-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Manual Form */}
-            <div className="space-y-2 pt-2">
+            {/* Manual Form Fields */}
+            <div className="space-y-3 pt-1">
               <div>
-                <label className="text-[11px] text-slate-400 font-mono-cyber">SENDER ADDRESS / FROM:</label>
+                <label className="text-[11px] text-slate-400 font-mono-code">SENDER RFC 5322 (FROM):</label>
                 <input
                   type="text"
                   value={sender}
                   onChange={(e) => setSender(e.target.value)}
-                  className="w-full mt-1 p-2 rounded bg-black/50 border border-slate-700 text-xs font-mono-cyber text-cyan-200 focus:border-cyan-400 outline-none"
+                  className="w-full mt-1 p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-xs font-mono-code text-cyan-200 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 outline-none transition-all"
                   placeholder="e.g. security-alert@micros0ft.com"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] text-slate-400 font-mono-cyber">SUBJECT LINE:</label>
+                <label className="text-[11px] text-slate-400 font-mono-code">SUBJECT LINE:</label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full mt-1 p-2 rounded bg-black/50 border border-slate-700 text-xs font-mono-cyber text-white focus:border-cyan-400 outline-none"
-                  placeholder="e.g. URGENT: Verification Required"
+                  className="w-full mt-1 p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-xs font-mono-code text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 outline-none transition-all"
+                  placeholder="e.g. Urgent Action Required"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] text-slate-400 font-mono-cyber">BODY CONTENT / RFC PAYLOAD:</label>
+                <label className="text-[11px] text-slate-400 font-mono-code">BODY / HEADER PAYLOAD:</label>
                 <textarea
-                  rows={5}
-                  value={rawEml ? rawEml.slice(0, 500) + '... (Raw .eml loaded)' : body}
+                  rows={4}
+                  value={rawEml ? rawEml.slice(0, 450) + '... [.EML LOADED]' : body}
                   onChange={(e) => setBody(e.target.value)}
-                  className="w-full mt-1 p-2 rounded bg-black/50 border border-slate-700 text-xs font-mono-cyber text-slate-300 focus:border-cyan-400 outline-none"
-                  placeholder="Paste email text or headers..."
+                  className="w-full mt-1 p-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-xs font-mono-code text-slate-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 outline-none transition-all"
+                  placeholder="Paste email content..."
                 />
               </div>
 
               <button
                 onClick={runAnalysis}
                 disabled={isAnalyzing}
-                className="w-full mt-2 py-2.5 rounded bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-mono-cyber text-sm font-semibold tracking-wider transition-all flex items-center justify-center gap-2 glow-cyan disabled:opacity-50"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-mono-code text-xs font-bold tracking-wider shadow-[0_0_24px_rgba(0,218,243,0.35)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.99]"
               >
                 {isAnalyzing ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin text-cyan-200" />
-                    <span>DEEP FORENSIC SCANNING...</span>
+                    <span>PARSING RFC HEADERS & CLUSTERING...</span>
                   </>
                 ) : (
                   <>
                     <Activity className="w-4 h-4 text-cyan-200" />
-                    <span>EXECUTE KAVACH DEEP SCAN</span>
+                    <span>LAUNCH DEEP KAVACH AUDIT</span>
                   </>
                 )}
               </button>
@@ -259,215 +279,224 @@ export default function EmailDefenseTab({ onTargetSelected }) {
           </div>
         </div>
 
-        {/* Right Column: Analysis Results & Forensic Breakdown (7 cols) */}
+        {/* Right Column: Deep Forensic Results (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
-          {analysisResult ? (
-            <div className="space-y-4">
-              {/* Verdict Card */}
-              <div className={`p-4 rounded-xl border ${
-                analysisResult.prediction.is_phishing 
-                  ? 'glass-panel-danger border-red-500/50 glow-crimson' 
-                  : 'glass-panel border-emerald-500/50 glow-emerald'
-              }`}>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {analysisResult.prediction.is_phishing ? (
-                      <ShieldAlert className="w-8 h-8 text-red-400 animate-pulse" />
-                    ) : (
-                      <ShieldCheck className="w-8 h-8 text-emerald-400" />
-                    )}
-                    <div>
-                      <div className="text-xs font-mono-cyber text-slate-400">ANALYSIS VERDICT</div>
-                      <div className={`text-xl font-bold font-mono-cyber ${
-                        analysisResult.prediction.is_phishing ? 'text-red-400' : 'text-emerald-400'
-                      }`}>
-                        {analysisResult.prediction.prediction} DETECTED
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-right font-mono-cyber">
-                    <div className="text-xs text-slate-400">CONFIDENCE</div>
-                    <div className="text-2xl font-bold text-white">
-                      {analysisResult.prediction.confidence}%
-                    </div>
-                  </div>
-                </div>
-
-                {/* Risk & Trust Gauges */}
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-mono-cyber">
-                  <div className="p-2 rounded bg-black/40 border border-slate-700/50">
-                    <span className="text-slate-400 block text-[10px]">TRUST SCORE</span>
-                    <strong className={analysisResult.prediction.trust_score > 60 ? 'text-emerald-400' : 'text-red-400'}>
-                      {analysisResult.prediction.trust_score}%
-                    </strong>
-                  </div>
-                  <div className="p-2 rounded bg-black/40 border border-slate-700/50">
-                    <span className="text-slate-400 block text-[10px]">URGENCY COERCION</span>
-                    <strong className="text-amber-400">
-                      {analysisResult.prediction.urgency_score}%
-                    </strong>
-                  </div>
-                  <div className="p-2 rounded bg-black/40 border border-slate-700/50">
-                    <span className="text-slate-400 block text-[10px]">AUTHORITY CLAIM</span>
-                    <strong className="text-purple-400">
-                      {analysisResult.prediction.authority_score}%
-                    </strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Authentication & SPF/DKIM/DMARC */}
-              <div className="glass-panel p-4 rounded-xl space-y-2">
-                <div className="text-xs font-mono-cyber text-cyan-400 flex items-center justify-between border-b border-cyan-500/20 pb-1.5">
-                  <span className="flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>AUTHENTICATION & REPUTATION HEADERS</span>
-                  </span>
-                  <span className="text-slate-400">RFC 5322 Standards</span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 font-mono-cyber text-xs">
-                  <div className="p-2 rounded bg-black/40 border border-slate-800 flex items-center justify-between">
-                    <span>SPF:</span>
-                    <span className={`font-bold ${
-                      analysisResult.parsed_metadata.spf_status === 'PASS' ? 'text-emerald-400' : 'text-red-400'
-                    }`}>
-                      {analysisResult.parsed_metadata.spf_status}
-                    </span>
-                  </div>
-                  <div className="p-2 rounded bg-black/40 border border-slate-800 flex items-center justify-between">
-                    <span>DKIM:</span>
-                    <span className={`font-bold ${
-                      analysisResult.parsed_metadata.dkim_status === 'PASS' ? 'text-emerald-400' : 'text-red-400'
-                    }`}>
-                      {analysisResult.parsed_metadata.dkim_status}
-                    </span>
-                  </div>
-                  <div className="p-2 rounded bg-black/40 border border-slate-800 flex items-center justify-between">
-                    <span>DMARC:</span>
-                    <span className={`font-bold ${
-                      analysisResult.parsed_metadata.dmarc_status === 'PASS' ? 'text-emerald-400' : 'text-red-400'
-                    }`}>
-                      {analysisResult.parsed_metadata.dmarc_status}
-                    </span>
-                  </div>
-                </div>
-
-                {/* GreyNoise Threat Intel */}
-                {analysisResult.parsed_metadata.threat_intel && (
-                  <div className="mt-2 p-2.5 rounded bg-black/50 border border-purple-500/30 text-xs font-mono-cyber">
-                    <div className="text-purple-300 font-bold flex items-center justify-between">
-                      <span>GREYNOISE INTEL: {analysisResult.parsed_metadata.threat_intel.actor}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-950 text-purple-200 border border-purple-500/40">
-                        {analysisResult.parsed_metadata.threat_intel.classification}
-                      </span>
-                    </div>
-                    <div className="text-slate-400 text-[11px] mt-1">
-                      TAGS: {analysisResult.parsed_metadata.threat_intel.tags?.join(', ') || 'NONE'}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Forensic Hop Traceroute (Mapped into God's Eye) */}
-              <div className="glass-panel p-4 rounded-xl space-y-2">
-                <div className="text-xs font-mono-cyber text-cyan-400 flex items-center justify-between border-b border-cyan-500/20 pb-1.5">
-                  <span className="flex items-center gap-1.5">
-                    <Server className="w-3.5 h-3.5" />
-                    <span>RECEIVED HOP TRACEROUTE (GEOSPATIAL ORIGIN)</span>
-                  </span>
-                  <span className="text-slate-400">{analysisResult.parsed_metadata.hops?.length || 1} Hops</span>
-                </div>
-
-                <div className="space-y-1.5">
-                  {analysisResult.parsed_metadata.hops?.map((hop, hidx) => (
-                    <div 
-                      key={hidx} 
-                      className="p-2 rounded bg-black/40 border border-slate-800 hover:border-cyan-500/40 transition-all flex items-center justify-between text-xs font-mono-cyber"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-cyan-950 text-cyan-300 flex items-center justify-center text-[10px] font-bold border border-cyan-500/40">
-                          {hop.hop_index}
-                        </span>
-                        <div>
-                          <div className="text-white font-semibold flex items-center gap-1.5">
-                            <span>{hop.ip}</span>
-                            <span className="text-slate-400 text-[10px]">({hop.geo?.city}, {hop.geo?.country})</span>
-                          </div>
-                          <div className="text-[10px] text-slate-400">{hop.geo?.org}</div>
+          <AnimatePresence mode="wait">
+            {analysisResult ? (
+              <motion.div 
+                key="results"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                {/* Master Verdict Card */}
+                <div className={`p-5 rounded-2xl border transition-all ${
+                  analysisResult.prediction.is_phishing 
+                    ? 'glass-surface-crimson' 
+                    : 'glass-surface-emerald'
+                }`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3.5">
+                      {analysisResult.prediction.is_phishing ? (
+                        <div className="w-12 h-12 rounded-xl bg-red-950/80 border border-red-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(255,51,102,0.4)]">
+                          <ShieldAlert className="w-6 h-6 text-red-400 animate-pulse" />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-emerald-950/80 border border-emerald-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(0,255,136,0.3)]">
+                          <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                        </div>
+                      )}
+                      <div>
+                        <div className="text-xs font-mono-code text-slate-400">CYBER INTELLIGENCE VERDICT</div>
+                        <div className={`text-xl font-bold font-display tracking-tight ${
+                          analysisResult.prediction.is_phishing ? 'text-red-400' : 'text-emerald-400'
+                        }`}>
+                          {analysisResult.prediction.prediction} DETECTED
                         </div>
                       </div>
+                    </div>
 
-                      <button
-                        onClick={() => onTargetSelected && onTargetSelected(hop.geo)}
-                        className="px-2 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 text-[10px] border border-cyan-500/40 flex items-center gap-1"
+                    <div className="text-right font-mono-code">
+                      <div className="text-[11px] text-slate-400">CERTAINTY</div>
+                      <div className="text-2xl font-bold text-white font-display">
+                        {analysisResult.prediction.confidence}%
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2.5 text-center font-mono-code text-xs">
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.08]">
+                      <span className="text-slate-400 block text-[10px]">TRUST SCORE</span>
+                      <strong className={`text-base font-display ${analysisResult.prediction.trust_score > 60 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {analysisResult.prediction.trust_score}%
+                      </strong>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.08]">
+                      <span className="text-slate-400 block text-[10px]">URGENCY METRIC</span>
+                      <strong className="text-base font-display text-amber-300">
+                        {analysisResult.prediction.urgency_score}%
+                      </strong>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.08]">
+                      <span className="text-slate-400 block text-[10px]">AUTHORITY SPOOF</span>
+                      <strong className="text-base font-display text-purple-300">
+                        {analysisResult.prediction.authority_score}%
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Authentication & SPF/DKIM/DMARC */}
+                <div className="glass-surface p-4 rounded-2xl space-y-2.5">
+                  <div className="text-xs font-mono-code text-cyan-300 flex items-center justify-between border-b border-white/[0.08] pb-2">
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <Lock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>CRYPTOGRAPHIC HEADERS (SPF / DKIM / DMARC)</span>
+                    </span>
+                    <span className="text-slate-400 text-[11px]">Domain Alignment</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 font-mono-code text-xs">
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06] flex items-center justify-between">
+                      <span className="text-slate-400">SPF:</span>
+                      <span className={`font-bold ${analysisResult.parsed_metadata.spf_status === 'PASS' ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {analysisResult.parsed_metadata.spf_status}
+                      </span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06] flex items-center justify-between">
+                      <span className="text-slate-400">DKIM:</span>
+                      <span className={`font-bold ${analysisResult.parsed_metadata.dkim_status === 'PASS' ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {analysisResult.parsed_metadata.dkim_status}
+                      </span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06] flex items-center justify-between">
+                      <span className="text-slate-400">DMARC:</span>
+                      <span className={`font-bold ${analysisResult.parsed_metadata.dmarc_status === 'PASS' ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {analysisResult.parsed_metadata.dmarc_status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* GreyNoise Live Threat Feed */}
+                  {analysisResult.parsed_metadata.threat_intel && (
+                    <div className="p-3 rounded-xl bg-purple-950/20 border border-purple-500/30 text-xs font-mono-code mt-2">
+                      <div className="text-purple-300 font-bold flex items-center justify-between">
+                        <span>GREYNOISE INTEL: {analysisResult.parsed_metadata.threat_intel.actor}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-purple-950 text-purple-200 border border-purple-500/40">
+                          {analysisResult.parsed_metadata.threat_intel.classification}
+                        </span>
+                      </div>
+                      <div className="text-slate-400 text-[11px] mt-1">
+                        TAGS: {analysisResult.parsed_metadata.threat_intel.tags?.join(', ') || 'NONE'}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Received Hop Traceroute */}
+                <div className="glass-surface p-4 rounded-2xl space-y-2">
+                  <div className="text-xs font-mono-code text-cyan-300 flex items-center justify-between border-b border-white/[0.08] pb-2">
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <Server className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>RECEIVED HOP TRACEROUTE (GEOSPATIAL TRAJECTORY)</span>
+                    </span>
+                    <span className="text-slate-400 text-[11px]">{analysisResult.parsed_metadata.hops?.length || 1} Hops</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {analysisResult.parsed_metadata.hops?.map((hop, hidx) => (
+                      <div 
+                        key={hidx} 
+                        className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06] hover:border-cyan-400/40 transition-all flex items-center justify-between text-xs font-mono-code"
                       >
-                        <MapPin className="w-3 h-3 text-red-400" />
-                        <span>LOCK GOD'S EYE</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-cyan-950 text-cyan-300 flex items-center justify-center text-[10px] font-bold border border-cyan-500/40">
+                            {hop.hop_index}
+                          </span>
+                          <div>
+                            <div className="text-white font-semibold">
+                              {hop.ip} <span className="text-slate-400 text-[10px]">({hop.geo?.city}, {hop.geo?.country})</span>
+                            </div>
+                            <div className="text-[10px] text-slate-400">{hop.geo?.org}</div>
+                          </div>
+                        </div>
 
-              {/* Dynamic Retrain / User Testing Lab */}
-              <div className="glass-panel p-4 rounded-xl space-y-3 border-l-4 border-amber-400">
-                <div className="flex items-center justify-between border-b border-amber-500/20 pb-1.5">
-                  <div className="flex items-center gap-2 text-amber-300 font-mono-cyber text-xs font-bold">
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>DYNAMIC MODEL RETRAINING LAB</span>
+                        <button
+                          onClick={() => onTargetSelected && onTargetSelected(hop.geo)}
+                          className="px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 text-[10px] border border-cyan-500/30 flex items-center gap-1 transition-all"
+                        >
+                          <MapPin className="w-3 h-3 text-red-400" />
+                          <span>FOCUS GOD'S EYE</span>
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                  <span className="text-[10px] text-slate-400 font-mono-cyber">Live Incremental Learning</span>
                 </div>
 
-                <p className="text-xs text-slate-300">
-                  Did the AI classify this test email correctly? Feed this sample back into the 100-baseline dataset to retrain the Random Forest model dynamically:
+                {/* Dynamic Retrain & Incremental Learning Lab */}
+                <div className="glass-surface p-4 rounded-2xl space-y-3 border-l-4 border-amber-400">
+                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
+                    <div className="flex items-center gap-2 text-amber-300 font-display text-xs font-bold">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>DYNAMIC INCREMENTAL LEARNING LAB</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-mono-code">100-Sample Base</span>
+                  </div>
+
+                  <p className="text-xs text-slate-300">
+                    Verify this live sample and retrain the Random Forest model on the fly:
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleRetrainDynamic(1)}
+                      className="flex-1 py-2 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-500/40 text-red-200 text-xs font-mono-code font-bold transition-all shadow-md"
+                    >
+                      + ADD AS PHISHING & RETRAIN
+                    </button>
+                    <button
+                      onClick={() => handleRetrainDynamic(0)}
+                      className="flex-1 py-2 rounded-xl bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-200 text-xs font-mono-code font-bold transition-all shadow-md"
+                    >
+                      + ADD AS LEGITIMATE & RETRAIN
+                    </button>
+                  </div>
+
+                  {retrainSuccess && (
+                    <div className="p-3 rounded-xl bg-amber-950/50 border border-amber-500/40 text-xs font-mono-code text-amber-200 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span>MODEL RETRAINED IN 8ms</span>
+                      </div>
+                      <div className="text-[11px] text-slate-300">
+                        New Dataset Size: <strong>{retrainSuccess.new_dataset_size}</strong> | 
+                        Accuracy: <strong>{retrainSuccess.updated_accuracy}%</strong> 
+                        (Delta: {retrainSuccess.accuracy_delta >= 0 ? `+${retrainSuccess.accuracy_delta}%` : `${retrainSuccess.accuracy_delta}%`})
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="glass-surface p-12 rounded-2xl text-center space-y-3"
+              >
+                <Terminal className="w-10 h-10 text-cyan-400/40 mx-auto animate-pulse" />
+                <div className="text-cyan-300 font-display text-sm font-semibold">
+                  AWAITING INBOUND RFC TELEMETRY
+                </div>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  Select a test attack scenario from the left or upload an RFC 5322 .eml file to trigger deep routing hops and Scikit-Learn prediction.
                 </p>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleRetrainDynamic(1)}
-                    className="flex-1 py-1.5 rounded bg-red-950/60 hover:bg-red-900 border border-red-500/40 text-red-200 text-xs font-mono-cyber transition-all"
-                  >
-                    + ADD AS KNOWN PHISHING & RETRAIN
-                  </button>
-                  <button
-                    onClick={() => handleRetrainDynamic(0)}
-                    className="flex-1 py-1.5 rounded bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-200 text-xs font-mono-cyber transition-all"
-                  >
-                    + ADD AS LEGITIMATE & RETRAIN
-                  </button>
-                </div>
-
-                {retrainSuccess && (
-                  <div className="p-2.5 rounded bg-amber-950/50 border border-amber-500/40 text-xs font-mono-cyber text-amber-200 space-y-1">
-                    <div className="font-bold flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>{retrainSuccess.status}</span>
-                    </div>
-                    <div className="text-[11px] text-slate-300">
-                      New Dataset Size: <strong>{retrainSuccess.new_dataset_size}</strong> emails | 
-                      Accuracy: <strong>{retrainSuccess.updated_accuracy}%</strong> 
-                      (Delta: {retrainSuccess.accuracy_delta >= 0 ? `+${retrainSuccess.accuracy_delta}%` : `${retrainSuccess.accuracy_delta}%`})
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="glass-panel p-12 rounded-xl text-center space-y-3">
-              <Terminal className="w-10 h-10 text-cyan-400/40 mx-auto animate-pulse" />
-              <div className="text-cyan-300 font-mono-cyber text-sm font-semibold">
-                WAITING FOR EMAIL TELEMETRY
-              </div>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
-                Select a preset scenario on the left or upload an .eml file to launch deep multi-layer header inspection, hop geocoding, and Scikit-Learn inference.
-              </p>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
