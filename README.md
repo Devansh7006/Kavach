@@ -1,18 +1,30 @@
 # 🛡️ KAVACH (The Protector)
-### AI Cyber Sentinel & Multi-Modal Multimedia Forensic Defense System
+### Institutional AI Cyber Sentinel & Multi-Modal Multimedia Forensic Defense Suite
 *Inspired by bilawalsidhu/gods-eye-view, GuidoBartoli/sherloq, Amped FIVE, and Amped Authenticator*
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19.3-61DAFB.svg?logo=react&logoColor=black)](https://react.dev)
+[![Three.js](https://img.shields.io/badge/Three.js-WebGL_3D-black.svg?logo=three.js&logoColor=white)](https://threejs.org)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.0-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 
 ---
 
 ## 🌟 Executive Overview
-**KAVACH (The Protector)** is a unified, defense-grade cyber intelligence and forensic suite developed by Team **SecYureD**. Moving far beyond static detection forms, KAVACH integrates:
-1. **God's Eye View (3D Geospatial Cyber Command HUD)**: Real-time 3D orbital surveillance tracking defense satellites (KAVACH-LEO, SSO, GEO), tracing global cyber attack arcs, and locking onto threat coordinates in real-time.
-2. **RFC 5322 Email Security & Hop Traceroute**: Deep `.eml` and raw header parsing, SPF/DKIM/DMARC cryptographic validation, reverse DNS hop extraction, GreyNoise threat actor classification, and an NLP Scikit-Learn Random Forest ensemble.
-3. **Interactive 100-Sample Learning Lab**: Pre-trained on 100 ground-truth emails (50 phishing / 50 legitimate). When a user submits an email for testing, KAVACH classifies it live, clusters nearest-neighbor exemplars, and allows 1-click dynamic retraining with instant accuracy delta metrics.
-4. **Amped FIVE & Sherloq Image Forensics**: Dual-layer Error Level Analysis (ELA) and Laplacian camera sensor noise variance filtering to detect spliced objects, generative diffusion smoothing, and EXIF software prompt signatures with GPS camera auto-lock.
-5. **Amped Authenticator Video Forensics**: Keyframe decomposition, optical flow anomaly detection, and frame-by-frame ELA scrubber to expose deepfake face-swap warping.
-6. **Librosa Acoustic Forensics**: 13-band Mel-Frequency Cepstral Coefficients (MFCC) and Mel-Spectrogram density heatmap analysis to detect synthetic AI voice clones and neural vocoder phase jitter.
-7. **Executive Incident Dossier**: Cryptographically sealed forensic audit reports with SHA-256 hash verification for legal chain of custody.
+**KAVACH (The Protector)** is a unified, defense-grade cyber intelligence and multimedia forensic suite developed by Team **SecYureD**. Engineered to replace legacy form inputs with an institutional war-room experience, KAVACH features:
+
+1. **God's Eye 3D NASA Photorealistic Earth**: High-resolution NASA Blue Marble 2048px day surface, normal relief map for mountain/coastal topography, specular ocean glare, and an independent rotating transparent cloud layer.
+2. **Global Reactive Threat Ambiance (Green / Red Dynamic Theming)**:
+   * **Legitimate / Clean Verdict**: Ambiance morphs into authoritative **Cyber Emerald Green (`#00ff88` / `#10b981`)** with an all-clear status banner.
+   * **Hostile / Deepfake Compromise**: Ambiance flashes into **High-Alert Crimson Red (`#ff3366` / `#ef4444`)** with DEFCON 1 emergency protocol indicators.
+3. **Institutional Glassmorphism UI**: Built with obsidian dark surfaces (`#0a0e16`), ambient radial glow lighting, frosted glass cards (`backdrop-blur-2xl`), and institutional typography (**Space Grotesk**, **JetBrains Mono**, **Inter**).
+4. **Authentic Real-Time Telemetry**: Real client round-trip latency measured via `performance.now()`, live UTC uptime counter, and real NORAD Keplerian satellite tracking (ISS NORAD 25544, Sentinel-6 NORAD 48274).
+5. **RFC 5322 Email Security & Hop Traceroute**: Deep `.eml` header parsing, SPF/DKIM/DMARC cryptographic validation, reverse DNS hop extraction, GreyNoise threat actor classification, and Scikit-Learn Random Forest ensemble.
+6. **Dynamic 100-Sample Incremental Learning Lab**: Pre-trained on 100 ground-truth emails (50 phishing / 50 legitimate). When a user submits an email, KAVACH performs live inference, computes cosine similarity against nearest baseline clusters, and enables 1-click dynamic retraining with instant accuracy delta metrics.
+7. **Amped FIVE & Sherloq Image Forensics**: Dual-layer Error Level Analysis (ELA) heatmap and Laplacian camera PRNU sensor noise variance filter to expose digital splicing and generative diffusion smoothing, with camera GPS auto-flight lock into God's Eye.
+8. **Amped Authenticator Video Forensics**: Frame-by-frame temporal optical flow and facial landmark warping detection with an interactive timeline scrubber.
+9. **Librosa Acoustic Forensics**: 13-band Mel-Frequency Cepstral Coefficients (MFCC) and Mel-Spectrogram density heatmap analysis to detect synthetic AI voice clones and neural vocoder phase jitter.
+10. **Executive Incident Dossier**: Cryptographically sealed forensic audit reports with SHA-256 hash verification for legal chain of custody.
 
 ---
 
@@ -27,30 +39,32 @@
 ## 🏗️ Architectural Topology
 
 ```
-+-------------------------------------------------------------------------+
-|                  KAVACH WEB COMMAND HUD (React 19 + Three.js)           |
-|   - 3D Tactical Cyber Globe (Satellite Orbits, Attack Arcs, FLIR Mode)  |
-|   - Multi-Spectral Image Inspector (ELA Heatmap vs Sherloq Noise Filter)|
-|   - Video Frame Timeline Scrubber & Librosa 13-MFCC Acoustic Canvas     |
-|   - Interactive Dynamic Model Training Lab & Dataset Evaluation         |
-+------------------------------------+------------------------------------+
-                                     |
-                                REST API
-                                     |
-+------------------------------------+------------------------------------+
-|                  KAVACH CENTRAL INTELLIGENCE BACKEND                     |
-|                           (Python FastAPI)                              |
-+-------------------------------------------------------------------------+
-       |                         |                          |
-+------+------+           +------+------+            +------+------+
-| EMAIL LAYER |           | MEDIA LAYER |            | GOD'S EYE   |
-+-------------+           +-------------+            +-------------+
-| • RFC Parser            | • ELA Engine             | • Orbitals  |
-| • SPF/DKIM/DMARC        | • Sherloq Noise Filter   | • Telemetry |
-| • GreyNoise Intel       | • Amped Video Flow       | • Attack Arc|
-| • 100-Sample ML         | • Librosa 13-MFCC        | • GeoIP Map |
-| • Dynamic Retrainer     | • EXIF/GPS Metadata      | • MGRS Grid |
-+-------------+           +-------------+            +-------------+
++---------------------------------------------------------------------------------------------------------+
+|                                  KAVACH INSTITUTIONAL COMMAND HUD (React 19 + Three.js)                 |
+|   • Photorealistic NASA 3D Earth (Day Map, Normal Relief, Ocean Specular, Dynamic Cloud Layer)         |
+|   • Reactive Threat Ambiance Engine (All-Green Clean System vs All-Red High-Alert Compromise)          |
+|   • Multi-Spectral Image Inspector (Error Level Analysis ELA Heatmap vs Sherloq Sensor Noise Variance)  |
+|   • Video Frame Timeline Scrubber & Librosa 13-Band MFCC Acoustic Density Canvas                        |
+|   • Dynamic 100-Sample Learning Lab (Real-Time Retraining with Live Accuracy Delta & Nearest Neighbors)  |
++----------------------------------------------------+----------------------------------------------------+
+                                                     |
+                                         REST API / Geo-Telemetry
+                                                     |
++----------------------------------------------------+----------------------------------------------------+
+|                                      KAVACH CENTRAL INTELLIGENCE BACKEND                                |
+|                                             (FastAPI + Python 3.11)                                     |
++---------------------------------------------------------------------------------------------------------+
+       |                                     |                                     |
++------+------+                       +------+------+                       +------+------+
+| EMAIL & .EML|                       | MEDIA FORENSICS                     | GOD'S EYE   |
++-------------+                       +-------------+                       +-------------+
+| • RFC 5322 Parser                   | • ELA Heatmap Engine                | • NASA Blue Marble
+| • SPF / DKIM / DMARC                | • Sherloq Laplacian Filter          | • Normal Relief & Clouds
+| • Received Hop Traceroute           | • Amped Video Flow Scrubber         | • NORAD Satellite Orbits
+| • GreyNoise Actor Intel             | • Librosa 13-Band MFCC              | • Attack Arc Trajectories
+| • 100-Email Baseline                | • EXIF & AI Generator Prompt Tags   | • GeoIP Lat/Lon Coordinate Lock
+| • Live Dynamic Retrainer            | • Camera GPS Auto-Fly Lock          | • MGRS Military Grid System
++-------------+                       +-------------+                       +-------------+
 ```
 
 ---
