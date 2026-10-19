@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-war-room: #040810;
+    --card-surface: rgba(10, 20, 36, 0.75);
+    --border-cyber: rgba(0, 240, 255, 0.22);
+    --neon-cyan: #00f0ff;
+    --neon-emerald: #00ff88;
+    --neon-crimson: #ff3366;
+    --neon-amber: #ffb703;
+  }
+
+  body {
+    background-color: var(--bg-war-room);
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Custom Tactical Cyber Utility Styles */
+.font-mono-cyber {
+  font-family: 'Share Tech Mono', 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+}
+
+.glow-crimson {
+  box-shadow: 0 0 20px rgba(255, 51, 102, 0.4);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.35);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+.text-glow-crimson {
+  text-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+}
+
+.text-glow-emerald {
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+}
+
+.glass-panel {
+  background: rgba(8, 16, 32, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 240, 255, 0.18);
+}
+
+.glass-panel-danger {
+  background: rgba(30, 8, 16, 0.78);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 51, 102, 0.3);
+}
+
+/* Radar Scanline Animation */
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-radar {
+  animation: radar-sweep 6s linear infinite;
+}
+
+/* Cyber Matrix Grid Pattern */
+.bg-grid-cyber {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #040810;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.6);
+}
