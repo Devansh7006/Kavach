@@ -235,7 +235,7 @@ async def process_hex_integrity(file: UploadFile = File(...)):
             "ascii": ascii_part
         })
 
-    # VirusTotal-style detection ratio
+    # Multi-engine forensic consensus ratio
     threat_engines_flagged = len(embedded_payloads) * 14
     if is_polyglot:
         threat_engines_flagged = 62
@@ -254,7 +254,7 @@ async def process_hex_integrity(file: UploadFile = File(...)):
             "ssdeep_fuzzy": f"384:{md5_hash[:12]}:{sha1_hash[:12]}"
         },
         "verdict": verdict,
-        "virustotal_ratio": f"{min(72, threat_engines_flagged)}/72",
+        "engine_ratio": f"{min(72, threat_engines_flagged)}/72",
         "is_tampered": bool(embedded_payloads),
         "embedded_payloads": embedded_payloads,
         "hex_preview": hex_rows,

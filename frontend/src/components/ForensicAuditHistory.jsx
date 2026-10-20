@@ -70,6 +70,7 @@ END OF AUDIT BUFFER
         return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
       case 'AUDIO':
         return 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30';
+      case 'HEX/BINARY':
       case 'HEX/VT':
         return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
       case 'RECON':

@@ -6,7 +6,7 @@ import {
   FileSearch, Download, ExternalLink, Cpu, Eye, BookOpen, Layers, Upload
 } from 'lucide-react';
 
-export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
+export default function BinaryHexInspectorTab({ onVerdictChange, onLogAudit }) {
   const [file, setFile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
@@ -75,12 +75,12 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
 
       if (onLogAudit) {
         onLogAudit({
-          module: "HEX/VT",
+          module: "HEX/BINARY",
           action: "INSPECTED",
           target: targetFile.name,
           verdict: data.is_tampered ? "⚠️ MALICIOUS / STEGANOGRAPHY DETECTED" : "✅ CLEAN FILE INTEGRITY VERIFIED",
           status: data.is_tampered ? "THREAT" : "LEGIT",
-          details: `SHA-256: ${data.hashes?.sha256?.slice(0, 16)}... | Magic Bytes: ${data.magic_bytes} | VT Engine Ratio: ${data.virustotal_ratio}`
+          details: `SHA-256: ${data.hashes?.sha256?.slice(0, 16)}... | Magic Bytes: ${data.magic_bytes} | Consensus Ratio: ${data.engine_ratio}`
         });
       }
     } catch (err) {
@@ -94,7 +94,7 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
     setHexFilter(val);
     if (val.trim().length >= 2 && onLogAudit) {
       onLogAudit({
-        module: "HEX/VT",
+        module: "HEX/BINARY",
         action: "SEARCH QUERY",
         target: `Hex Query: "${val}"`,
         verdict: `BYTE PATTERN FILTER APPLIED`,
@@ -129,7 +129,7 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
                 NIST SP 800-86 COMPLIANT
               </span>
               <span className="text-xs font-mono-hud text-[#62C0F6] uppercase font-bold">
-                VIRUSTOTAL FILE INTEGRITY ENGINE
+                KAVACH FILE INTEGRITY & HEX SENTINEL
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold font-aveton text-white tracking-tight flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
         </div>
       </div>
 
-      {/* 2. VIRUSTOTAL STYLE SCAN RESULTS */}
+      {/* 2. KAVACH FILE INTEGRITY SCAN RESULTS */}
       <AnimatePresence mode="wait">
         {result ? (
           <motion.div
@@ -215,7 +215,7 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
             exit={{ opacity: 0 }}
             className="space-y-6"
           >
-            {/* VIRUSTOTAL DETECTION RATIO BAR & BANNER */}
+            {/* KAVACH DETECTION RATIO BAR & BANNER */}
             <div className={`p-6 rounded-[28px] border shadow-2xl transition-all ${
               result.is_tampered 
                 ? 'bg-[#18090f] border-[#FF3366]/40 shadow-[0_0_30px_rgba(255,51,102,0.25)]' 
@@ -238,7 +238,7 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
 
                   <div>
                     <div className="text-xs font-mono-hud text-slate-400 uppercase tracking-wider font-bold">
-                      VIRUSTOTAL FILE AUDIT // TAMPERING & AI MALWARE STATUS
+                      KAVACH FILE INTEGRITY AUDIT // TAMPERING & SLACK INSPECTION
                     </div>
                     <div className={`text-xl sm:text-2xl font-extrabold font-aveton mt-0.5 ${
                       result.is_tampered ? 'text-[#FF3366]' : 'text-[#B2F601]'
@@ -255,7 +255,7 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
                   </div>
                 </div>
 
-                {/* Right VirusTotal Detection Gauge */}
+                {/* Right Security Consensus Detection Gauge */}
                 <div className="flex items-center gap-4 p-3 rounded-2xl bg-black/60 border border-white/10 self-stretch sm:self-auto justify-between sm:justify-start">
                   <div className="relative w-16 h-16 flex items-center justify-center">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -276,14 +276,14 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
                       />
                     </svg>
                     <span className="absolute text-xs font-mono-hud font-extrabold text-white">
-                      {result.virustotal_ratio}
+                      {result.engine_ratio}
                     </span>
                   </div>
 
                   <div className="font-mono-hud text-xs pr-3">
-                    <div className="text-slate-400 text-[10px]">SECURITY VENDORS</div>
+                    <div className="text-slate-400 text-[10px]">HEURISTIC ENGINES</div>
                     <div className="text-sm font-bold text-white">
-                      {result.is_tampered ? 'FLAGGED AS MALICIOUS' : 'COMMUNITY APPROVED'}
+                      {result.is_tampered ? 'ANOMALIES DETECTED' : 'CRYPTOGRAPHICALLY VERIFIED'}
                     </div>
                     <div className="text-[10px] text-slate-500 mt-0.5">
                       {result.is_tampered ? 'Steganography / Injected Payload' : 'Zero Threat Signatures'}

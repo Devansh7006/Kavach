@@ -12,7 +12,7 @@ import EmailDefenseTab from './components/EmailDefenseTab';
 import ImageForensicsTab from './components/ImageForensicsTab';
 import VideoForensicsTab from './components/VideoForensicsTab';
 import AudioForensicsTab from './components/AudioForensicsTab';
-import VirusTotalHexTab from './components/VirusTotalHexTab';
+import BinaryHexInspectorTab from './components/BinaryHexInspectorTab';
 import SpartanShieldLogo from './components/SpartanShieldLogo';
 import ForensicAuditHistory from './components/ForensicAuditHistory';
 
@@ -90,12 +90,12 @@ export default function App() {
     {
       id: "LOG-06",
       timestamp: "19:19:50",
-      module: "HEX/VT",
+      module: "HEX/BINARY",
       action: "INSPECTED",
       target: "disguised_polyglot.jpg",
       verdict: "⚠️ POLYGLOT MALWARE DETECTED",
       status: "THREAT",
-      details: "MZ Executable Header masked with .jpg extension | 62/72 VirusTotal Engines Flagged"
+      details: "MZ Executable Header masked with .jpg extension | 62/72 Heuristic Engines Flagged"
     },
     {
       id: "LOG-07",
@@ -285,7 +285,7 @@ export default function App() {
               { id: 'IMAGE', label: "IMAGE FORENSICS", icon: ImageIcon },
               { id: 'VIDEO', label: "VIDEO FORENSICS", icon: Video },
               { id: 'AUDIO', label: "AUDIO FORENSICS", icon: Radio },
-              { id: 'VIRUSTOTAL', label: "HEX SCAN", icon: Binary }
+              { id: 'HEX_SCAN', label: "HEX SCAN", icon: Binary }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -361,7 +361,7 @@ export default function App() {
           { id: 'IMAGE', label: "IMAGE", icon: ImageIcon },
           { id: 'VIDEO', label: "VIDEO", icon: Video },
           { id: 'AUDIO', label: "AUDIO", icon: Radio },
-          { id: 'VIRUSTOTAL', label: "HEX SCAN", icon: Binary }
+          { id: 'HEX_SCAN', label: "HEX SCAN", icon: Binary }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -476,8 +476,8 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'VIRUSTOTAL' && (
-            <VirusTotalHexTab 
+          {activeTab === 'HEX_SCAN' && (
+            <BinaryHexInspectorTab 
               onVerdictChange={setThreatState} 
               onLogAudit={handleLogAudit}
             />
