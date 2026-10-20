@@ -1,7 +1,7 @@
 """
 KAVACH - Advanced EML & Header Forensic Parser
 Parses RFC 5322/2822 emails, extracts full hop traceroutes, validates SPF/DKIM/DMARC,
-and maps origin-to-destination geospatial trajectory for the God's Eye View.
+and maps origin-to-destination geospatial trajectory for the ASTRALIS 3D Spatial Grid.
 """
 
 from typing import Dict, Any, List

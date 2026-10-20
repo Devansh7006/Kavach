@@ -271,7 +271,7 @@ legit_samples = [
         "subject": "GitHub: [kavach-security] Pull Request #14 Merged by Sameeraj",
         "sender": "notifications@github.com",
         "return_path": "noreply@github.com",
-        "body": "Sameeraj merged commit a9f012b into main: 'Implement Real-Time God's Eye Geospatial View with Three.js HUD'. View changes on GitHub: https://github.com/kavach-defense/kavach/pull/14",
+        "body": "Sameeraj merged commit a9f012b into main: 'Implement Real-Time ASTRALIS 3D Spatial Reconnaissance View with Three.js HUD'. View changes on GitHub: https://github.com/kavach-defense/kavach/pull/14",
         "headers": {
             "Received": [
                 "from smtp.github.com (140.82.112.21) by mx.developer.net; Mon, 19 Oct 2026 18:22:01 +0000"
@@ -320,7 +320,7 @@ legit_topics = [
     ("Stripe: Payment of $49.00 confirmed for Pro Subscription", "receipts@stripe.com", "54.187.159.20"),
     ("Google Calendar: Antigravity Demo Rehearsal @ 3:00pm", "calendar-notification@google.com", "172.217.16.206"),
     ("Statuspage Incident Update: All API Services Operational", "updates@statuspage.io", "151.101.65.140"),
-    ("New Comment on Figma Project: God's Eye View Mockup", "notifications@figma.com", "151.101.1.91"),
+    ("New Comment on Figma Project: ASTRALIS 3D Recon UI Mockup", "notifications@figma.com", "151.101.1.91"),
     ("Atlassian Bitbucket: Pipeline #4821 Passed Successfully", "notifications@bitbucket.org", "18.205.93.0"),
     ("Your Spotify Family Plan Monthly Receipt", "no-reply@spotify.com", "35.186.224.25"),
     ("Docker Hub: Automated Build Finished for kavach-core", "no-reply@docker.com", "52.84.150.80"),

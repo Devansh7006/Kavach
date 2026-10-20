@@ -1,100 +1,185 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 @layer base {
   :root {
-    --bg-obsidian: #0a0e16;
-    --surface-card: rgba(24, 28, 36, 0.72);
-    --surface-card-hover: rgba(32, 38, 48, 0.85);
-    --border-glass: rgba(133, 148, 140, 0.22);
-    --primary-cyan: #00daf3;
-    --primary-emerald: #00ff88;
-    --primary-crimson: #ff3366;
-    --text-primary: #dfe2ee;
-    --text-secondary: #85948c;
+    /* Exact Palette from Vasil Enev Cyber Pastel / Protocol Noir */
+    --protocol-noir: #171836;
+    --protocol-deep: #0d0e20;
+    --protocol-surface: #1e1f42;
+    --fluxberry: #B853CF;
+    --blossom: #F9A1F8;
+    --light-peach: #FFD8AD;
+    
+    /* Functional Alert Accents */
+    --cyber-emerald: #00ff9f;
+    --cyber-crimson: #ff3366;
+    --cyber-cyan: #00f5ff;
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
   }
 
   body {
-    background-color: var(--bg-obsidian);
+    background-color: var(--protocol-deep);
     color: var(--text-primary);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
   }
 }
 
-/* Typography Classes matching Groww Pro / AegisTrade */
+/* Typography Hierarchy */
 .font-display {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.font-heading {
+  font-family: 'Outfit', sans-serif;
 }
 
 .font-mono-code {
   font-family: 'JetBrains Mono', monospace;
 }
 
-.font-body {
-  font-family: 'Inter', sans-serif;
+/* 21st.dev Style Ultra-Refined Glassmorphism Surfaces */
+.cyber-glass {
+  background: rgba(23, 24, 54, 0.68);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(249, 161, 248, 0.14);
+  box-shadow: 0 12px 40px 0 rgba(7, 8, 20, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Institutional Glassmorphism Surface Tokens */
-.glass-surface {
-  background: rgba(20, 26, 36, 0.7);
+.cyber-glass:hover {
+  border-color: rgba(249, 161, 248, 0.28);
+  box-shadow: 0 16px 48px 0 rgba(7, 8, 20, 0.65), 0 0 25px rgba(184, 83, 207, 0.15);
+}
+
+.cyber-glass-interactive {
+  background: rgba(23, 24, 54, 0.6);
   backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: all 0.25s ease;
 }
 
-.glass-surface:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+.cyber-glass-interactive:hover {
+  background: rgba(30, 31, 66, 0.8);
+  border-color: rgba(249, 161, 248, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(184, 83, 207, 0.22);
 }
 
-.glass-surface-emerald {
-  background: rgba(10, 36, 24, 0.75);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(0, 255, 136, 0.35);
-  box-shadow: 0 0 35px rgba(0, 255, 136, 0.18), inset 0 0 20px rgba(0, 255, 136, 0.05);
+/* Reactive Ambiance Surface Tokens */
+.cyber-glass-emerald {
+  background: rgba(8, 38, 26, 0.72);
+  backdrop-filter: blur(28px);
+  border: 1px solid rgba(0, 255, 159, 0.4);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 35px rgba(0, 255, 159, 0.22), inset 0 1px 0 rgba(0, 255, 159, 0.2);
 }
 
-.glass-surface-crimson {
-  background: rgba(40, 10, 20, 0.75);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 51, 102, 0.4);
-  box-shadow: 0 0 35px rgba(255, 51, 102, 0.22), inset 0 0 20px rgba(255, 51, 102, 0.06);
+.cyber-glass-crimson {
+  background: rgba(46, 12, 24, 0.75);
+  backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 51, 102, 0.45);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 51, 102, 0.25), inset 0 1px 0 rgba(255, 51, 102, 0.2);
 }
 
-.glass-pill {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* 21st.dev Style Gradient Glow Borders */
+.gradient-border-neon {
+  position: relative;
+  border-radius: 1rem;
+}
+
+.gradient-border-neon::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #B853CF 0%, #F9A1F8 45%, #FFD8AD 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Cyber Pastel Text Gradients */
+.text-gradient-cyber {
+  background: linear-gradient(135deg, #F9A1F8 0%, #B853CF 50%, #FFD8AD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-peach {
+  background: linear-gradient(135deg, #ffffff 0%, #FFD8AD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Pill Arch with 4-Point Star Badge (Matching Image 2 Reference) */
+.star-arch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #FFD8AD;
+}
+
+.star-icon-bubble {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background: rgba(249, 161, 248, 0.15);
+  border: 1px solid rgba(249, 161, 248, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(249, 161, 248, 0.3);
 }
 
 /* Custom Tactical Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(10, 14, 22, 0.6);
+  background: rgba(13, 14, 32, 0.8);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(133, 148, 140, 0.3);
+  background: rgba(184, 83, 207, 0.35);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 240, 255, 0.5);
+  background: rgba(249, 161, 248, 0.6);
 }
 
-/* Ambient Radial Glow Animations */
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50% { opacity: 0.95; transform: scale(1.04); }
+/* Keyframes for Ambient Motion */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
 }
 
-.animate-pulse-ambient {
-  animation: pulse-subtle 8s ease-in-out infinite;
+.animate-float {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 9s ease-in-out infinite;
 }

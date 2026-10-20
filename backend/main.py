@@ -21,7 +21,7 @@ from gods_eye.threat_stream import generate_live_attack_arcs, get_threat_summary
 
 app = FastAPI(
     title="KAVACH Defense API",
-    description="Military-grade cyber intelligence, email forensics, deepfake detection, and God's Eye geospatial tracking",
+    description="Military-grade autonomous cyber sentinel, email forensics, multimedia deepfake detection, and ASTRALIS 3D spatial reconnaissance",
     version="2.0.0"
 )
 
@@ -63,7 +63,7 @@ def health_check():
     return {
         "status": "HEALTHY",
         "subsystems": {
-            "gods_eye_geospatial": "ONLINE",
+            "astralis_geospatial": "ONLINE",
             "email_phishing_engine": "ONLINE",
             "image_ela_forensics": "ONLINE",
             "video_authenticator": "ONLINE",
@@ -74,8 +74,9 @@ def health_check():
         "total_baseline_samples": len(dataset_manager.get_all())
     }
 
+@app.get("/api/astralis/telemetry")
 @app.get("/api/gods-eye/telemetry")
-def get_gods_eye_telemetry():
+def get_astralis_telemetry():
     """Returns live satellite positions, cyber attack arcs, and threat dashboard metrics."""
     return {
         "timestamp": time.time(),
@@ -122,6 +123,17 @@ async def analyze_email(
         "sha256_hash": sha256_hash,
         "parsed_metadata": parsed,
         "prediction": prediction_result,
+        "spatial_trajectory": {
+            "origin": parsed["origin_geo"],
+            "hops": [h["geo"] for h in parsed["hops"]],
+            "destination": {
+                "lat": 28.6139,
+                "lon": 77.2090,
+                "city": "KAVACH Interception Node",
+                "country": "India",
+                "org": "Cyber Defense Grid"
+            }
+        },
         "gods_eye_trajectory": {
             "origin": parsed["origin_geo"],
             "hops": [h["geo"] for h in parsed["hops"]],

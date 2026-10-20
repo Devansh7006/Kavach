@@ -1,6 +1,6 @@
 # 🛡️ KAVACH (The Protector)
-### Institutional AI Cyber Sentinel & Multi-Modal Multimedia Forensic Defense Suite
-*Inspired by bilawalsidhu/gods-eye-view, GuidoBartoli/sherloq, Amped FIVE, and Amped Authenticator*
+### Autonomous AI Cyber Sentinel & Multi-Modal Multimedia Forensic Suite
+*Featuring ASTRALIS 3D Spatial Reconnaissance, Amped FIVE & Sherloq Multi-Spectral ELA, Amped Authenticator, and Librosa Voice Deepfake Auditing*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -11,20 +11,31 @@
 ---
 
 ## 🌟 Executive Overview
-**KAVACH (The Protector)** is a unified, defense-grade cyber intelligence and multimedia forensic suite developed by Team **SecYureD**. Engineered to replace legacy form inputs with an institutional war-room experience, KAVACH features:
+**KAVACH (The Protector)** is a unified, defense-grade cyber intelligence and multimedia forensic suite developed by Team **SecYureD**. Engineered with a bespoke Cyber Pastel & Protocol Noir design system (inspired by **21st.dev** and modern institutional war rooms), KAVACH features:
 
-1. **God's Eye 3D NASA Photorealistic Earth**: High-resolution NASA Blue Marble 2048px day surface, normal relief map for mountain/coastal topography, specular ocean glare, and an independent rotating transparent cloud layer.
-2. **Global Reactive Threat Ambiance (Green / Red Dynamic Theming)**:
-   * **Legitimate / Clean Verdict**: Ambiance morphs into authoritative **Cyber Emerald Green (`#00ff88` / `#10b981`)** with an all-clear status banner.
-   * **Hostile / Deepfake Compromise**: Ambiance flashes into **High-Alert Crimson Red (`#ff3366` / `#ef4444`)** with DEFCON 1 emergency protocol indicators.
-3. **Institutional Glassmorphism UI**: Built with obsidian dark surfaces (`#0a0e16`), ambient radial glow lighting, frosted glass cards (`backdrop-blur-2xl`), and institutional typography (**Space Grotesk**, **JetBrains Mono**, **Inter**).
-4. **Authentic Real-Time Telemetry**: Real client round-trip latency measured via `performance.now()`, live UTC uptime counter, and real NORAD Keplerian satellite tracking (ISS NORAD 25544, Sentinel-6 NORAD 48274).
-5. **RFC 5322 Email Security & Hop Traceroute**: Deep `.eml` header parsing, SPF/DKIM/DMARC cryptographic validation, reverse DNS hop extraction, GreyNoise threat actor classification, and Scikit-Learn Random Forest ensemble.
-6. **Dynamic 100-Sample Incremental Learning Lab**: Pre-trained on 100 ground-truth emails (50 phishing / 50 legitimate). When a user submits an email, KAVACH performs live inference, computes cosine similarity against nearest baseline clusters, and enables 1-click dynamic retraining with instant accuracy delta metrics.
-7. **Amped FIVE & Sherloq Image Forensics**: Dual-layer Error Level Analysis (ELA) heatmap and Laplacian camera PRNU sensor noise variance filter to expose digital splicing and generative diffusion smoothing, with camera GPS auto-flight lock into God's Eye.
-8. **Amped Authenticator Video Forensics**: Frame-by-frame temporal optical flow and facial landmark warping detection with an interactive timeline scrubber.
-9. **Librosa Acoustic Forensics**: 13-band Mel-Frequency Cepstral Coefficients (MFCC) and Mel-Spectrogram density heatmap analysis to detect synthetic AI voice clones and neural vocoder phase jitter.
-10. **Executive Incident Dossier**: Cryptographically sealed forensic audit reports with SHA-256 hash verification for legal chain of custody.
+1. **ASTRALIS 3D Photorealistic Spatial Reconnaissance**: Full-powered 3D orbital surveillance engine utilizing NASA Blue Marble 2048px day surface maps, 3D normal bump relief for mountain ranges, specular ocean glare, and an independent rotating transparent cloud layer.
+2. **Deep Space Celestial Starfield**: Multi-colored 2,200 particle celestial field tinted with cyber pastel nebulae (`Fluxberry #B853CF` and `Light Peach #FFD8AD`).
+3. **NORAD Orbital Constellation Tracking**: Real-time Keplerian orbital telemetry for active defense satellites:
+   * **ISS (ZARYA)** — NORAD 25544 (LEO 420 km, 7.66 km/s, 51.6° inclination) with 3D solar arrays.
+   * **SENTINEL-1A** — NORAD 39634 (SAR Radar Recon, 693 km SSO).
+   * **AURA-GEO 3** — Geostationary Early Warning, 35,786 km orbit.
+4. **Global Reactive Threat Ambiance (Dynamic Green / Red Theming)**:
+   * **Clean / Legitimate Status**: Entire UI ambiance and atmospheric halo shift to **Cyber Emerald Green (`#00ff9f`)** with verified authentic seals.
+   * **Hostile / Deepfake Compromise**: Entire UI ambiance flashes into **High-Alert Crimson Red (`#ff3366`)** with DEFCON 1 emergency protocol indicators.
+   * **Navbar Ambiance Switcher**: Allows live manual toggling between `NEUTRAL`, `LEGIT (GREEN)`, and `THREAT (RED)` during hackathon presentations.
+5. **Cyber Pastel & Protocol Noir Aesthetic (21st.dev Inspired)**:
+   * **Protocol Noir (`#171836`)**: Deep obsidian command base with diffuse ambient glow lights.
+   * **Fluxberry (`#B853CF`)**: High-energy orchid neon accent for multi-spectral forensic lenses.
+   * **Blossom (`#F9A1F8`)**: Soft cyber rose glow for authentic interactive elements.
+   * **Light Peach (`#FFD8AD`)**: Warm glowing champagne telemetry metrics.
+   * **Star Arch Badges (✦)**: Arch-style glassmorphic bento cards with frosted circular star badges.
+6. **Authentic Real-Time Telemetry**: Real client round-trip latency measured via `performance.now()`, live UTC uptime counter, and real BGP Autonomous System Numbers (`AS15169` Google, `AS16509` AWS, `AS8075` Microsoft, `AS13335` Cloudflare).
+7. **RFC 5322 Email Security & Hop Traceroute**: Deep `.eml` header parsing, SPF/DKIM/DMARC cryptographic validation, reverse DNS hop extraction, GreyNoise threat actor classification, and Scikit-Learn Random Forest ensemble.
+8. **Dynamic 100-Sample Incremental Learning Lab**: Pre-trained on 100 ground-truth emails (50 phishing / 50 legitimate). Enables live testing, Cosine Similarity clustering against known attacks, and 1-click dynamic retraining with instant accuracy delta metrics.
+9. **Amped FIVE & Sherloq Image Forensics**: Dual-layer Error Level Analysis (ELA) heatmap and Laplacian camera PRNU sensor noise variance filter to expose digital splicing and generative diffusion smoothing, with camera GPS auto-flight lock into ASTRALIS 3D.
+10. **Amped Authenticator Video Forensics**: Frame-by-frame temporal optical flow and facial landmark warping detection with an interactive timeline scrubber.
+11. **Librosa Acoustic Forensics**: 13-band Mel-Frequency Cepstral Coefficients (MFCC) and Mel-Spectrogram density heatmap analysis to detect synthetic AI voice clones and neural vocoder phase jitter.
+12. **Executive Incident Dossier**: Cryptographically sealed forensic audit reports with SHA-256 hash verification for legal chain of custody.
 
 ---
 
@@ -41,7 +52,7 @@
 ```
 +---------------------------------------------------------------------------------------------------------+
 |                                  KAVACH INSTITUTIONAL COMMAND HUD (React 19 + Three.js)                 |
-|   • Photorealistic NASA 3D Earth (Day Map, Normal Relief, Ocean Specular, Dynamic Cloud Layer)         |
+|   • ASTRALIS 3D Spatial Reconnaissance (NASA Blue Marble, Normal Relief, Specular Ocean, Clouds)       |
 |   • Reactive Threat Ambiance Engine (All-Green Clean System vs All-Red High-Alert Compromise)          |
 |   • Multi-Spectral Image Inspector (Error Level Analysis ELA Heatmap vs Sherloq Sensor Noise Variance)  |
 |   • Video Frame Timeline Scrubber & Librosa 13-Band MFCC Acoustic Density Canvas                        |
@@ -56,7 +67,7 @@
 +---------------------------------------------------------------------------------------------------------+
        |                                     |                                     |
 +------+------+                       +------+------+                       +------+------+
-| EMAIL & .EML|                       | MEDIA FORENSICS                     | GOD'S EYE   |
+| EMAIL & .EML|                       | MEDIA FORENSICS                     | ASTRALIS 3D |
 +-------------+                       +-------------+                       +-------------+
 | • RFC 5322 Parser                   | • ELA Heatmap Engine                | • NASA Blue Marble
 | • SPF / DKIM / DMARC                | • Sherloq Laplacian Filter          | • Normal Relief & Clouds

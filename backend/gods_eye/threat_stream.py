@@ -1,6 +1,6 @@
 """
 KAVACH - Real-Time Global Threat Telemetry & Attack Arc Visualizer
-Generates real-time attack trajectories for the God's Eye 3D tactical command globe.
+Generates real-time attack trajectories for the ASTRALIS 3D tactical command globe.
 """
 
 import time

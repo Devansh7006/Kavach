@@ -276,7 +276,7 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
                           onClick={() => onTargetSelected && onTargetSelected(result.target_geo)}
                           className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] border border-emerald-500/40"
                         >
-                          LOCK GOD'S EYE
+                          LOCK SPATIAL RADAR
                         </button>
                       </div>
                     )}

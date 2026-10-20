@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { 
   Crosshair, Satellite, Compass, RotateCcw, Flame, ShieldAlert, 
-  ShieldCheck, Eye, Layers, Maximize2, Radio, Globe as GlobeIcon
+  ShieldCheck, Eye, Layers, Maximize2, Radio, Globe as GlobeIcon,
+  Sparkles, Activity, Cpu, ArrowUpRight
 } from 'lucide-react';
 
 function latLonToVector3(lat, lon, radius) {
@@ -16,7 +17,7 @@ function latLonToVector3(lat, lon, radius) {
   return new THREE.Vector3(x, y, z);
 }
 
-export default function GodsEyeGlobe({
+export default function AstralisGlobe({
   activeTarget = null,
   threatState = 'NEUTRAL', // 'NEUTRAL' | 'LEGIT' | 'THREAT'
   satellites = [],
@@ -31,21 +32,46 @@ export default function GodsEyeGlobe({
 
   const [flirMode, setFlirMode] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [showSatellites, setShowSatellites] = useState(true);
   const [hudCoords, setHudCoords] = useState({ 
     lat: '28.6139° N', 
     lon: '77.2090° E', 
-    city: 'New Delhi (HQ)', 
+    city: 'New Delhi (Command HQ)', 
     mgrs: '43R EK 9104',
     altitude: '35,786 km'
   });
   const [lockedNode, setLockedNode] = useState(null);
 
-  // Dynamic Theme Colors
+  // Dynamic Theme Colors based on Image 2 Palette & Threat State
   const themeColors = {
-    NEUTRAL: { primary: 0x00daf3, glow: 0x00d4ff, accent: '#00daf3' },
-    LEGIT: { primary: 0x00ff88, glow: 0x00ff88, accent: '#00ff88' },
-    THREAT: { primary: 0xff3366, glow: 0xff3366, accent: '#ff3366' }
-  }[threatState] || { primary: 0x00daf3, glow: 0x00d4ff, accent: '#00daf3' };
+    NEUTRAL: { 
+      primary: 0xB853CF, // Fluxberry
+      secondary: 0xF9A1F8, // Blossom
+      accent: 0xFFD8AD, // Light Peach
+      glow: 0x9333ea,
+      starGlow: 0xF9A1F8
+    },
+    LEGIT: { 
+      primary: 0x00ff9f, 
+      secondary: 0x00e5a3, 
+      accent: 0x76ffd6, 
+      glow: 0x00ff9f,
+      starGlow: 0x00ff9f
+    },
+    THREAT: { 
+      primary: 0xff3366, 
+      secondary: 0xff1744, 
+      accent: 0xff8a80, 
+      glow: 0xff3366,
+      starGlow: 0xff3366
+    }
+  }[threatState] || {
+    primary: 0xB853CF,
+    secondary: 0xF9A1F8,
+    accent: 0xFFD8AD,
+    glow: 0x9333ea,
+    starGlow: 0xF9A1F8
+  };
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -54,33 +80,84 @@ export default function GodsEyeGlobe({
 
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
-    camera.position.set(0, 22, 78);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1500);
+    // Cinematic camera angle: elevated, showcasing the Earth's illuminated curvature
+    camera.position.set(0, 10, 68);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true, 
+      powerPreference: "high-performance" 
+    });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.25;
     mountRef.current.appendChild(renderer.domElement);
 
+    // Deep Space Starfield with Cyber Pastel hues (Matching Image 2)
+    const starCount = 2200;
+    const starGeo = new THREE.BufferGeometry();
+    const starPositions = new Float32Array(starCount * 3);
+    const starColors = new Float32Array(starCount * 3);
+
+    const paletteColors = [
+      new THREE.Color('#ffffff'),
+      new THREE.Color('#FFD8AD'), // Light peach
+      new THREE.Color('#F9A1F8'), // Blossom
+      new THREE.Color('#B853CF'), // Fluxberry
+      new THREE.Color('#00f5ff')
+    ];
+
+    for (let i = 0; i < starCount; i++) {
+      // Spherical distribution around deep space
+      const r = 350 + Math.random() * 500;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+
+      starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      starPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      starPositions[i * 3 + 2] = r * Math.cos(phi);
+
+      const col = paletteColors[Math.floor(Math.random() * paletteColors.length)];
+      starColors[i * 3] = col.r;
+      starColors[i * 3 + 1] = col.g;
+      starColors[i * 3 + 2] = col.b;
+    }
+
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+    const starMat = new THREE.PointsMaterial({
+      size: 1.4,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.85
+    });
+    const starField = new THREE.Points(starGeo, starMat);
+    scene.add(starField);
+
+    // Globe Main Group with Natural 23.44° Axial Tilt
     const globeGroup = new THREE.Group();
+    globeGroup.rotation.z = THREE.MathUtils.degToRad(-15);
+    // Initial rotation presenting lit continents (Europe/India/Asia/Africa)
+    globeGroup.rotation.y = 2.8;
     scene.add(globeGroup);
     globeGroupRef.current = globeGroup;
 
-    // 2. Lighting (Sunlight + Ambient Earth Fill)
-    const sunLight = new THREE.DirectionalLight(0xffffff, 2.2);
-    sunLight.position.set(60, 30, 50);
+    // 2. Cinematic Lighting (Golden Hour Sun + Ambient Earth Glow)
+    const sunLight = new THREE.DirectionalLight(0xfff7e6, 2.8);
+    sunLight.position.set(75, 25, 45);
     scene.add(sunLight);
 
-    const ambientLight = new THREE.AmbientLight(0x334155, 0.7);
+    const ambientLight = new THREE.AmbientLight(0x1e2040, 0.85);
     scene.add(ambientLight);
 
-    const spaceLight = new THREE.DirectionalLight(themeColors.primary, 0.5);
-    spaceLight.position.set(-60, -20, -40);
-    scene.add(spaceLight);
+    const rimLight = new THREE.DirectionalLight(themeColors.primary, 0.9);
+    rimLight.position.set(-65, -15, -45);
+    scene.add(rimLight);
 
-    // 3. Texture Loader for Photorealistic NASA Earth
+    // 3. Texture Loader for NASA Blue Marble Earth
     const textureLoader = new THREE.TextureLoader();
     const RADIUS = 25;
 
@@ -94,28 +171,28 @@ export default function GodsEyeGlobe({
     const earthMat = new THREE.MeshPhongMaterial({
       map: dayTexture,
       normalMap: normalTexture,
-      normalScale: new THREE.Vector2(0.85, 0.85),
+      normalScale: new THREE.Vector2(0.9, 0.9),
       specularMap: specularTexture,
-      specular: new THREE.Color(0x222222),
-      shininess: 18
+      specular: new THREE.Color(0x334466),
+      shininess: 24
     });
     const earthMesh = new THREE.Mesh(earthGeo, earthMat);
     globeGroup.add(earthMesh);
 
-    // Floating Clouds Layer
+    // Dynamic Atmospheric Cloud Sphere
     const cloudsGeo = new THREE.SphereGeometry(RADIUS * 1.018, 64, 64);
     const cloudsMat = new THREE.MeshPhongMaterial({
       map: cloudsTexture,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.72,
       blending: THREE.AdditiveBlending
     });
     const cloudsMesh = new THREE.Mesh(cloudsGeo, cloudsMat);
     globeGroup.add(cloudsMesh);
     cloudsMeshRef.current = cloudsMesh;
 
-    // Atmospheric Rayleigh Glow Shader
-    const atmosphereGeo = new THREE.SphereGeometry(RADIUS * 1.12, 32, 32);
+    // Outer Atmospheric Rayleigh Limb Scattering Halo
+    const atmosphereGeo = new THREE.SphereGeometry(RADIUS * 1.14, 48, 48);
     const atmosphereMat = new THREE.ShaderMaterial({
       uniforms: {
         glowColor: { value: new THREE.Color(themeColors.glow) }
@@ -131,8 +208,8 @@ export default function GodsEyeGlobe({
         varying vec3 vNormal;
         uniform vec3 glowColor;
         void main() {
-          float intensity = pow(0.72 - dot(vNormal, vec3(0, 0, 1.0)), 2.2);
-          gl_FragColor = vec4(glowColor, 1.0) * intensity * 0.85;
+          float intensity = pow(0.7 - dot(vNormal, vec3(0, 0, 1.0)), 2.4);
+          gl_FragColor = vec4(glowColor, 1.0) * intensity * 0.9;
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -143,29 +220,29 @@ export default function GodsEyeGlobe({
     globeGroup.add(atmosphereMesh);
     atmosphereMeshRef.current = atmosphereMesh;
 
-    // 4. Defense Hotspot Nodes (Real Coordinates)
+    // 4. Ground Defense Hotspot Nodes (Genuine Coordinates)
     const REAL_NODES = [
-      { name: "New Delhi (KAVACH Primary HQ)", lat: 28.6139, lon: 77.2090, type: "HQ", color: 0x00ff88 },
+      { name: "New Delhi (KAVACH Command HQ)", lat: 28.6139, lon: 77.2090, type: "HQ", color: 0x00ff9f },
       { name: "Moscow Uplink (Bulletproof Host)", lat: 55.7558, lon: 37.6173, type: "THREAT", color: 0xff3366 },
       { name: "St. Petersburg Phish Relay", lat: 59.9343, lon: 30.3351, type: "THREAT", color: 0xff3366 },
-      { name: "Shanghai APT Infiltration Gateway", lat: 31.2304, lon: 121.4737, type: "THREAT", color: 0xff9900 },
-      { name: "Ashburn (AWS SES Backbone)", lat: 38.9072, lon: -77.0369, type: "GATEWAY", color: 0x00daf3 },
-      { name: "Amsterdam Offshore Proxy", lat: 52.3676, lon: 4.9041, type: "PROXY", color: 0xffb703 },
-      { name: "San Francisco Cloud Node", lat: 37.7749, lon: -122.4194, type: "SENSOR", color: 0x00daf3 }
+      { name: "Shanghai APT Infiltration Gateway", lat: 31.2304, lon: 121.4737, type: "THREAT", color: 0xB853CF },
+      { name: "Ashburn (AWS SES Cloud Backbone)", lat: 38.9072, lon: -77.0369, type: "GATEWAY", color: 0xFFD8AD },
+      { name: "Amsterdam Transit Proxy", lat: 52.3676, lon: 4.9041, type: "PROXY", color: 0xF9A1F8 },
+      { name: "San Francisco Defense Grid", lat: 37.7749, lon: -122.4194, type: "SENSOR", color: 0x00f5ff }
     ];
 
     REAL_NODES.forEach((node) => {
-      const pos = latLonToVector3(node.lat, node.lon, RADIUS + 0.15);
+      const pos = latLonToVector3(node.lat, node.lon, RADIUS + 0.16);
       
       // Node Beacon
-      const beaconGeo = new THREE.SphereGeometry(node.type === "HQ" ? 0.75 : 0.6, 16, 16);
+      const beaconGeo = new THREE.SphereGeometry(node.type === "HQ" ? 0.75 : 0.55, 16, 16);
       const beaconMat = new THREE.MeshBasicMaterial({ color: node.color });
       const beaconMesh = new THREE.Mesh(beaconGeo, beaconMat);
       beaconMesh.position.copy(pos);
       globeGroup.add(beaconMesh);
 
       // Beacon Target Ring
-      const ringGeo = new THREE.RingGeometry(0.9, 1.25, 32);
+      const ringGeo = new THREE.RingGeometry(0.85, 1.25, 32);
       const ringMat = new THREE.MeshBasicMaterial({
         color: node.color,
         side: THREE.DoubleSide,
@@ -178,46 +255,46 @@ export default function GodsEyeGlobe({
       globeGroup.add(ringMesh);
     });
 
-    // 5. Orbital Defense Satellites with Solar Array Models
+    // 5. Orbital Satellites with 3D Solar Panels & Conical Sensor Rays
     const satGroup = new THREE.Group();
     const REAL_SATELLITES = [
-      { name: "ISS (ZARYA) // NORAD 25544", radius: RADIUS + 6.5, speed: 0.0075, inc: 0.9, color: 0x00ff88, alt: "420 km", vel: "7.66 km/s" },
-      { name: "SENTINEL-6 // NORAD 48274", radius: RADIUS + 11.0, speed: 0.0055, inc: 1.15, color: 0x00daf3, alt: "1,336 km", vel: "7.15 km/s" },
-      { name: "KAVACH GEO-GUARDIAN", radius: RADIUS + 17.5, speed: 0.0018, inc: 0.1, color: 0xffb703, alt: "35,786 km", vel: "3.07 km/s" }
+      { name: "ISS (ZARYA) // NORAD 25544", radius: RADIUS + 6.2, speed: 0.0075, inc: 0.9, color: 0x00ff9f, alt: "420 km", vel: "7.66 km/s", type: "Tactical Recon" },
+      { name: "SENTINEL-1A // NORAD 39634", radius: RADIUS + 10.5, speed: 0.0055, inc: 1.15, color: 0xF9A1F8, alt: "693 km", vel: "7.51 km/s", type: "SAR Radar Recon" },
+      { name: "KAVACH AURA-3 (GEO)", radius: RADIUS + 18.0, speed: 0.0018, inc: 0.12, color: 0xFFD8AD, alt: "35,786 km", vel: "3.07 km/s", type: "Early Warning Constellation" }
     ];
 
     const satInstances = REAL_SATELLITES.map((sat) => {
-      // Orbit Ring
+      // Orbital Ring Line
       const orbitCurve = new THREE.EllipseCurve(0, 0, sat.radius, sat.radius, 0, 2 * Math.PI, false, 0);
       const pts = orbitCurve.getPoints(72);
       const orbitGeo = new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p.x, 0, p.y)));
-      const orbitMat = new THREE.LineBasicMaterial({ color: sat.color, transparent: true, opacity: 0.28 });
+      const orbitMat = new THREE.LineBasicMaterial({ color: sat.color, transparent: true, opacity: 0.32 });
       const orbitLine = new THREE.Line(orbitGeo, orbitMat);
       orbitLine.rotation.x = sat.inc;
       satGroup.add(orbitLine);
 
-      // Satellite Body + Solar Panels
+      // Satellite Craft Body + Solar Array Wings
       const satCraft = new THREE.Group();
       
-      const busGeo = new THREE.BoxGeometry(0.7, 0.45, 0.9);
-      const busMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3, metalness: 0.8 });
+      const busGeo = new THREE.BoxGeometry(0.75, 0.45, 0.95);
+      const busMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.2, metalness: 0.85 });
       const busMesh = new THREE.Mesh(busGeo, busMat);
       satCraft.add(busMesh);
 
-      // Solar Wings
-      const wingGeo = new THREE.BoxGeometry(2.4, 0.08, 0.7);
-      const wingMat = new THREE.MeshBasicMaterial({ color: 0x0088ff });
+      // Solar Wings with Cyber Pastel Glare
+      const wingGeo = new THREE.BoxGeometry(2.6, 0.08, 0.75);
+      const wingMat = new THREE.MeshBasicMaterial({ color: sat.color });
       const wingMesh = new THREE.Mesh(wingGeo, wingMat);
       satCraft.add(wingMesh);
 
       satGroup.add(satCraft);
 
-      // Ground Scan Conical Sensor Beam
-      const coneGeo = new THREE.ConeGeometry(3.8, sat.radius - RADIUS, 16, 1, true);
+      // Ground Scan Conic Beam
+      const coneGeo = new THREE.ConeGeometry(3.6, sat.radius - RADIUS, 16, 1, true);
       const coneMat = new THREE.MeshBasicMaterial({
         color: sat.color,
         transparent: true,
-        opacity: 0.08,
+        opacity: 0.07,
         wireframe: true
       });
       const coneMesh = new THREE.Mesh(coneGeo, coneMat);
@@ -227,13 +304,13 @@ export default function GodsEyeGlobe({
     });
     globeGroup.add(satGroup);
 
-    // 6. Real Global Cyber Attack Arcs
+    // 6. Global Cyber Intercept Arcs
     const arcGroup = new THREE.Group();
     const ARC_ROUTES = [
       { src: { lat: 55.7558, lon: 37.6173 }, dst: { lat: 28.6139, lon: 77.2090 }, color: 0xff3366 },
       { src: { lat: 59.9343, lon: 30.3351 }, dst: { lat: 38.9072, lon: -77.0369 }, color: 0xff3366 },
-      { src: { lat: 31.2304, lon: 121.4737 }, dst: { lat: 37.7749, lon: -122.4194 }, color: 0xff9900 },
-      { src: { lat: 52.3676, lon: 4.9041 }, dst: { lat: 28.6139, lon: 77.2090 }, color: 0x00daf3 }
+      { src: { lat: 31.2304, lon: 121.4737 }, dst: { lat: 37.7749, lon: -122.4194 }, color: 0xB853CF },
+      { src: { lat: 52.3676, lon: 4.9041 }, dst: { lat: 28.6139, lon: 77.2090 }, color: 0x00f5ff }
     ];
 
     ARC_ROUTES.forEach((route) => {
@@ -249,7 +326,7 @@ export default function GodsEyeGlobe({
       const arcMat = new THREE.LineBasicMaterial({
         color: route.color,
         transparent: true,
-        opacity: 0.75,
+        opacity: 0.78,
         linewidth: 2
       });
       const arcLine = new THREE.Line(arcGeo, arcMat);
@@ -257,7 +334,7 @@ export default function GodsEyeGlobe({
     });
     globeGroup.add(arcGroup);
 
-    // 7. Interactive Mouse Drag & Zoom Controls
+    // 7. Smooth Interactive Mouse Orbit Controls
     let isDragging = false;
     let prevMouse = { x: 0, y: 0 };
 
@@ -280,8 +357,8 @@ export default function GodsEyeGlobe({
       setHudCoords({
         lat: `${Math.abs(cLat)}° ${cLat >= 0 ? 'N' : 'S'}`,
         lon: `${Math.abs(cLon)}° ${cLon >= 0 ? 'E' : 'W'}`,
-        city: 'Free Orbit Surveillance',
-        mgrs: `43R ${Math.abs(cLat * 12 + 10)} ${Math.abs(cLon * 18 + 20)}`,
+        city: 'Free Orbital Reconnaissance',
+        mgrs: `43R ${Math.abs(cLat * 14 + 10)} ${Math.abs(cLon * 19 + 20)}`,
         altitude: `${(35786 - Math.abs(cLat) * 200).toLocaleString()} km`
       });
     };
@@ -296,17 +373,17 @@ export default function GodsEyeGlobe({
     const animate = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
 
-      // Rotate Earth slowly
+      // Smooth Natural Rotation
       if (autoRotate && !isDragging) {
-        globeGroup.rotation.y += 0.0014;
+        globeGroup.rotation.y += 0.0015;
       }
 
-      // Clouds rotate slightly faster than Earth for realism
+      // Clouds rotate slightly faster than Earth for genuine atmospheric realism
       if (cloudsMeshRef.current) {
-        cloudsMeshRef.current.rotation.y += 0.0004;
+        cloudsMeshRef.current.rotation.y += 0.00045;
       }
 
-      // Update Satellite Orbits
+      // Update Satellites
       satInstances.forEach((sat) => {
         sat.angle += sat.speed;
         const x = sat.radius * Math.cos(sat.angle);
@@ -369,113 +446,121 @@ export default function GodsEyeGlobe({
       setHudCoords({
         lat: `${activeTarget.lat.toFixed(4)}°`,
         lon: `${activeTarget.lon.toFixed(4)}°`,
-        city: activeTarget.city || 'Ground Lock',
+        city: activeTarget.city || 'Spatial Node',
         mgrs: `TARGET LOCKED // ${activeTarget.city || 'COORDINATES'}`,
-        altitude: '540 km (LEO Lock)'
+        altitude: '540 km (LEO Track)'
       });
     }
   }, [activeTarget]);
 
   return (
-    <div className="relative w-full h-full min-h-[580px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#070b14] shadow-[0_12px_48px_rgba(0,0,0,0.6)]">
+    <div className="relative w-full h-full min-h-[640px] overflow-hidden rounded-3xl border border-white/[0.12] bg-[#0d0e20] shadow-[0_20px_60px_rgba(7,8,20,0.8)]">
       {/* 3D WebGL Canvas */}
       <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
-      {/* TOP LEFT: SATELLITE OSINT HUD */}
-      <div className="absolute top-5 left-5 z-20 pointer-events-none flex flex-col gap-2.5">
-        <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg bg-black/60 border border-white/[0.12] backdrop-blur-xl text-xs font-mono-code text-cyan-300">
-          <Satellite className="w-4 h-4 text-emerald-400 animate-pulse" />
-          <span className="font-bold tracking-wider">GOD'S EYE 3D // NASA REAL PHOTO-EARTH</span>
+      {/* TOP LEFT: SPATIAL RECONNAISSANCE HUD (21st.dev Style Pill Arch) */}
+      <div className="absolute top-6 left-6 z-20 pointer-events-none flex flex-col gap-3">
+        <div className="star-arch-badge">
+          <div className="star-icon-bubble">
+            <span className="text-[#FFD8AD] text-xs font-bold leading-none">✦</span>
+          </div>
+          <span className="font-heading font-bold tracking-wider text-white">ASTRALIS 3D</span>
+          <span className="text-[10px] text-[#B853CF] uppercase font-mono-code font-bold">// SPATIAL RECON</span>
         </div>
 
-        <div className="p-3 rounded-xl bg-black/60 border border-white/[0.08] backdrop-blur-xl text-xs font-mono-code text-slate-300 space-y-1.5 min-w-[260px]">
-          <div className="flex justify-between items-center text-cyan-400 pb-1 border-b border-white/[0.08]">
-            <span className="text-[11px] font-bold">ORBITAL SURVEILLANCE:</span>
-            <span className="text-emerald-400 font-bold text-[10px]">NORAD ONLINE</span>
+        <div className="p-4 rounded-2xl cyber-glass text-xs font-mono-code text-slate-300 space-y-2 min-w-[280px]">
+          <div className="flex justify-between items-center text-[#F9A1F8] pb-1.5 border-b border-white/[0.08]">
+            <span className="text-[11px] font-bold flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-[#00ff9f]" />
+              <span>ORBITAL RECONNAISSANCE:</span>
+            </span>
+            <span className="text-[#00ff9f] font-bold text-[10px] px-1.5 py-0.5 rounded bg-[#00ff9f]/10 border border-[#00ff9f]/30">
+              SYNCHRONIZED
+            </span>
           </div>
           <div className="flex justify-between text-[11px]">
             <span className="text-slate-400">ISS (NORAD 25544):</span>
-            <span className="text-white">420 km // 7.66 km/s</span>
+            <span className="text-white font-semibold">420 km // 7.66 km/s</span>
           </div>
           <div className="flex justify-between text-[11px]">
-            <span className="text-slate-400">SENTINEL-6 (48274):</span>
-            <span className="text-white">1,336 km // Altimetry</span>
+            <span className="text-slate-400">SENTINEL-1A (39634):</span>
+            <span className="text-[#FFD8AD] font-semibold">693 km // SAR Radar</span>
           </div>
           <div className="flex justify-between text-[11px]">
-            <span className="text-slate-400">GEO-GUARDIAN:</span>
-            <span className="text-amber-300 font-semibold">35,786 km // Early Warning</span>
+            <span className="text-slate-400">AURA-GEO 3:</span>
+            <span className="text-[#F9A1F8] font-semibold">35,786 km // Early Warning</span>
           </div>
         </div>
       </div>
 
       {/* TOP RIGHT: CONTROLS & CAMERA RESET */}
-      <div className="absolute top-5 right-5 z-20 flex items-center gap-2">
+      <div className="absolute top-6 right-6 z-20 flex items-center gap-2.5">
         <button
           onClick={() => setAutoRotate(!autoRotate)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono-code text-xs backdrop-blur-xl border transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-mono-code text-xs backdrop-blur-xl border transition-all ${
             autoRotate 
-              ? 'bg-cyan-500/20 border-cyan-400/60 text-cyan-200' 
-              : 'bg-black/60 border-white/[0.1] text-slate-400'
+              ? 'bg-[#B853CF]/20 border-[#B853CF]/50 text-[#FFD8AD] shadow-[0_0_15px_rgba(184,83,207,0.3)]' 
+              : 'bg-[#171836]/70 border-white/[0.1] text-slate-400 hover:text-white'
           }`}
-          title="Toggle Natural Planetary Rotation"
+          title="Toggle Planetary Rotation"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span>{autoRotate ? 'ROTATING' : 'PAUSED'}</span>
+          <span>{autoRotate ? 'ORBIT ACTIVE' : 'PAUSED'}</span>
         </button>
 
         <button
           onClick={() => {
             if (globeGroupRef.current) {
-              globeGroupRef.current.rotation.set(0, 0, 0);
+              globeGroupRef.current.rotation.set(THREE.MathUtils.degToRad(-15), 2.8, 0);
               setAutoRotate(true);
               setLockedNode(null);
             }
           }}
-          className="p-2 rounded-lg bg-black/60 hover:bg-white/10 border border-white/[0.1] text-slate-300 backdrop-blur-xl transition-all"
+          className="p-2.5 rounded-xl bg-[#171836]/70 hover:bg-white/[0.1] border border-white/[0.1] text-slate-300 backdrop-blur-xl transition-all shadow-lg"
           title="Reset Camera Center"
         >
-          <Maximize2 className="w-3.5 h-3.5" />
+          <Maximize2 className="w-4 h-4" />
         </button>
       </div>
 
       {/* CENTER TACTICAL RETICLE */}
       <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
-        <div className="relative w-56 h-56 border border-white/[0.08] rounded-full flex items-center justify-center">
-          <div className="absolute inset-3 border border-dashed border-cyan-500/20 rounded-full" />
-          <Crosshair className="w-8 h-8 text-cyan-400/40" />
-          <div className="absolute bottom-3 text-[9px] font-mono-code text-cyan-400/70 tracking-widest uppercase">
-            {lockedNode ? `LOCKED: ${lockedNode.city || 'NODE'}` : 'GEOSPATIAL PASSIVE'}
+        <div className="relative w-64 h-64 border border-white/[0.08] rounded-full flex items-center justify-center">
+          <div className="absolute inset-4 border border-dashed border-[#B853CF]/25 rounded-full" />
+          <Crosshair className="w-9 h-9 text-[#F9A1F8]/35" />
+          <div className="absolute bottom-4 text-[9px] font-mono-code text-[#FFD8AD]/70 tracking-widest uppercase">
+            {lockedNode ? `LOCKED: ${lockedNode.city || 'NODE'}` : 'SPATIAL PASSIVE SCAN'}
           </div>
         </div>
       </div>
 
-      {/* BOTTOM CENTER: PRECISE COORDINATES TELEMETRY BAR */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-        <div className="flex items-center gap-4 px-5 py-2 rounded-full bg-black/75 border border-white/[0.12] backdrop-blur-2xl text-xs font-mono-code text-cyan-300 shadow-2xl">
-          <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
-            <Compass className="w-3.5 h-3.5 animate-spin" />
-            <span>GEO-RADAR:</span>
+      {/* BOTTOM CENTER: REAL-TIME COORDINATES TELEMETRY BAR */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+        <div className="flex items-center gap-4 px-6 py-2.5 rounded-full cyber-glass text-xs font-mono-code text-[#FFD8AD] shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
+          <div className="flex items-center gap-2 text-[#00ff9f] font-bold">
+            <Compass className="w-4 h-4 animate-spin" />
+            <span>GROUND TRACK:</span>
           </div>
           <span>LAT: <strong className="text-white">{hudCoords.lat}</strong></span>
           <span>LON: <strong className="text-white">{hudCoords.lon}</strong></span>
           <span className="text-slate-400 hidden sm:inline">ALT: <strong className="text-white">{hudCoords.altitude}</strong></span>
-          <span className="text-amber-400 hidden md:inline font-bold">[{hudCoords.city}]</span>
+          <span className="text-[#F9A1F8] hidden md:inline font-bold">[{hudCoords.city}]</span>
         </div>
       </div>
 
       {/* BOTTOM RIGHT: ACTIVE NODE INSPECTION PILL */}
       {lockedNode && (
-        <div className="absolute bottom-5 right-5 z-20 p-3.5 rounded-xl bg-black/80 border border-red-500/50 backdrop-blur-2xl text-xs font-mono-code text-slate-200 max-w-xs shadow-2xl animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center gap-1.5 text-red-400 font-bold mb-1">
+        <div className="absolute bottom-6 right-6 z-20 p-4 rounded-2xl bg-[#171836]/85 border border-[#ff3366]/50 backdrop-blur-2xl text-xs font-mono-code text-slate-200 max-w-xs shadow-[0_16px_48px_rgba(0,0,0,0.7)] animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center gap-2 text-[#ff3366] font-bold mb-1.5">
             <ShieldAlert className="w-4 h-4 animate-bounce" />
-            <span>INTERCEPT TARGET IDENTIFIED</span>
+            <span className="tracking-wide">THREAT TARGET LOCKED</span>
           </div>
-          <div className="text-white text-sm font-bold font-display">{lockedNode.city || 'Ground Location'}, {lockedNode.country || 'Global'}</div>
-          <div className="text-slate-400 text-[11px] mt-0.5">IP: <span className="text-cyan-300">{lockedNode.ip || '185.220.101.45'}</span></div>
+          <div className="text-white text-base font-bold font-heading">{lockedNode.city || 'Ground Location'}, {lockedNode.country || 'Global'}</div>
+          <div className="text-slate-400 text-[11px] mt-1">IP: <span className="text-[#F9A1F8] font-bold">{lockedNode.ip || '185.220.101.45'}</span></div>
           <div className="text-slate-400 text-[11px]">ASN: <span className="text-slate-200">{lockedNode.org || 'Autonomous Bulletproof Transit'}</span></div>
-          <div className="mt-2 flex items-center justify-between text-[11px] pt-1.5 border-t border-white/[0.08]">
-            <span className="text-slate-400">RISK FACTOR:</span>
-            <span className="px-2 py-0.5 rounded bg-red-950 text-red-400 font-bold border border-red-500/40">
+          <div className="mt-2.5 flex items-center justify-between text-[11px] pt-2 border-t border-white/[0.08]">
+            <span className="text-slate-400">RISK SEVERITY:</span>
+            <span className="px-2.5 py-0.5 rounded bg-red-950/80 text-red-400 font-bold border border-red-500/40">
               {lockedNode.threat_risk || 94}% CRITICAL
             </span>
           </div>

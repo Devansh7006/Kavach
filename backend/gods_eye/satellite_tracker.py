@@ -1,5 +1,5 @@
 """
-KAVACH - God's Eye Defense Satellite Orbital Tracker
+KAVACH - ASTRALIS 3D Defense Satellite Orbital Tracker
 Calculates real-time orbital positions and telemetry for cyber defense surveillance satellites.
 """
 

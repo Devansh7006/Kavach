@@ -427,7 +427,7 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange }) {
                           className="px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 text-[10px] border border-cyan-500/30 flex items-center gap-1 transition-all"
                         >
                           <MapPin className="w-3 h-3 text-red-400" />
-                          <span>FOCUS GOD'S EYE</span>
+                          <span>LOCK SPATIAL RADAR</span>
                         </button>
                       </div>
                     ))}

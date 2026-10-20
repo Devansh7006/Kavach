@@ -6,7 +6,7 @@ Features:
 - High-Frequency Noise Extraction & Variance Mapping
 - Luminance Gradient & Color Inconsistency Detection
 - Full EXIF & Software/AI Generation Prompt Metadata Parsing
-- GPS Coordinate Extraction with God's Eye 3D Target Lock
+- GPS Coordinate Extraction with ASTRALIS 3D Target Lock
 """
 
 from typing import Dict, Any, Tuple
@@ -196,7 +196,7 @@ def analyze_image_forensics(image_bytes: bytes, filename: str = "evidence.jpg") 
     
     verdict = "AI-GENERATED / MANIPULATED" if ai_prob >= 50.0 else "AUTHENTIC MEDIA"
 
-    # Geolocation target coordinate for God's Eye view
+    # Geolocation target coordinate for ASTRALIS 3D view
     target_geo = None
     if exif["gps"]["has_gps"]:
         target_geo = {

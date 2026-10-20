@@ -18,7 +18,7 @@ export default function DossierExportTab() {
     sha256_hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     integrity_status: "VERIFIED_CHAIN_OF_CUSTODY",
     systems_deployed: [
-      "God's Eye 3D Orbital Intelligence (Cesium/Three.js HUD)",
+      "ASTRALIS 3D Spatial Reconnaissance & Orbital Telemetry",
       "RFC 5322 Email Phishing Classifier with Dynamic 100-Sample Learning",
       "Amped FIVE & Sherloq Error Level Analysis (ELA) Heatmap Engine",
       "Amped Authenticator Frame-by-Frame Temporal Video Inspector",
