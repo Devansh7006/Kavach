@@ -63,72 +63,16 @@ export default function AudioForensicsTab({ onVerdictChange, onLogAudit }) {
         });
       }
     } catch (err) {
-      console.error(err);
-      loadTestAudioAnalysis('SYNTHETIC');
+      console.error("Audio forensics processing error:", err);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const loadTestAudioAnalysis = (type = 'SYNTHETIC') => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      const isSynthetic = type === 'SYNTHETIC';
-      const mockMfcc = [
-        { name: "MFCC-1", value: isSynthetic ? -18.4 : -32.1 },
-        { name: "MFCC-2", value: isSynthetic ? 42.1 : 28.4 },
-        { name: "MFCC-3", value: isSynthetic ? -8.9 : -16.2 },
-        { name: "MFCC-4", value: isSynthetic ? 15.3 : 8.7 },
-        { name: "MFCC-5", value: isSynthetic ? -22.1 : -14.6 },
-        { name: "MFCC-6", value: isSynthetic ? 19.8 : 11.2 },
-        { name: "MFCC-7", value: isSynthetic ? -14.2 : -9.4 },
-        { name: "MFCC-8", value: isSynthetic ? 9.6 : 5.8 },
-        { name: "MFCC-9", value: isSynthetic ? -11.0 : -6.1 },
-        { name: "MFCC-10", value: isSynthetic ? 6.4 : 3.5 },
-        { name: "MFCC-11", value: isSynthetic ? -7.8 : -4.2 },
-        { name: "MFCC-12", value: isSynthetic ? 4.2 : 2.1 },
-        { name: "MFCC-13", value: isSynthetic ? -5.1 : -1.8 }
-      ];
-
-      const res = {
-        filename: isSynthetic ? "executive_voice_note_clone.wav" : "microphone_speech_raw.wav",
-        sample_rate: "16000 Hz",
-        duration: isSynthetic ? "6.2s" : "5.4s",
-        verdict: isSynthetic ? "SYNTHETIC / AI VOICE CLONE" : "VERIFIED AUTHENTIC HUMAN VOICE",
-        deepfake_confidence: isSynthetic ? 88.4 : 7.1,
-        trust_score: isSynthetic ? 11.6 : 92.9,
-        is_ai_generated: isSynthetic,
-        mfcc_coefficients: mockMfcc,
-        spectral_metrics: {
-          spectral_flatness: isSynthetic ? 0.0381 : 0.0124,
-          spectral_centroid_hz: isSynthetic ? 2410.5 : 1840.2,
-          spectral_rolloff_hz: isSynthetic ? 4890.0 : 3620.0,
-          zero_crossing_rate: isSynthetic ? 0.0821 : 0.0542
-        },
-        acoustic_signatures: isSynthetic ? [
-          { parameter: "Neural Vocoder Phase Jitter", status: "DETECTED (HIGH)" },
-          { parameter: "Harmonic Formant Naturalness", status: "UNNATURAL REGULARITY" },
-          { parameter: "High-Frequency Cutoff", status: "4890 Hz (Acoustic Compression)" }
-        ] : [
-          { parameter: "Natural Glottal Pulse Irregularity", status: "NOMINAL (HUMAN VOCAL TRACT)" },
-          { parameter: "Harmonic Jitter & Shimmer", status: "NORMAL BIOMETRIC VARIANCE" },
-          { parameter: "Room Reverberation & Air Noise", status: "PHYSICAL MICROPHONE PRESENT" }
-        ]
-      };
-      setResult(res);
-      if (onVerdictChange) onVerdictChange(isSynthetic ? 'THREAT' : 'LEGIT');
-      if (onLogAudit) {
-        onLogAudit({
-          module: "AUDIO",
-          action: "ANALYZED",
-          target: res.filename,
-          verdict: isSynthetic ? "⚠️ AI VOICE CLONE (SYNTHETIC)" : "✅ AUTHENTIC HUMAN VOICE",
-          status: isSynthetic ? "THREAT" : "LEGIT",
-          details: `13-Band Librosa MFCC | Rate: ${res.sample_rate} | Flatness: ${res.spectral_metrics.spectral_flatness} | Confidence: ${res.deepfake_confidence}%`
-        });
-      }
-      setIsAnalyzing(false);
-    }, 1000);
+  const resetBuffer = () => {
+    setResult(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (onVerdictChange) onVerdictChange('NEUTRAL');
   };
 
   return (
@@ -160,18 +104,21 @@ export default function AudioForensicsTab({ onVerdictChange, onLogAudit }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <button
-            onClick={() => loadTestAudioAnalysis('AUTHENTIC')}
-            className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[#B2F601] font-mono-hud text-xs border border-white/[0.12] transition-all font-semibold"
-          >
-            SAMPLE AUTHENTIC VOICE
-          </button>
-          <button
-            onClick={() => loadTestAudioAnalysis('SYNTHETIC')}
-            className="px-3.5 py-2 rounded-xl bg-[#FF3366]/15 hover:bg-[#FF3366]/25 text-[#FF3366] font-mono-hud text-xs border border-[#FF3366]/40 transition-all font-bold"
-          >
-            SAMPLE SYNTHETIC CLONE
-          </button>
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] text-[10px] font-mono-hud text-slate-300 border border-white/10">
+            <span className="w-2 h-2 rounded-full bg-[#B2F601] animate-pulse" />
+            <span>VOICE TIMBRE PIPELINE ACTIVE</span>
+          </span>
+
+          {result && (
+            <button
+              onClick={resetBuffer}
+              className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white font-mono-hud text-xs border border-white/[0.12] transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+              <span>CLEAR BUFFER</span>
+            </button>
+          )}
+
           <button
             onClick={() => fileInputRef.current?.click()}
             className="px-4 py-2 rounded-xl bg-[#62C0F6] hover:bg-[#7ed2ff] text-[#0a0a0d] font-bold text-xs shadow-[0_0_15px_rgba(98,192,246,0.4)] transition-all flex items-center gap-1.5 cursor-pointer"

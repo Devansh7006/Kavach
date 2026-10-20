@@ -323,40 +323,34 @@ export default function App() {
             })}
           </div>
 
-          {/* Right Trailing Cluster: Threat Level Switcher */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="flex items-center rounded-full bg-black/60 p-0.5 sm:p-1 border border-white/10 text-[9px] sm:text-[10px] font-mono-hud">
-              <button
+          {/* Right Trailing Cluster: Automated Sentinel Threat Monitor Badge */}
+          <div className="flex items-center gap-2 shrink-0 select-none">
+            {threatState === 'THREAT' ? (
+              <div 
                 onClick={() => setThreatState('NEUTRAL')}
-                className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
-                  threatState === 'NEUTRAL' 
-                    ? 'bg-white/15 text-white font-bold border border-white/20' 
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                title="Click to reset threat monitor to standby"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FF3366]/15 border border-[#FF3366]/40 text-[#FF3366] font-mono-hud text-[10px] font-extrabold shadow-[0_0_15px_rgba(255,51,102,0.35)] cursor-pointer hover:bg-[#FF3366]/25 transition-all"
               >
-                NEUTRAL
-              </button>
-              <button
-                onClick={() => setThreatState('LEGIT')}
-                className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
-                  threatState === 'LEGIT' 
-                    ? 'bg-[#B2F601] text-[#0a0a0d] font-bold shadow-[0_0_12px_rgba(178,246,1,0.5)]' 
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                <span className="w-2 h-2 rounded-full bg-[#FF3366] animate-ping" />
+                <span className="tracking-wider">DEFCON 1 // THREAT DETECTED</span>
+              </div>
+            ) : threatState === 'LEGIT' ? (
+              <div 
+                onClick={() => setThreatState('NEUTRAL')}
+                title="Click to reset threat monitor to standby"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#B2F601]/15 border border-[#B2F601]/40 text-[#B2F601] font-mono-hud text-[10px] font-extrabold shadow-[0_0_15px_rgba(178,246,1,0.35)] cursor-pointer hover:bg-[#B2F601]/25 transition-all"
               >
-                LEGIT
-              </button>
-              <button
-                onClick={() => setThreatState('THREAT')}
-                className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
-                  threatState === 'THREAT' 
-                    ? 'bg-[#FF3366] text-white font-bold shadow-[0_0_12px_rgba(255,51,102,0.5)]' 
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                <span className="w-2 h-2 rounded-full bg-[#B2F601]" />
+                <span className="tracking-wider">SYSTEM SECURE // INTEGRITY OK</span>
+              </div>
+            ) : (
+              <div 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-slate-300 font-mono-hud text-[10px] font-bold shadow-sm"
               >
-                THREAT
-              </button>
-            </div>
+                <span className="w-2 h-2 rounded-full bg-[#62C0F6] animate-pulse" />
+                <span className="tracking-wider">SENTINEL MONITORING ACTIVE</span>
+              </div>
+            )}
           </div>
         </header>
       </div>

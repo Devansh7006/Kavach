@@ -57,96 +57,17 @@ export default function VideoForensicsTab({ onVerdictChange, onLogAudit }) {
         });
       }
     } catch (err) {
-      console.error(err);
-      loadTestVideoAnalysis('DEEPFAKE');
+      console.error("Video forensics analysis error:", err);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const loadTestVideoAnalysis = (type = 'DEEPFAKE') => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      const isSynthetic = type === 'DEEPFAKE';
-      const mockFrames = Array.from({ length: 8 }, (_, i) => ({
-        frame_number: i * 15,
-        timestamp: `${(i * 0.5).toFixed(1)}s`,
-        ela_score: isSynthetic ? 45 + (i % 3) * 16 : 8 + (i % 3) * 4,
-        flow_movement: isSynthetic ? (0.16 + (i * 0.04)).toFixed(2) : (0.02 + (i * 0.01)).toFixed(2),
-        ai_probability: isSynthetic ? 68 + (i % 4) * 8 : 4 + (i % 3) * 2,
-        status: isSynthetic ? (i % 2 === 0 ? "ALERT_ANOMALY" : "CONSISTENT") : "NATURAL_FRAME"
-      }));
-
-      const res = {
-        filename: isSynthetic ? "suspected_deepfake_broadcast.mp4" : "cctv_optical_capture.mp4",
-        total_frames: 120,
-        fps: 30.0,
-        duration: "4.0s",
-        verdict: isSynthetic ? "DEEPFAKE / SYNTHETIC VIDEO DETECTED" : "VERIFIED AUTHENTIC HUMAN FOOTAGE",
-        deepfake_confidence: isSynthetic ? 84.6 : 6.2,
-        trust_score: isSynthetic ? 15.4 : 93.8,
-        temporal_consistency: isSynthetic ? "UNSTABLE_SYNTHETIC_JITTER" : "STABLE_NATURAL_FLOW",
-        is_ai_generated: isSynthetic,
-        timeline: mockFrames,
-        forensic_summary: isSynthetic ? [
-          "Analyzed 8 keyframe intervals at 30.0 FPS.",
-          "Optical flow discrepancy across facial landmarks indicates deepfake face-swap warping.",
-          "Inter-frame compression inconsistency detected via Amped Authenticator algorithm."
-        ] : [
-          "Natural photon shot noise verified across all 8 sampled keyframes.",
-          "Continuous temporal optical flow matches authentic hardware camera shutter.",
-          "Zero neural face-swap latent diffusion boundary artifacts."
-        ]
-      };
-      setResult(res);
-      if (onVerdictChange) onVerdictChange(isSynthetic ? 'THREAT' : 'LEGIT');
-      if (onLogAudit) {
-        onLogAudit({
-          module: "VIDEO",
-          action: "ANALYZED",
-          target: res.filename,
-          verdict: isSynthetic ? "⚠️ AI DEEPFAKE (FACE-SWAP WARPING)" : "✅ AUTHENTIC HUMAN FOOTAGE",
-          status: isSynthetic ? "THREAT" : "LEGIT",
-          details: `${res.timeline.length} Keyframes @ ${res.fps} FPS | Temporal: ${res.temporal_consistency} | Deepfake Conf: ${res.deepfake_confidence}%`
-        });
-      }
-      setIsAnalyzing(false);
-    }, 1000);
-  };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setIsAnalyzing(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const res = await fetch('/api/media/video-forensics', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      data.is_ai_generated = data.deepfake_confidence > 50;
-      setResult(data);
-      if (onVerdictChange) onVerdictChange(data.is_ai_generated ? 'THREAT' : 'LEGIT');
-      if (onLogAudit) {
-        onLogAudit({
-          module: "VIDEO",
-          action: "ANALYZED",
-          target: file.name,
-          verdict: data.is_ai_generated ? "⚠️ AI DEEPFAKE (FACE-SWAP WARPING)" : "✅ AUTHENTIC CAMERA FOOTAGE",
-          status: data.is_ai_generated ? "THREAT" : "LEGIT",
-          details: `FPS: ${data.fps || 30} | Duration: ${data.duration || 'N/A'} | Deepfake Conf: ${data.deepfake_confidence || 80}%`
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      loadTestVideoAnalysis('DEEPFAKE');
-    } finally {
-      setIsAnalyzing(false);
-    }
+  const resetBuffer = () => {
+    setResult(null);
+    setSelectedFrame(0);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (onVerdictChange) onVerdictChange('NEUTRAL');
   };
 
   return (
@@ -170,24 +91,27 @@ export default function VideoForensicsTab({ onVerdictChange, onLogAudit }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <button
-            onClick={() => loadTestVideoAnalysis('AUTHENTIC')}
-            className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[#B2F601] font-mono-hud text-xs border border-white/[0.12] transition-all font-semibold"
-          >
-            SAMPLE AUTHENTIC VIDEO
-          </button>
-          <button
-            onClick={() => loadTestVideoAnalysis('DEEPFAKE')}
-            className="px-3.5 py-2 rounded-xl bg-[#FF3366]/15 hover:bg-[#FF3366]/25 text-[#FF3366] font-mono-hud text-xs border border-[#FF3366]/40 transition-all font-bold"
-          >
-            SAMPLE DEEPFAKE VIDEO
-          </button>
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] text-[10px] font-mono-hud text-slate-300 border border-white/10">
+            <span className="w-2 h-2 rounded-full bg-[#B2F601] animate-pulse" />
+            <span>OPTICAL FLOW ENGINE ACTIVE</span>
+          </span>
+
+          {result && (
+            <button
+              onClick={resetBuffer}
+              className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white font-mono-hud text-xs border border-white/[0.12] transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+              <span>CLEAR BUFFER</span>
+            </button>
+          )}
+
           <button 
             onClick={() => fileInputRef.current?.click()}
             className="cursor-pointer px-4 py-2 rounded-xl bg-[#62C0F6] hover:bg-[#7ed2ff] text-[#0a0a0d] font-bold text-xs shadow-[0_0_15px_rgba(98,192,246,0.4)] transition-all flex items-center gap-1.5 active:scale-95"
           >
             <Upload className="w-3.5 h-3.5" />
-            <span>UPLOAD VIDEO</span>
+            <span>BROWSE VIDEO</span>
           </button>
           <input 
             type="file" 

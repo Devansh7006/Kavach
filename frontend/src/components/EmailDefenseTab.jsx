@@ -76,7 +76,7 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
         module: "EMAIL",
         action: "LOAD PRESET",
         target: preset.subject,
-        verdict: "SAMPLE LOADED INTO AUDIT WORKBENCH",
+        verdict: "PLAYBOOK INCIDENT LOADED INTO WORKBENCH",
         status: "INFO",
         details: `Sender: ${preset.sender}`
       });
@@ -161,6 +161,17 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
 
   const runAnalysis = () => {
     executeAnalysis();
+  };
+
+  const resetBuffer = () => {
+    setSender(PRESET_EMAILS[0].sender);
+    setSubject(PRESET_EMAILS[0].subject);
+    setBody(PRESET_EMAILS[0].body);
+    setRawEml('');
+    setAnalysisResult(null);
+    setRetrainSuccess(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (onVerdictChange) onVerdictChange('NEUTRAL');
   };
 
   const handleRetrainDynamic = async (label) => {
@@ -267,13 +278,24 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
                 <Mail className="w-4 h-4 text-cyan-400" />
                 <span>EMAIL FORENSICS CONSOLE</span>
               </div>
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="cursor-pointer text-xs font-mono-code px-3 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-cyan-300 border border-white/[0.12] transition-all flex items-center gap-1.5"
-              >
-                <Upload className="w-3 h-3 text-cyan-400" />
-                <span>BROWSE .EML</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {analysisResult && (
+                  <button
+                    onClick={resetBuffer}
+                    className="cursor-pointer text-xs font-mono-code px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white border border-white/[0.12] transition-all flex items-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3 h-3 text-slate-400" />
+                    <span>CLEAR</span>
+                  </button>
+                )}
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="cursor-pointer text-xs font-mono-code px-3 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-cyan-300 border border-white/[0.12] transition-all flex items-center gap-1.5"
+                >
+                  <Upload className="w-3 h-3 text-cyan-400" />
+                  <span>BROWSE .EML</span>
+                </button>
+              </div>
               <input 
                 ref={fileInputRef} 
                 type="file" 
@@ -285,7 +307,7 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
 
             {/* Presets */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-mono-code text-slate-400">QUICK ATTACK SCENARIOS:</label>
+              <label className="text-[11px] font-mono-code text-slate-400">ACTIVE INCIDENT PLAYBOOKS:</label>
               <div className="flex flex-col gap-1.5">
                 {PRESET_EMAILS.map((p, idx) => (
                   <button
@@ -529,7 +551,7 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
                   </div>
 
                   <p className="text-xs text-slate-300">
-                    Verify this live sample and retrain the Random Forest model on the fly:
+                    Verify this live incident payload and retrain the Random Forest model on the fly:
                   </p>
 
                   <div className="flex items-center gap-3">
@@ -586,7 +608,7 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
                     CLICK / TOUCH TO BROWSE .EML OR DRAG & DROP HERE
                   </div>
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
-                    Select a test attack scenario from the left, or drop an RFC 5322 .eml or raw text email here to trigger header routing & AI phishing detection.
+                    Select an incident playbook from the left, or drop an RFC 5322 .eml or raw email payload here to trigger header routing & AI phishing detection.
                   </p>
                 </div>
                 <div className="pt-2 flex items-center justify-center gap-3">

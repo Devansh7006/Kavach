@@ -144,59 +144,13 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange, o
     });
   };
 
-  const loadSyntheticSample = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 400;
-    canvas.height = 400;
-    const ctx = canvas.getContext('2d');
-    
-    const grad = ctx.createLinearGradient(0, 0, 400, 400);
-    grad.addColorStop(0, '#101c30');
-    grad.addColorStop(1, '#070b14');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 400, 400);
-
-    ctx.fillStyle = '#ff3366';
-    ctx.fillRect(110, 110, 180, 180);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 18px monospace';
-    ctx.fillText('SPLICED ADOBE LAYER', 120, 205);
-
-    canvas.toBlob((blob) => {
-      const file = new File([blob], 'spliced_evidence.jpg', { type: 'image/jpeg' });
-      setSelectedImage(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      analyzeFile(file, url);
-    }, 'image/jpeg', 0.92);
-  };
-
-  const loadAuthenticSample = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 400;
-    canvas.height = 400;
-    const ctx = canvas.getContext('2d');
-    
-    const grad = ctx.createLinearGradient(0, 0, 400, 400);
-    grad.addColorStop(0, '#1a2332');
-    grad.addColorStop(1, '#111722');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 400, 400);
-
-    ctx.fillStyle = '#B2F601';
-    ctx.font = 'bold 16px monospace';
-    ctx.fillText('AUTHENTIC SENSOR CAPTURE', 75, 200);
-    ctx.fillStyle = '#62C0F6';
-    ctx.font = '12px monospace';
-    ctx.fillText('SONY ILCE-7RM4 // ISO 100 // 1/250s', 85, 230);
-
-    canvas.toBlob((blob) => {
-      const file = new File([blob], 'authentic_sensor_shot.jpg', { type: 'image/jpeg' });
-      setSelectedImage(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      analyzeFile(file, url);
-    }, 'image/jpeg', 0.98);
+  const resetBuffer = () => {
+    setSelectedImage(null);
+    setPreviewUrl(null);
+    setResult(null);
+    setActiveView('ORIGINAL');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (onVerdictChange) onVerdictChange('NEUTRAL');
   };
 
   const handleFileChange = (e) => {
@@ -338,18 +292,21 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange, o
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <button
-            onClick={loadAuthenticSample}
-            className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[#B2F601] font-mono-hud text-xs border border-white/[0.12] transition-all font-semibold cursor-pointer"
-          >
-            SAMPLE AUTHENTIC PHOTO
-          </button>
-          <button
-            onClick={loadSyntheticSample}
-            className="px-3.5 py-2 rounded-xl bg-[#FF3366]/15 hover:bg-[#FF3366]/25 text-[#FF3366] font-mono-hud text-xs border border-[#FF3366]/40 transition-all font-bold cursor-pointer"
-          >
-            SAMPLE TAMPERED / AI TEST
-          </button>
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] text-[10px] font-mono-hud text-slate-300 border border-white/10">
+            <span className="w-2 h-2 rounded-full bg-[#B2F601] animate-pulse" />
+            <span>SPECTRAL ANALYZER ACTIVE</span>
+          </span>
+
+          {(selectedImage || result) && (
+            <button
+              onClick={resetBuffer}
+              className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white font-mono-hud text-xs border border-white/[0.12] transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+              <span>CLEAR BUFFER</span>
+            </button>
+          )}
+
           <button
             onClick={() => fileInputRef.current?.click()}
             className="px-4 py-2 rounded-xl bg-[#62C0F6] hover:bg-[#7ed2ff] text-[#0a0a0d] font-bold text-xs shadow-[0_0_15px_rgba(98,192,246,0.4)] transition-all flex items-center gap-1.5 cursor-pointer"

@@ -42,37 +42,11 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const loadTestSample = (sampleType) => {
-    setIsAnalyzing(true);
-    let sampleBytes;
-    let filename = "sample.bin";
-
-    if (sampleType === 'STEGO') {
-      filename = "tampered_stego_evidence.jpg";
-      // Standard JPEG header + payload + EOI + hidden trailing payload
-      const header = [0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01];
-      const dummyBody = new Array(64).fill(0x55);
-      const eoi = [0xFF, 0xD9];
-      const hiddenPayload = Array.from(new TextEncoder().encode("HIDDEN_ENCRYPTED_TEXT_FLAG{kavach_forensic_stego_detected}_TRAILING_SLACK_STREAM"));
-      sampleBytes = new Uint8Array([...header, ...dummyBody, ...eoi, ...hiddenPayload]);
-    } else if (sampleType === 'POLYGLOT') {
-      filename = "disguised_polyglot.jpg";
-      // Starts with MZ (executable header) but named .jpg
-      const mzHeader = [0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00];
-      const dummyBody = new Array(80).fill(0x90);
-      const testPayload = Array.from(new TextEncoder().encode("ANOMALOUS_DISGUISED_BINARY_HEADER_FLAGGED"));
-      sampleBytes = new Uint8Array([...mzHeader, ...dummyBody, ...testPayload]);
-    } else {
-      filename = "authentic_camera_shot.jpg";
-      const header = [0xFF, 0xD8, 0xFF, 0xE1, 0x00, 0x22, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00];
-      const dummyBody = new Array(96).fill(0x3C);
-      const eoi = [0xFF, 0xD9];
-      sampleBytes = new Uint8Array([...header, ...dummyBody, ...eoi]);
-    }
-
-    const testFile = new File([sampleBytes], filename, { type: 'image/jpeg' });
-    setFile(testFile);
-    analyzeFile(testFile);
+  const resetBuffer = () => {
+    setFile(null);
+    setResult(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (onVerdictChange) onVerdictChange('NEUTRAL');
   };
 
   const handleFileUpload = (e) => {
@@ -164,26 +138,23 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
             </h2>
           </div>
 
-          {/* Quick Action Buttons */}
+          {/* Production Controls */}
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => loadTestSample('CLEAN')}
-              className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[#B2F601] font-mono-hud text-xs border border-white/[0.12] transition-all"
-            >
-              SAMPLE CLEAN FILE
-            </button>
-            <button
-              onClick={() => loadTestSample('STEGO')}
-              className="px-3.5 py-2 rounded-xl bg-[#FF3366]/15 hover:bg-[#FF3366]/25 text-[#FF3366] font-mono-hud text-xs border border-[#FF3366]/40 transition-all font-bold"
-            >
-              SAMPLE STEGO INJECTION
-            </button>
-            <button
-              onClick={() => loadTestSample('POLYGLOT')}
-              className="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 font-mono-hud text-xs border border-amber-500/40 transition-all font-bold"
-            >
-              SAMPLE POLYGLOT EXECUTABLE
-            </button>
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] text-[10px] font-mono-hud text-slate-300 border border-white/10">
+              <span className="w-2 h-2 rounded-full bg-[#B2F601] animate-pulse" />
+              <span>LIVE INGESTION ACTIVE</span>
+            </span>
+
+            {result && (
+              <button
+                onClick={resetBuffer}
+                className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white font-mono-hud text-xs border border-white/[0.12] transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+                <span>CLEAR BUFFER</span>
+              </button>
+            )}
+
             <button 
               onClick={() => fileInputRef.current?.click()}
               className="px-4 py-2 rounded-xl bg-[#62C0F6] hover:bg-[#7ed2ff] text-[#0a0a0d] font-bold text-xs shadow-[0_0_15px_rgba(98,192,246,0.4)] transition-all flex items-center gap-1.5 cursor-pointer"
