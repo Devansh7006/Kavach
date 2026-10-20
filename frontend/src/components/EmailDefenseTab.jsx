@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, ShieldCheck, ShieldAlert, Server, MapPin, CheckCircle2, 
   Database, RefreshCw, Cpu, Activity, Globe2, Lock, Terminal, 
-  ChevronRight, ArrowUpRight, Hash, Send
+  ChevronRight, ArrowUpRight, Hash, Send, Upload
 } from 'lucide-react';
 
 const PRESET_EMAILS = [
@@ -36,6 +36,9 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
   const [analysisResult, setAnalysisResult] = useState(null);
   const [retrainSuccess, setRetrainSuccess] = useState(null);
   const [datasetMetrics, setDatasetMetrics] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetch('/api/email/dataset')
@@ -43,6 +46,25 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
       .then(d => setDatasetMetrics(d))
       .catch(err => console.log('Dataset fetch fallback', err));
   }, []);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      processEmailFile(file);
+    }
+  };
 
   const handlePresetSelect = (preset) => {
     setSender(preset.sender);
@@ -61,32 +83,42 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
     }
   };
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => setRawEml(event.target.result);
-      reader.readAsText(file);
-      if (onLogAudit) {
-        onLogAudit({
-          module: "EMAIL",
-          action: "FILE UPLOAD",
-          target: file.name,
-          verdict: "RAW RFC-5322 EML INGESTED",
-          status: "INFO",
-          details: `Size: ${(file.size / 1024).toFixed(1)} KB`
-        });
-      }
+  const processEmailFile = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target.result;
+      setRawEml(content);
+      executeAnalysis(content, file.name);
+    };
+    reader.readAsText(file);
+    if (onLogAudit) {
+      onLogAudit({
+        module: "EMAIL",
+        action: "FILE UPLOAD",
+        target: file.name,
+        verdict: "RAW RFC-5322 EML INGESTED",
+        status: "INFO",
+        details: `Size: ${(file.size / 1024).toFixed(1)} KB`
+      });
     }
   };
 
-  const runAnalysis = async () => {
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      processEmailFile(file);
+    }
+  };
+
+  const executeAnalysis = async (customEml = null, customTargetName = null) => {
     setIsAnalyzing(true);
     setRetrainSuccess(null);
 
     const formData = new FormData();
-    if (rawEml) {
-      formData.append('raw_eml', rawEml);
+    const targetEml = customEml !== null ? customEml : rawEml;
+    if (targetEml) {
+      formData.append('raw_eml', targetEml);
     } else {
       formData.append('sender', sender);
       formData.append('subject', subject);
@@ -114,10 +146,10 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
         onLogAudit({
           module: "EMAIL",
           action: "ANALYZED",
-          target: subject || (rawEml ? "Uploaded RFC-5322 EML File" : "Email Message"),
+          target: customTargetName || subject || (targetEml ? "Uploaded RFC-5322 EML File" : "Email Message"),
           verdict: isPhish ? "⚠️ AI-CRAFTED PHISHING DETECTED" : "✅ AUTHENTIC HUMAN EMAIL",
           status: isPhish ? "THREAT" : "LEGIT",
-          details: `From: ${sender || 'Uploaded EML'} | Certainty: ${data.prediction?.confidence || 98}% | Invariant Checks Complete`
+          details: `From: ${data.parsed_metadata?.sender || sender || 'Uploaded EML'} | Certainty: ${data.prediction?.confidence || 98}% | Invariant Checks Complete`
         });
       }
     } catch (err) {
@@ -125,6 +157,10 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const runAnalysis = () => {
+    executeAnalysis();
   };
 
   const handleRetrainDynamic = async (label) => {
@@ -231,10 +267,20 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
                 <Mail className="w-4 h-4 text-cyan-400" />
                 <span>EMAIL FORENSICS CONSOLE</span>
               </div>
-              <label className="cursor-pointer text-xs font-mono-code px-3 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-cyan-300 border border-white/[0.12] transition-all">
-                UPLOAD .EML
-                <input type="file" accept=".eml,.txt" onChange={handleFileUpload} className="hidden" />
-              </label>
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="cursor-pointer text-xs font-mono-code px-3 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-cyan-300 border border-white/[0.12] transition-all flex items-center gap-1.5"
+              >
+                <Upload className="w-3 h-3 text-cyan-400" />
+                <span>BROWSE .EML</span>
+              </button>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                accept=".eml,.txt,.msg" 
+                onChange={handleFileUpload} 
+                className="hidden" 
+              />
             </div>
 
             {/* Presets */}
@@ -521,15 +567,35 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onL
                 key="empty"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="glass-surface p-12 rounded-2xl text-center space-y-3"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`p-14 rounded-2xl border-2 transition-all cursor-pointer text-center space-y-4 group select-none ${
+                  isDragging 
+                    ? 'border-[#B2F601] bg-[#B2F601]/10 shadow-[0_0_30px_rgba(178,246,1,0.3)]' 
+                    : 'glass-surface border-white/[0.1] hover:border-cyan-400/60 hover:bg-[#070b14]'
+                }`}
+                title="Click or touch to browse .eml file, or drag and drop email payload here"
               >
-                <Terminal className="w-10 h-10 text-cyan-400/40 mx-auto animate-pulse" />
-                <div className="text-cyan-300 font-display text-sm font-semibold">
-                  AWAITING INBOUND RFC TELEMETRY
+                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto group-hover:border-cyan-400/60 group-hover:bg-cyan-400/10 group-hover:scale-105 transition-all">
+                  <Mail className="w-8 h-8 text-cyan-400/70 group-hover:text-cyan-300 transition-colors" />
                 </div>
-                <p className="text-xs text-slate-400 max-w-md mx-auto">
-                  Select a test attack scenario from the left or upload an RFC 5322 .eml file to trigger deep routing hops and Scikit-Learn prediction.
-                </p>
+                <div className="space-y-1.5">
+                  <div className="text-base font-extrabold text-white group-hover:text-cyan-300 transition-colors font-display">
+                    CLICK / TOUCH TO BROWSE .EML OR DRAG & DROP HERE
+                  </div>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                    Select a test attack scenario from the left, or drop an RFC 5322 .eml or raw text email here to trigger header routing & AI phishing detection.
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center justify-center gap-3">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.06] text-xs font-bold text-slate-300 border border-white/15 group-hover:border-cyan-400/50 group-hover:text-white transition-all shadow-md">
+                    <Upload className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Tap or Click to Select File</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500">or drop .eml anywhere</span>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, ShieldAlert, ShieldCheck, FileCode, Hash, Binary, 
   Search, Copy, Check, RefreshCw, AlertTriangle, Terminal, 
-  FileSearch, Download, ExternalLink, Cpu, Eye, BookOpen, Layers
+  FileSearch, Download, ExternalLink, Cpu, Eye, BookOpen, Layers, Upload
 } from 'lucide-react';
 
 export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
@@ -12,6 +12,29 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
   const [result, setResult] = useState(null);
   const [copiedKey, setCopiedKey] = useState(null);
   const [hexFilter, setHexFilter] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+
+  const fileInputRef = useRef(null);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile) {
+      setFile(droppedFile);
+      analyzeFile(droppedFile);
+    }
+  };
 
   const copyToClipboard = (text, key) => {
     navigator.clipboard.writeText(text);
@@ -161,10 +184,19 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
             >
               SAMPLE POLYGLOT EXECUTABLE
             </button>
-            <label className="cursor-pointer px-4 py-2 rounded-xl bg-[#62C0F6] hover:bg-[#7ed2ff] text-[#0a0a0d] font-bold text-xs shadow-[0_0_15px_rgba(98,192,246,0.4)] transition-all">
-              UPLOAD EVIDENCE FILE
-              <input type="file" onChange={handleFileUpload} className="hidden" />
-            </label>
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="px-4 py-2 rounded-xl bg-[#62C0F6] hover:bg-[#7ed2ff] text-[#0a0a0d] font-bold text-xs shadow-[0_0_15px_rgba(98,192,246,0.4)] transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>BROWSE EVIDENCE</span>
+            </button>
+            <input 
+              ref={fileInputRef} 
+              type="file" 
+              onChange={handleFileUpload} 
+              className="hidden" 
+            />
           </div>
         </div>
 
@@ -504,19 +536,43 @@ export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
             </div>
           </motion.div>
         ) : (
-          <div className="p-16 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl text-center space-y-3 font-mono-hud">
+          <div 
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`p-16 rounded-[28px] border-2 transition-all cursor-pointer text-center space-y-4 font-mono-hud group select-none ${
+              isDragging 
+                ? 'border-[#B2F601] bg-[#B2F601]/10 shadow-[0_0_30px_rgba(178,246,1,0.3)]' 
+                : 'bg-[#0a0a0d] border-white/[0.1] hover:border-[#62C0F6]/60 hover:bg-[#070b14] shadow-2xl'
+            }`}
+            title="Click or touch to browse file, or drag and drop file here"
+          >
             {isAnalyzing ? (
               <div className="space-y-3">
-                <RefreshCw className="w-10 h-10 text-[#62C0F6] animate-spin mx-auto" />
-                <div className="text-white font-bold">COMPUTING CRYPTOGRAPHIC HASHES & CARVING FILE SLACK...</div>
+                <RefreshCw className="w-12 h-12 text-[#62C0F6] animate-spin mx-auto" />
+                <div className="text-white font-bold text-sm">COMPUTING CRYPTOGRAPHIC HASHES & CARVING FILE SLACK...</div>
                 <div className="text-xs text-slate-400">Extracting MD5, SHA-256, magic byte headers, and trailing EOF markers</div>
               </div>
             ) : (
               <>
-                <FileCode className="w-14 h-14 text-slate-600 mx-auto" />
-                <div className="text-white text-base font-bold">NO FILE CURRENTLY LOADED IN FORENSIC BUFFER</div>
-                <div className="text-xs text-slate-400 max-w-md mx-auto">
-                  Click one of the test samples above or upload any image, video, document, or suspicious binary to execute NIST-compliant integrity verification.
+                <div className="w-20 h-20 rounded-3xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto group-hover:border-[#62C0F6]/60 group-hover:bg-[#62C0F6]/10 group-hover:scale-105 transition-all">
+                  <FileCode className="w-10 h-10 text-slate-500 group-hover:text-[#62C0F6] transition-colors" />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="text-base font-extrabold text-white group-hover:text-[#62C0F6] transition-colors font-aveton">
+                    CLICK / TOUCH TO BROWSE EVIDENCE OR DRAG & DROP HERE
+                  </div>
+                  <div className="text-xs text-slate-400 max-w-md mx-auto">
+                    Upload any image, video, document, archive, or suspicious binary to execute NIST SP 800-86 cryptographic & hex integrity analysis.
+                  </div>
+                </div>
+                <div className="pt-2 flex items-center justify-center gap-3">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.06] text-xs font-bold text-slate-300 border border-white/15 group-hover:border-[#62C0F6]/50 group-hover:text-white transition-all shadow-md">
+                    <Upload className="w-3.5 h-3.5 text-[#62C0F6]" />
+                    <span>Tap or Click to Select File</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500">or drop evidence file anywhere</span>
                 </div>
               </>
             )}
