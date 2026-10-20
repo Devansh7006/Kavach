@@ -152,7 +152,7 @@ export default function App() {
               </div>
 
               <div className="flex flex-col">
-                <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none flex items-center gap-1">
+                <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none flex items-center gap-1 font-aveton">
                   KAVACH <span className="text-[#B2F601] font-semibold">// AURA 3D</span>
                 </span>
                 <span className="text-[9px] font-mono-hud text-[#62C0F6] uppercase font-bold hidden sm:inline">

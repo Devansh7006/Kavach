@@ -70,7 +70,7 @@ export default function CommandScreenHUD({
             K20
           </div>
           <div>
-            <h1 className="text-lg font-extrabold font-body-clean text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-lg font-extrabold font-aveton text-white tracking-tight flex items-center gap-2">
               <span>全球态势指挥大屏</span>
               <span className="text-xs font-mono-hud text-[#62C0F6] uppercase font-semibold">
                 // AURA 3D COMMAND WAR ROOM

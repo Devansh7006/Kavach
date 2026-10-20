@@ -1,6 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap');
 @import "tailwindcss";
 
+/* 1. Official Aveton Corporate Logo Typeface (from FlawlessAndCo User Upload) */
+@font-face {
+  font-family: 'Aveton';
+  src: url('/fonts/Aveton-Regular.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     /* Exact Cyberpunk Tactical & Apple Island Palette from User Reference */
@@ -28,15 +37,29 @@
     -webkit-font-smoothing: antialiased;
     letter-spacing: -0.01em;
   }
+
+  h1, h2, h3, .font-aveton {
+    font-family: 'Aveton', 'Plus Jakarta Sans', sans-serif;
+  }
 }
 
-/* Typography Tokens (Hyper-Clean Geometric Grotesk from Reference) */
+/* Typography Tokens */
+.font-aveton {
+  font-family: 'Aveton', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.font-brand {
+  font-family: 'Aveton', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.02em;
+}
+
 .font-body-clean {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .font-tactical {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Aveton', 'Space Grotesk', sans-serif;
 }
 
 .font-mono-hud {
@@ -45,10 +68,10 @@
 
 /* Aliases for backwards compatibility */
 .font-heading {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Aveton', 'Plus Jakarta Sans', sans-serif;
 }
 .font-display {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Aveton', 'Plus Jakarta Sans', sans-serif;
 }
 .font-mono-code {
   font-family: 'JetBrains Mono', monospace;

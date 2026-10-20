@@ -40,7 +40,7 @@ export function ThreatSparklineCard({ totalSignals = "48,304", delta = "+1,240",
 
       {/* Primary Value & Green Growth Pill */}
       <div className="flex items-baseline gap-3 my-2">
-        <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-body-clean">
+        <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-aveton">
           {totalSignals}
         </span>
         <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#B2F601]/15 text-[#B2F601] text-[10px] font-bold border border-[#B2F601]/30">
