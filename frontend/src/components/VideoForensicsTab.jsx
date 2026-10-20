@@ -1,44 +1,50 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, Film, RefreshCw, BarChart2, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Video, Film, RefreshCw, BarChart2, ShieldCheck, ShieldAlert, Upload, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export default function VideoForensicsTab({ onVerdictChange }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [selectedFrame, setSelectedFrame] = useState(0);
 
-  const loadTestVideoAnalysis = () => {
+  const loadTestVideoAnalysis = (type = 'DEEPFAKE') => {
     setIsAnalyzing(true);
     setTimeout(() => {
+      const isSynthetic = type === 'DEEPFAKE';
       const mockFrames = Array.from({ length: 8 }, (_, i) => ({
         frame_number: i * 15,
         timestamp: `${(i * 0.5).toFixed(1)}s`,
-        ela_score: 45 + (i % 3) * 16,
-        flow_movement: (0.16 + (i * 0.04)).toFixed(2),
-        ai_probability: 62 + (i % 4) * 9,
-        status: i % 2 === 0 ? "ALERT_ANOMALY" : "CONSISTENT"
+        ela_score: isSynthetic ? 45 + (i % 3) * 16 : 8 + (i % 3) * 4,
+        flow_movement: isSynthetic ? (0.16 + (i * 0.04)).toFixed(2) : (0.02 + (i * 0.01)).toFixed(2),
+        ai_probability: isSynthetic ? 68 + (i % 4) * 8 : 4 + (i % 3) * 2,
+        status: isSynthetic ? (i % 2 === 0 ? "ALERT_ANOMALY" : "CONSISTENT") : "NATURAL_FRAME"
       }));
 
       const res = {
-        filename: "suspected_deepfake_broadcast.mp4",
+        filename: isSynthetic ? "suspected_deepfake_broadcast.mp4" : "cctv_optical_capture.mp4",
         total_frames: 120,
         fps: 30.0,
         duration: "4.0s",
-        verdict: "DEEPFAKE / SYNTHETIC VIDEO DETECTED",
-        deepfake_confidence: 78.2,
-        trust_score: 21.8,
-        temporal_consistency: "UNSTABLE_SYNTHETIC_JITTER",
+        verdict: isSynthetic ? "DEEPFAKE / SYNTHETIC VIDEO DETECTED" : "VERIFIED AUTHENTIC HUMAN FOOTAGE",
+        deepfake_confidence: isSynthetic ? 84.6 : 6.2,
+        trust_score: isSynthetic ? 15.4 : 93.8,
+        temporal_consistency: isSynthetic ? "UNSTABLE_SYNTHETIC_JITTER" : "STABLE_NATURAL_FLOW",
+        is_ai_generated: isSynthetic,
         timeline: mockFrames,
-        forensic_summary: [
+        forensic_summary: isSynthetic ? [
           "Analyzed 8 keyframe intervals at 30.0 FPS.",
           "Optical flow discrepancy across facial landmarks indicates deepfake face-swap warping.",
           "Inter-frame compression inconsistency detected via Amped Authenticator algorithm."
+        ] : [
+          "Natural photon shot noise verified across all 8 sampled keyframes.",
+          "Continuous temporal optical flow matches authentic hardware camera shutter.",
+          "Zero neural face-swap latent diffusion boundary artifacts."
         ]
       };
       setResult(res);
-      if (onVerdictChange) onVerdictChange('THREAT');
+      if (onVerdictChange) onVerdictChange(isSynthetic ? 'THREAT' : 'LEGIT');
       setIsAnalyzing(false);
-    }, 1100);
+    }, 1000);
   };
 
   const handleFileUpload = async (e) => {
@@ -55,11 +61,12 @@ export default function VideoForensicsTab({ onVerdictChange }) {
         body: formData
       });
       const data = await res.json();
+      data.is_ai_generated = data.deepfake_confidence > 50;
       setResult(data);
-      if (onVerdictChange) onVerdictChange(data.deepfake_confidence > 50 ? 'THREAT' : 'LEGIT');
+      if (onVerdictChange) onVerdictChange(data.is_ai_generated ? 'THREAT' : 'LEGIT');
     } catch (err) {
       console.error(err);
-      loadTestVideoAnalysis();
+      loadTestVideoAnalysis('DEEPFAKE');
     } finally {
       setIsAnalyzing(false);
     }
@@ -71,13 +78,13 @@ export default function VideoForensicsTab({ onVerdictChange }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6"
+      className="space-y-6 text-slate-200 font-body-clean"
     >
-      {/* Banner */}
-      <div className="glass-surface p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between border-l-4 border-cyan-400 gap-4">
+      {/* Top Banner */}
+      <div className="p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold font-display text-cyan-300 flex items-center gap-2">
-            <Film className="w-4 h-4 text-cyan-400" />
+          <h2 className="text-base font-extrabold font-aveton text-white flex items-center gap-2">
+            <Film className="w-4 h-4 text-[#62C0F6]" />
             <span>VIDEO FORENSICS & TEMPORAL DEEPFAKE ANALYZER // AMPED AUTHENTICATOR</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -85,15 +92,22 @@ export default function VideoForensicsTab({ onVerdictChange }) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
-            onClick={loadTestVideoAnalysis}
-            className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-cyan-300 font-mono-code text-xs border border-white/[0.12] transition-all"
+            onClick={() => loadTestVideoAnalysis('AUTHENTIC')}
+            className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[#B2F601] font-mono-hud text-xs border border-white/[0.12] transition-all font-semibold"
           >
-            LOAD SAMPLE DEEPFAKE
+            SAMPLE AUTHENTIC VIDEO
           </button>
-          <label className="cursor-pointer px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-mono-code text-xs font-semibold shadow-lg transition-all">
-            UPLOAD VIDEO (.MP4/.MOV)
+          <button
+            onClick={() => loadTestVideoAnalysis('DEEPFAKE')}
+            className="px-3.5 py-2 rounded-xl bg-[#FF3366]/15 hover:bg-[#FF3366]/25 text-[#FF3366] font-mono-hud text-xs border border-[#FF3366]/40 transition-all font-bold"
+          >
+            SAMPLE DEEPFAKE VIDEO
+          </button>
+          <label className="cursor-pointer px-4 py-2 rounded-xl bg-[#62C0F6] hover:bg-[#7ed2ff] text-[#0a0a0d] font-bold text-xs shadow-[0_0_15px_rgba(98,192,246,0.4)] transition-all flex items-center gap-1.5">
+            <Upload className="w-3.5 h-3.5" />
+            <span>UPLOAD VIDEO</span>
             <input type="file" accept="video/*" onChange={handleFileUpload} className="hidden" />
           </label>
         </div>
@@ -101,38 +115,61 @@ export default function VideoForensicsTab({ onVerdictChange }) {
 
       {result ? (
         <div className="space-y-6">
-          {/* Top Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="glass-surface p-4 rounded-2xl border-l-4 border-red-500">
-              <div className="text-xs text-slate-400 font-mono-code">INTEGRITY VERDICT</div>
-              <div className="text-base font-bold text-red-400 font-display mt-1">{result.verdict}</div>
-              <div className="text-[11px] text-slate-400 font-mono-code mt-0.5">Confidence: {result.deepfake_confidence}%</div>
+          {/* Top Metrics Cards with EXPLICIT AI VERDICT BADGE */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Metric 1: Explicit AI Status */}
+            <div className={`p-5 rounded-[28px] border shadow-2xl space-y-1.5 ${
+              result.is_ai_generated 
+                ? 'bg-[#18090f] border-[#FF3366]/40 shadow-[0_0_20px_rgba(255,51,102,0.2)]' 
+                : 'bg-[#09150d] border-[#B2F601]/40 shadow-[0_0_20px_rgba(178,246,1,0.2)]'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-400 font-mono-hud uppercase">INTEGRITY VERDICT</span>
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold font-mono-hud border ${
+                  result.is_ai_generated
+                    ? 'bg-[#FF3366]/20 text-[#FF3366] border-[#FF3366]/40'
+                    : 'bg-[#B2F601]/20 text-[#B2F601] border-[#B2F601]/40'
+                }`}>
+                  {result.is_ai_generated ? "⚠️ AI SYNTHETIC" : "✅ AUTHENTIC"}
+                </span>
+              </div>
+              <div className={`text-base font-extrabold font-aveton mt-1 ${
+                result.is_ai_generated ? 'text-[#FF3366]' : 'text-[#B2F601]'
+              }`}>
+                {result.verdict}
+              </div>
+              <div className="text-[11px] text-slate-400 font-mono-hud">
+                AI Confidence: <strong className="text-white">{result.deepfake_confidence}%</strong>
+              </div>
             </div>
 
-            <div className="glass-surface p-4 rounded-2xl border-l-4 border-amber-500">
-              <div className="text-xs text-slate-400 font-mono-code">TEMPORAL MOTION</div>
-              <div className="text-base font-bold text-amber-300 font-display mt-1">{result.temporal_consistency}</div>
-              <div className="text-[11px] text-slate-400 font-mono-code mt-0.5">Optical Flow Drift</div>
+            {/* Metric 2: Optical Flow */}
+            <div className="p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-1.5">
+              <div className="text-[10px] text-slate-400 font-mono-hud uppercase">TEMPORAL MOTION JITTER</div>
+              <div className="text-base font-bold text-amber-300 font-aveton mt-1">{result.temporal_consistency}</div>
+              <div className="text-[11px] text-slate-400 font-mono-hud">Optical Flow Drift Metric</div>
             </div>
 
-            <div className="glass-surface p-4 rounded-2xl border-l-4 border-cyan-500">
-              <div className="text-xs text-slate-400 font-mono-code">KEYFRAMES INSPECTED</div>
-              <div className="text-base font-bold text-cyan-300 font-display mt-1">{result.timeline?.length || 0} INTERVALS</div>
-              <div className="text-[11px] text-slate-400 font-mono-code mt-0.5">FPS: {result.fps} // Duration: {result.duration}</div>
+            {/* Metric 3: Keyframes */}
+            <div className="p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-1.5">
+              <div className="text-[10px] text-slate-400 font-mono-hud uppercase">KEYFRAMES INSPECTED</div>
+              <div className="text-base font-bold text-[#62C0F6] font-aveton mt-1">{result.timeline?.length || 0} INTERVALS</div>
+              <div className="text-[11px] text-slate-400 font-mono-hud">FPS: {result.fps} // Duration: {result.duration}</div>
             </div>
 
-            <div className="glass-surface p-4 rounded-2xl border-l-4 border-emerald-500">
-              <div className="text-xs text-slate-400 font-mono-code">TRUST SCORE</div>
-              <div className="text-base font-bold text-emerald-400 font-display mt-1">{result.trust_score}%</div>
-              <div className="text-[11px] text-slate-400 font-mono-code mt-0.5">Authenticity Baseline</div>
+            {/* Metric 4: Trust Score */}
+            <div className="p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-1.5">
+              <div className="text-[10px] text-slate-400 font-mono-hud uppercase">AUTHENTICITY BASELINE</div>
+              <div className="text-base font-bold text-[#B2F601] font-aveton mt-1">{result.trust_score}%</div>
+              <div className="text-[11px] text-slate-400 font-mono-hud">Hardware Shutter Correlation</div>
             </div>
           </div>
 
           {/* Timeline Scrubber */}
-          <div className="glass-surface p-5 rounded-2xl space-y-4">
-            <div className="text-xs font-mono-code text-cyan-300 flex items-center justify-between border-b border-white/[0.08] pb-2 font-bold">
+          <div className="p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-4">
+            <div className="text-xs font-mono-hud text-[#62C0F6] flex items-center justify-between border-b border-white/[0.08] pb-2 font-bold">
               <span className="flex items-center gap-1.5">
-                <BarChart2 className="w-3.5 h-3.5 text-cyan-400" />
+                <BarChart2 className="w-3.5 h-3.5 text-[#62C0F6]" />
                 <span>FRAME-BY-FRAME ANOMALY SCRUBBER</span>
               </span>
               <span className="text-slate-400 text-[11px] font-normal">Click keyframe to inspect</span>
@@ -143,17 +180,17 @@ export default function VideoForensicsTab({ onVerdictChange }) {
                 <div
                   key={idx}
                   onClick={() => setSelectedFrame(idx)}
-                  className={`p-2.5 rounded-xl cursor-pointer transition-all border font-mono-code text-xs ${
+                  className={`p-2.5 rounded-2xl cursor-pointer transition-all border font-mono-hud text-xs ${
                     selectedFrame === idx
-                      ? 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_15px_rgba(0,218,243,0.3)]'
+                      ? 'bg-[#62C0F6]/20 border-[#62C0F6] shadow-[0_0_15px_rgba(98,192,246,0.3)]'
                       : frame.status === 'ALERT_ANOMALY'
-                      ? 'bg-red-950/30 border-red-500/40 hover:border-red-500/70'
+                      ? 'bg-[#FF3366]/10 border-[#FF3366]/40 hover:border-[#FF3366]'
                       : 'bg-black/40 border-white/[0.06] hover:border-white/[0.15]'
                   }`}
                 >
                   <div className="flex justify-between items-center text-[10px] mb-1">
                     <span className="text-slate-400">F#{frame.frame_number}</span>
-                    <span className="text-cyan-300">{frame.timestamp}</span>
+                    <span className="text-[#62C0F6] font-bold">{frame.timestamp}</span>
                   </div>
 
                   {frame.thumbnail_b64 ? (
@@ -166,7 +203,7 @@ export default function VideoForensicsTab({ onVerdictChange }) {
 
                   <div className="flex justify-between items-center text-[10px]">
                     <span className="text-slate-400">AI:</span>
-                    <span className={frame.ai_probability > 50 ? 'text-red-400 font-bold' : 'text-emerald-400'}>
+                    <span className={frame.ai_probability > 50 ? 'text-[#FF3366] font-bold' : 'text-[#B2F601] font-bold'}>
                       {frame.ai_probability}%
                     </span>
                   </div>
@@ -176,20 +213,20 @@ export default function VideoForensicsTab({ onVerdictChange }) {
 
             {/* Selected Frame Telemetry */}
             {result.timeline && result.timeline[selectedFrame] && (
-              <div className="p-3.5 rounded-xl bg-black/40 border border-white/[0.08] flex flex-wrap items-center justify-between gap-4 font-mono-code text-xs">
+              <div className="p-3.5 rounded-2xl bg-black/50 border border-white/[0.08] flex flex-wrap items-center justify-between gap-4 font-mono-hud text-xs">
                 <div>
                   <span className="text-slate-400">SELECTED FRAME:</span>{' '}
-                  <strong className="text-cyan-300 font-display">#{result.timeline[selectedFrame].frame_number}</strong> ({result.timeline[selectedFrame].timestamp})
+                  <strong className="text-[#62C0F6] font-aveton">#{result.timeline[selectedFrame].frame_number}</strong> ({result.timeline[selectedFrame].timestamp})
                 </div>
                 <div>
                   <span className="text-slate-400">ELA ERROR SCORE:</span>{' '}
-                  <strong className="text-amber-300 font-display">{result.timeline[selectedFrame].ela_score}%</strong>
+                  <strong className="text-amber-300 font-aveton">{result.timeline[selectedFrame].ela_score}%</strong>
                 </div>
                 <div>
                   <span className="text-slate-400">OPTICAL MOTION DRIFT:</span>{' '}
-                  <strong className="text-purple-300 font-display">{result.timeline[selectedFrame].flow_movement}</strong>
+                  <strong className="text-purple-300 font-aveton">{result.timeline[selectedFrame].flow_movement}</strong>
                 </div>
-                <span className="px-2.5 py-1 rounded-lg bg-black/80 border border-white/[0.12] text-[10px] text-cyan-300">
+                <span className="px-2.5 py-1 rounded-lg bg-black/80 border border-white/[0.12] text-[10px] text-[#62C0F6]">
                   AMPED STATUS: {result.timeline[selectedFrame].status}
                 </span>
               </div>
@@ -197,16 +234,20 @@ export default function VideoForensicsTab({ onVerdictChange }) {
           </div>
         </div>
       ) : (
-        <div className="glass-surface p-12 rounded-2xl text-center font-mono-code text-xs text-slate-400 space-y-2">
+        <div className="p-16 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl text-center font-mono-hud text-xs text-slate-400 space-y-3">
           {isAnalyzing ? (
             <div className="space-y-3">
-              <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
-              <div>EXTRACTING KEYFRAMES & COMPUTING OPTICAL FLOW MATRICES...</div>
+              <RefreshCw className="w-10 h-10 text-[#62C0F6] animate-spin mx-auto" />
+              <div className="text-white font-bold text-sm">EXTRACTING KEYFRAMES & COMPUTING OPTICAL FLOW MATRICES...</div>
+              <div className="text-slate-400">Inspecting temporal inter-frame pixel stability</div>
             </div>
           ) : (
             <>
-              <Video className="w-12 h-12 text-cyan-400/30 mx-auto" />
-              <div>UPLOAD VIDEO FOOTAGE TO COMMENCE TEMPORAL ARTIFACT INSPECTION</div>
+              <Video className="w-14 h-14 text-slate-600 mx-auto" />
+              <div className="text-white font-bold text-base">NO VIDEO FOOTAGE LOADED IN BUFFER</div>
+              <div className="text-xs text-slate-400 max-w-md mx-auto">
+                Upload video (.mp4/.mov) or click sample buttons above to execute Amped Authenticator temporal deepfake inspection.
+              </div>
             </>
           )}
         </div>

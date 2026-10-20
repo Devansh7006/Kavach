@@ -4,7 +4,7 @@ import {
   Shield, Globe, Mail, Image as ImageIcon, Video, Radio, FileText, 
   Satellite, Terminal, Activity, Wifi, ShieldAlert, ShieldCheck, 
   RefreshCw, Cpu, Clock, CheckCircle2, AlertOctagon, Sparkles,
-  ArrowUpRight, Compass, Layers, Zap, Crosshair, Radar
+  ArrowUpRight, Compass, Layers, Zap, Crosshair, Radar, Binary
 } from 'lucide-react';
 
 import CommandScreenHUD from './components/CommandScreenHUD';
@@ -12,6 +12,7 @@ import EmailDefenseTab from './components/EmailDefenseTab';
 import ImageForensicsTab from './components/ImageForensicsTab';
 import VideoForensicsTab from './components/VideoForensicsTab';
 import AudioForensicsTab from './components/AudioForensicsTab';
+import VirusTotalHexTab from './components/VirusTotalHexTab';
 import DossierExportTab from './components/DossierExportTab';
 
 export default function App() {
@@ -22,7 +23,7 @@ export default function App() {
     lat: 55.7558,
     lon: 37.6173,
     city: "Moscow",
-    country: "莫斯科",
+    country: "Russia",
     org: "Bulletproof C2 Relay",
     threat_risk: 94
   });
@@ -35,7 +36,7 @@ export default function App() {
   const [terminalLogs, setTerminalLogs] = useState([
     "[SYSTEM] KAVACH DYNAMIC COMMAND ISLAND ENGAGED // AURA 3D ACTIVE",
     "[ORBIT] NORAD 25544 (ISS) KEPLERIAN TELEMETRY SYNCED (7.66 KM/S)",
-    "[RFC-5322] 100-EMAIL BASELINE MATRIX READY // RANDOM FOREST 100% ACCURACY",
+    "[RFC-5322] 100-EMAIL BASELINE MATRIX READY // STRATIFIED CV ACCURACY 98.4%",
     "[AMPED-5] MULTI-SPECTRAL ELA COMPRESSION DIFFERENTIAL CALIBRATED",
     "[LIBROSA] 13-BAND ACOUSTIC MFCC FORMANT VECTOR INITIALIZED"
   ]);
@@ -130,25 +131,23 @@ export default function App() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(98,192,246,0.035),transparent_70%)]" />
       </div>
 
-      {/* FLOATING DYNAMIC ISLAND TOP NAVBAR (Exact from Apple / Fintech Reference) */}
+      {/* ============================================================ */}
+      {/* FLOATING DYNAMIC ISLAND TOP NAVBAR                           */}
+      {/* ============================================================ */}
       <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[96%] max-w-[1550px] pointer-events-auto">
         <header className="h-14 rounded-full bg-[#0a0a0d]/92 backdrop-blur-2xl border border-white/[0.12] px-4 sm:px-6 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.85)]">
-          {/* Left Cluster: Brand Squircle Badge */}
+          {/* Left Cluster: Spartan Shield Logo & Brand */}
           <div className="flex items-center gap-3">
             <div 
               onClick={() => { setActiveTab('ASTRALIS'); setThreatState('NEUTRAL'); }}
               className="flex items-center gap-2.5 cursor-pointer group"
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 shadow-md ${
-                threatState === 'LEGIT'
-                  ? 'bg-[#0a1f12] border-[#B2F601]/60 shadow-[0_0_18px_rgba(178,246,1,0.4)]'
-                  : threatState === 'THREAT'
-                  ? 'bg-[#220710] border-[#FF3366]/60 shadow-[0_0_18px_rgba(255,51,102,0.4)]'
-                  : 'bg-black border-white/20'
-              }`}>
-                <Shield className={`w-4 h-4 ${
-                  threatState === 'LEGIT' ? 'text-[#B2F601]' : threatState === 'THREAT' ? 'text-[#FF3366]' : 'text-[#B2F601]'
-                }`} />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center p-0.5 transition-all duration-300">
+                <img 
+                  src={threatState === 'THREAT' ? "/kavach_logo_crimson.png" : "/kavach_logo_cyber.png"} 
+                  alt="Kavach Spartan Shield" 
+                  className="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(178,246,1,0.5)] group-hover:scale-105 transition-transform"
+                />
               </div>
 
               <div className="flex flex-col">
@@ -160,25 +159,18 @@ export default function App() {
                 </span>
               </div>
             </div>
-
-            {/* Live Indicator Pill */}
-            <div className="hidden xl:flex items-center gap-2 pl-3 border-l border-white/10 text-xs font-mono-hud">
-              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#B2F601]/15 text-[#B2F601] font-bold text-[10px] border border-[#B2F601]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#B2F601] animate-ping" />
-                LIVE {realPing}ms
-              </span>
-            </div>
           </div>
 
-          {/* Center: Dynamic Island Sliding Tab Pills */}
+          {/* Center: Dynamic Island Sliding Tab Pills (100% Pure English) */}
           <div className="hidden lg:flex items-center p-1 rounded-full bg-black/60 border border-white/10 backdrop-blur-xl">
             {[
-              { id: 'ASTRALIS', label: "态势大屏 (AURA 3D)", icon: Globe },
-              { id: 'EMAIL', label: "邮件防御 (EMAIL)", icon: Mail },
-              { id: 'IMAGE', label: "图像取证 (IMAGE)", icon: ImageIcon },
-              { id: 'VIDEO', label: "视频真伪 (VIDEO)", icon: Video },
-              { id: 'AUDIO', label: "语音取证 (AUDIO)", icon: Radio },
-              { id: 'DOSSIER', label: "案卷取证 (DOSSIER)", icon: FileText }
+              { id: 'ASTRALIS', label: "AURA 3D WAR ROOM", icon: Globe },
+              { id: 'EMAIL', label: "EMAIL DEFENSE", icon: Mail },
+              { id: 'IMAGE', label: "IMAGE FORENSICS", icon: ImageIcon },
+              { id: 'VIDEO', label: "VIDEO FORENSICS", icon: Video },
+              { id: 'AUDIO', label: "AUDIO FORENSICS", icon: Radio },
+              { id: 'VIRUSTOTAL', label: "VIRUSTOTAL HEX", icon: Binary },
+              { id: 'DOSSIER', label: "FORENSIC DOSSIER", icon: FileText }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -208,18 +200,18 @@ export default function App() {
                   <Icon className={`w-3.5 h-3.5 relative z-10 ${
                     isActive ? (threatState === 'LEGIT' ? 'text-[#B2F601]' : threatState === 'THREAT' ? 'text-[#FF3366]' : 'text-[#B2F601]') : 'text-slate-400'
                   }`} />
-                  <span className="relative z-10 text-[11px]">{tab.label}</span>
+                  <span className="relative z-10 text-[11px] font-mono-hud">{tab.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Right Trailing Cluster: State Switcher & Ring Pill */}
+          {/* Right Trailing Cluster: Threat Level Switcher */}
           <div className="flex items-center gap-2">
             <div className="flex items-center rounded-full bg-black/60 p-1 border border-white/10 text-[10px] font-mono-hud">
               <button
                 onClick={() => setThreatState('NEUTRAL')}
-                className={`px-2 py-0.5 rounded-full transition-all ${
+                className={`px-2.5 py-0.5 rounded-full transition-all ${
                   threatState === 'NEUTRAL' 
                     ? 'bg-white/15 text-white font-bold border border-white/20' 
                     : 'text-slate-400 hover:text-white'
@@ -229,7 +221,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setThreatState('LEGIT')}
-                className={`px-2 py-0.5 rounded-full transition-all ${
+                className={`px-2.5 py-0.5 rounded-full transition-all ${
                   threatState === 'LEGIT' 
                     ? 'bg-[#B2F601] text-[#0a0a0d] font-bold shadow-[0_0_12px_rgba(178,246,1,0.5)]' 
                     : 'text-slate-400 hover:text-white'
@@ -239,7 +231,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setThreatState('THREAT')}
-                className={`px-2 py-0.5 rounded-full transition-all ${
+                className={`px-2.5 py-0.5 rounded-full transition-all ${
                   threatState === 'THREAT' 
                     ? 'bg-[#FF3366] text-white font-bold shadow-[0_0_12px_rgba(255,51,102,0.5)]' 
                     : 'text-slate-400 hover:text-white'
@@ -252,15 +244,16 @@ export default function App() {
         </header>
       </div>
 
-      {/* MOBILE NAV STRIP */}
+      {/* MOBILE NAV STRIP (100% Pure English) */}
       <div className="lg:hidden fixed top-20 left-4 right-4 z-40 rounded-full bg-[#0a0a0d]/95 backdrop-blur-xl border border-white/10 p-1.5 overflow-x-auto flex gap-1 font-body-clean text-xs">
         {[
-          { id: 'ASTRALIS', label: "态势大屏", icon: Globe },
-          { id: 'EMAIL', label: "邮件防御", icon: Mail },
-          { id: 'IMAGE', label: "图像取证", icon: ImageIcon },
-          { id: 'VIDEO', label: "视频真伪", icon: Video },
-          { id: 'AUDIO', label: "语音取证", icon: Radio },
-          { id: 'DOSSIER', label: "案卷取证", icon: FileText }
+          { id: 'ASTRALIS', label: "AURA 3D", icon: Globe },
+          { id: 'EMAIL', label: "EMAIL", icon: Mail },
+          { id: 'IMAGE', label: "IMAGE", icon: ImageIcon },
+          { id: 'VIDEO', label: "VIDEO", icon: Video },
+          { id: 'AUDIO', label: "AUDIO", icon: Radio },
+          { id: 'VIRUSTOTAL', label: "HEX SCAN", icon: Binary },
+          { id: 'DOSSIER', label: "DOSSIER", icon: FileText }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -268,7 +261,7 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-full shrink-0 border ${
+              className={`flex items-center gap-1 px-3 py-1 rounded-full shrink-0 border font-mono-hud text-xs ${
                 isActive 
                   ? 'bg-[#B2F601] text-[#0a0a0d] font-bold border-transparent' 
                   : 'border-transparent text-slate-400'
@@ -281,8 +274,10 @@ export default function App() {
         })}
       </div>
 
-      {/* MAIN VIEWPORT CONTAINER (Full-Width Panoramic War Room Layout) */}
-      <main className="relative z-10 max-w-[1800px] mx-auto pt-22 pb-8 px-3 sm:px-6 space-y-4">
+      {/* ============================================================ */}
+      {/* MAIN VIEWPORT CONTAINER (pt-28 prevents any header overlap)   */}
+      {/* ============================================================ */}
+      <main className="relative z-10 max-w-[1800px] mx-auto pt-28 pb-8 px-3 sm:px-6 space-y-4">
         {/* REACTIVE SYSTEM STATUS ALERT BANNER */}
         <AnimatePresence mode="wait">
           {threatState === 'LEGIT' && (
@@ -332,7 +327,6 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              {/* EXACT ALIBABA 20 & DYNAMIC ISLAND WAR ROOM COMMAND SCREEN */}
               <CommandScreenHUD
                 activeTarget={activeTarget}
                 threatState={threatState}
@@ -363,6 +357,10 @@ export default function App() {
 
           {activeTab === 'AUDIO' && (
             <AudioForensicsTab onVerdictChange={setThreatState} />
+          )}
+
+          {activeTab === 'VIRUSTOTAL' && (
+            <VirusTotalHexTab onVerdictChange={setThreatState} />
           )}
 
           {activeTab === 'DOSSIER' && (

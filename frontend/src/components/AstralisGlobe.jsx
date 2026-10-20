@@ -18,24 +18,24 @@ function latLonToVector3(lat, lon, radius) {
   return new THREE.Vector3(x, y, z);
 }
 
-// 16 Pinned Global Cities (Matching Alibaba 20 & Big Data War Room reference)
+// 16 Pinned Global Cities (Pure English)
 export const PINNED_CITIES = [
-  { id: 'MOW', name: 'Moscow', cn: '莫斯科', lat: 55.75, lon: 37.61, risk: 94, org: 'Bulletproof C2 Relay', sector: 'SEC-1' },
-  { id: 'ISB', name: 'Islamabad', cn: '伊斯兰堡', lat: 33.68, lon: 73.04, risk: 65, org: 'Autonomous Subnet', sector: 'SEC-2' },
-  { id: 'THR', name: 'Tehran', cn: '德黑兰', lat: 35.68, lon: 51.38, risk: 88, org: 'Sandworm Mirror', sector: 'SEC-1' },
-  { id: 'DXB', name: 'Dubai', cn: '迪拜', lat: 25.20, lon: 55.27, risk: 32, org: 'Gulf Interconnect', sector: 'SEC-2' },
-  { id: 'LON', name: 'London', cn: '伦敦', lat: 51.50, lon: -0.12, risk: 14, org: 'LINX Exchange', sector: 'SEC-3' },
-  { id: 'FRA', name: 'Frankfurt', cn: '法兰克福', lat: 50.11, lon: 8.68, risk: 18, org: 'DE-CIX Core', sector: 'SEC-2' },
-  { id: 'DEL', name: 'New Delhi', cn: '新德里', lat: 28.61, lon: 77.20, risk: 42, org: 'NIXI Routing Hub', sector: 'SEC-1' },
-  { id: 'WUH', name: 'Wuhan', cn: '武汉', lat: 30.59, lon: 114.30, risk: 54, org: 'Optical Backbone', sector: 'SEC-1' },
-  { id: 'CAN', name: 'Guangzhou', cn: '广州', lat: 23.12, lon: 113.26, risk: 29, org: 'Subsea Terminal', sector: 'SEC-2' },
-  { id: 'HKG', name: 'Hong Kong', cn: '香港', lat: 22.31, lon: 114.16, risk: 22, org: 'HKIX Transit', sector: 'SEC-2' },
-  { id: 'SIN', name: 'Singapore', cn: '新加坡', lat: 1.35, lon: 103.81, risk: 12, org: 'Equinix SG1 Hub', sector: 'SEC-1' },
-  { id: 'JKT', name: 'Jakarta', cn: '雅加达', lat: -6.20, lon: 106.84, risk: 45, org: 'APNIC Regional Node', sector: 'SEC-2' },
-  { id: 'SYD', name: 'Sydney', cn: '悉尼', lat: -33.86, lon: 151.20, risk: 10, org: 'Pacific Gateway', sector: 'SEC-3' },
-  { id: 'SFO', name: 'San Francisco', cn: '旧金山', lat: 37.77, lon: -122.41, risk: 15, org: 'Bay Area Transit', sector: 'SEC-3' },
-  { id: 'NYC', name: 'New York', cn: '纽约', lat: 40.71, lon: -74.00, risk: 19, org: 'JFK Teleport', sector: 'SEC-3' },
-  { id: 'TYO', name: 'Tokyo', cn: '东京', lat: 35.67, lon: 139.65, risk: 11, org: 'JPIX Otari Center', sector: 'SEC-2' }
+  { id: 'MOW', name: 'Moscow', code: 'MOW', lat: 55.75, lon: 37.61, risk: 94, org: 'Bulletproof C2 Relay', sector: 'SEC-1' },
+  { id: 'ISB', name: 'Islamabad', code: 'ISB', lat: 33.68, lon: 73.04, risk: 65, org: 'Autonomous Subnet', sector: 'SEC-2' },
+  { id: 'THR', name: 'Tehran', code: 'THR', lat: 35.68, lon: 51.38, risk: 88, org: 'Sandworm Mirror', sector: 'SEC-1' },
+  { id: 'DXB', name: 'Dubai', code: 'DXB', lat: 25.20, lon: 55.27, risk: 32, org: 'Gulf Interconnect', sector: 'SEC-2' },
+  { id: 'LON', name: 'London', code: 'LON', lat: 51.50, lon: -0.12, risk: 14, org: 'LINX Exchange', sector: 'SEC-3' },
+  { id: 'FRA', name: 'Frankfurt', code: 'FRA', lat: 50.11, lon: 8.68, risk: 18, org: 'DE-CIX Core', sector: 'SEC-2' },
+  { id: 'DEL', name: 'New Delhi', code: 'DEL', lat: 28.61, lon: 77.20, risk: 42, org: 'NIXI Routing Hub', sector: 'SEC-1' },
+  { id: 'WUH', name: 'Wuhan', code: 'WUH', lat: 30.59, lon: 114.30, risk: 54, org: 'Optical Backbone', sector: 'SEC-1' },
+  { id: 'CAN', name: 'Guangzhou', code: 'CAN', lat: 23.12, lon: 113.26, risk: 29, org: 'Subsea Terminal', sector: 'SEC-2' },
+  { id: 'HKG', name: 'Hong Kong', code: 'HKG', lat: 22.31, lon: 114.16, risk: 22, org: 'HKIX Transit', sector: 'SEC-2' },
+  { id: 'SIN', name: 'Singapore', code: 'SIN', lat: 1.35, lon: 103.81, risk: 12, org: 'Equinix SG1 Hub', sector: 'SEC-1' },
+  { id: 'JKT', name: 'Jakarta', code: 'JKT', lat: -6.20, lon: 106.84, risk: 45, org: 'APNIC Regional Node', sector: 'SEC-2' },
+  { id: 'SYD', name: 'Sydney', code: 'SYD', lat: -33.86, lon: 151.20, risk: 10, org: 'Pacific Gateway', sector: 'SEC-3' },
+  { id: 'SFO', name: 'San Francisco', code: 'SFO', lat: 37.77, lon: -122.41, risk: 15, org: 'Bay Area Transit', sector: 'SEC-3' },
+  { id: 'NYC', name: 'New York', code: 'NYC', lat: 40.71, lon: -74.00, risk: 19, org: 'JFK Teleport', sector: 'SEC-3' },
+  { id: 'TYO', name: 'Tokyo', code: 'TYO', lat: 35.67, lon: 139.65, risk: 11, org: 'JPIX Otari Center', sector: 'SEC-2' }
 ];
 
 export default function AstralisGlobe({
@@ -477,7 +477,7 @@ export default function AstralisGlobe({
       callsign: `${city.id}-NODE`,
       model: city.org,
       status: `THREAT RISK: ${city.risk}% // ${city.sector}`,
-      route: `${city.name} (${city.cn}) — ROUTING GATEWAY`,
+      route: `${city.name} [${city.code}] — ROUTING GATEWAY`,
       lat: `${city.lat}° N`,
       lon: `${city.lon}° E`
     });
@@ -487,7 +487,7 @@ export default function AstralisGlobe({
         city: city.name,
         lat: city.lat,
         lon: city.lon,
-        country: city.cn,
+        country: city.name,
         org: city.org,
         threat_risk: city.risk
       });
@@ -519,11 +519,11 @@ export default function AstralisGlobe({
                   className="w-1.5 h-1.5 rounded-full shrink-0" 
                   style={{ backgroundColor: city.risk > 70 ? '#FF3366' : city.risk > 30 ? '#62C0F6' : '#B2F601' }}
                 />
-                <span className="text-[11px] font-bold text-white tracking-wide font-tactical">
-                  {city.cn}
-                </span>
-                <span className="text-[9px] text-slate-400 font-mono-hud hidden sm:inline">
+                <span className="text-[11px] font-bold text-white tracking-wide font-aveton">
                   {city.name}
+                </span>
+                <span className="text-[9px] text-[#62C0F6] font-mono-hud hidden sm:inline">
+                  [{city.code}]
                 </span>
               </div>
               {/* Leader tick indicator */}

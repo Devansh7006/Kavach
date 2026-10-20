@@ -34,7 +34,7 @@ export default function CommandScreenHUD({
   const timeString = `${formatDigits(currentTime.getHours())}:${formatDigits(currentTime.getMinutes())}:${formatDigits(currentTime.getSeconds())}`;
   const dateString = `${currentTime.getFullYear()}.${formatDigits(currentTime.getMonth() + 1)}.${formatDigits(currentTime.getDate())}`;
 
-  // Detailed Flight / Threat Vector Table (From Image 1 Alibaba 20 Screen)
+  // Detailed Flight / Threat Vector Table (Pure English)
   const flightVectorRows = [
     { time: "09:01", code: "CA1817", route: "WESTWARD RELAY -> MOSCOW", status: "CRITICAL", sector: "1", risk: 94, city: "Moscow", lat: 55.75, lon: 37.61 },
     { time: "09:02", code: "MU536", route: "SHANGHAI -> FRANKFURT", status: "NORMAL", sector: "2", risk: 18, city: "Frankfurt", lat: 50.11, lon: 8.68 },
@@ -62,18 +62,22 @@ export default function CommandScreenHUD({
 
   return (
     <div className="relative w-full overflow-hidden text-slate-200 font-body-clean">
-      {/* Dynamic Island Status Ribbon */}
+      {/* Command Screen Top Indicator Ribbon */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 mb-3 border-b border-white/[0.08] gap-3">
-        {/* Left Subtitle */}
+        {/* Left Subtitle with Spartan Shield Crest */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0a0a0d] border border-white/15 text-[#B2F601] font-bold text-xs shadow-md">
-            K20
+          <div className="flex items-center justify-center w-9 h-9 rounded-full bg-[#0a0a0d] border border-white/15 p-1 shadow-md">
+            <img 
+              src={threatState === 'THREAT' ? "/kavach_logo_crimson.png" : "/kavach_logo_cyber.png"} 
+              alt="Kavach Spartan Shield" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <h1 className="text-lg font-extrabold font-aveton text-white tracking-tight flex items-center gap-2">
-              <span>全球态势指挥大屏</span>
+              <span>GLOBAL SITUATION COMMAND HUD</span>
               <span className="text-xs font-mono-hud text-[#62C0F6] uppercase font-semibold">
-                // AURA 3D COMMAND WAR ROOM
+                // AURA 3D WAR ROOM
               </span>
             </h1>
             <div className="text-[10px] text-slate-400 font-body-clean">
@@ -96,42 +100,42 @@ export default function CommandScreenHUD({
       {/* Panoramic 3-Column Command Center Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* ============================================================ */}
-        {/* LEFT FLANK HUD (3.5 Cols): Apple Island Cards & Crossing Stats */}
+        {/* LEFT FLANK HUD (3.5 Cols): Apple Island Cards & Situation Stats */}
         {/* ============================================================ */}
         <div className="lg:col-span-3 space-y-3.5">
-          {/* Card 1: THREAT SPARKLINE CARD (Widget 1 from reference image) */}
+          {/* Card 1: THREAT SPARKLINE CARD */}
           <ThreatSparklineCard 
             totalSignals="48,304" 
             delta="+1,240" 
             pct="1.24%" 
           />
 
-          {/* Card 2: NOTIFICATION ALERT PILL (Widget 5 from reference image) */}
+          {/* Card 2: NOTIFICATION ALERT PILL */}
           <NotificationPill 
             title="M365 Auth Gateway" 
             subtitle="Credential harvest spoof isolated" 
             percentage="98" 
           />
 
-          {/* Card 3: 网络态势统计 / Situation Statistics (Image 1 Left) */}
+          {/* Card 3: GLOBAL SITUATION STATISTICS (100% Pure English) */}
           <div className="p-4 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-3 select-none">
             <div className="flex items-center justify-between border-b border-white/[0.07] pb-2">
               <div className="flex items-center gap-2 text-white text-xs font-bold font-body-clean">
                 <CheckSquare className="w-3.5 h-3.5 text-[#62C0F6]" />
-                <span>网络态势统计</span>
-                <span className="text-[10px] text-slate-500 font-normal">Crossing Statistics</span>
+                <span>GLOBAL SITUATION STATISTICS</span>
+                <span className="text-[10px] text-slate-500 font-normal">Active Network Nodes</span>
               </div>
               <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#B2F601]/15 text-[#B2F601] font-bold">LIVE</span>
             </div>
 
-            {/* Horizontal Subsystem Progress Bars (Image 1) */}
+            {/* Horizontal Subsystem Progress Bars */}
             <div className="space-y-2 pt-1 font-body-clean text-[11px]">
               <div className="flex items-center justify-between text-slate-400 text-[10px]">
-                <span>按指标统计 (Metric Breakdown)</span>
+                <span>Subsystem Metric Breakdown</span>
                 <div className="flex gap-2 text-[9px]">
-                  <span className="text-[#62C0F6]">● 本分支</span>
-                  <span className="text-[#B2F601]">● 正常</span>
-                  <span className="text-[#FF3366]">● 告警</span>
+                  <span className="text-[#62C0F6]">● Local</span>
+                  <span className="text-[#B2F601]">● Nominal</span>
+                  <span className="text-[#FF3366]">● Alert</span>
                 </div>
               </div>
 
@@ -155,7 +159,7 @@ export default function CommandScreenHUD({
                 </div>
               ))}
 
-              {/* Scale Marker Ticks (Image 1) */}
+              {/* Scale Marker Ticks */}
               <div className="flex justify-between text-[8px] text-slate-500 pt-1 border-t border-white/[0.06] font-mono-hud">
                 <span>0</span>
                 <span>5000</span>
@@ -168,13 +172,13 @@ export default function CommandScreenHUD({
             </div>
           </div>
 
-          {/* Card 4: 实时态势资讯 / Real-Time Incident Stream (From Image 2) */}
+          {/* Card 4: REAL-TIME THREAT INTEL STREAM */}
           <div className="p-4 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-2 select-none">
             <div className="flex items-center justify-between border-b border-white/[0.07] pb-2">
               <div className="flex items-center gap-2 text-white text-xs font-bold font-body-clean">
                 <Terminal className="w-3.5 h-3.5 text-[#62C0F6]" />
-                <span>实时态势资讯</span>
-                <span className="text-[10px] text-slate-500 font-normal">Real-Time Threat Intel</span>
+                <span>REAL-TIME THREAT INTEL</span>
+                <span className="text-[10px] text-slate-500 font-normal">Live Signal Feed</span>
               </div>
               <span className="w-2 h-2 rounded-full bg-[#B2F601] animate-ping" />
             </div>
@@ -207,13 +211,13 @@ export default function CommandScreenHUD({
         {/* RIGHT FLANK HUD (3 Cols): Vertical Bar Widget & Flights      */}
         {/* ============================================================ */}
         <div className="lg:col-span-3 space-y-3.5">
-          {/* Card 1: VERTICAL BAR VISUALIZER CARD (Widget 6 from reference image) */}
+          {/* Card 1: VERTICAL BAR VISUALIZER CARD */}
           <VerticalBarVisualizerCard 
             title="TRAJECTORY FREQUENCY" 
             subtitle="Daily Intercept Load (2,195 / 24h)" 
           />
 
-          {/* Card 2: QUICK ACTION PILL (Widget 2 & 4 from reference image) */}
+          {/* Card 2: QUICK ACTION PILL */}
           <QuickActionPill 
             icon="★" 
             title="AURA-GEO 3 SATELLITE" 
@@ -222,22 +226,22 @@ export default function CommandScreenHUD({
             onClick={() => onSelectNode && onSelectNode({ city: "Orbital Recon", lat: 35.78, lon: -100, threat_risk: 12 })}
           />
 
-          {/* Card 3: 详细航班信息 / Detailed Flight & Threat Vectors Table (Image 1) */}
+          {/* Card 3: THREAT & FLIGHT VECTORS TABLE (100% Pure English) */}
           <div className="p-4 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-2.5 select-none">
             <div className="flex items-center justify-between border-b border-white/[0.07] pb-2">
               <div className="flex items-center gap-2 text-white text-xs font-bold font-body-clean">
                 <Plane className="w-3.5 h-3.5 text-[#62C0F6]" />
-                <span>详细航班信息</span>
-                <span className="text-[9px] text-slate-500 font-normal">Flight & Threat Vectors</span>
+                <span>THREAT & FLIGHT VECTORS</span>
+                <span className="text-[9px] text-slate-500 font-normal">Geospatial Inbound Signals</span>
               </div>
             </div>
 
             {/* Table Header */}
             <div className="grid grid-cols-12 text-[9px] font-mono-hud text-slate-400 border-b border-white/[0.06] pb-1 px-1">
-              <span className="col-span-2">时间</span>
-              <span className="col-span-3">航班/代码</span>
-              <span className="col-span-5">航段/路径</span>
-              <span className="col-span-2 text-right">态势</span>
+              <span className="col-span-2">TIME</span>
+              <span className="col-span-3">VECTOR / CODE</span>
+              <span className="col-span-5">TRAJECTORY PATH</span>
+              <span className="col-span-2 text-right">DEFCON</span>
             </div>
 
             {/* Table Rows (Clickable to lock on globe) */}
@@ -274,22 +278,22 @@ export default function CommandScreenHUD({
             </div>
           </div>
 
-          {/* Card 4: 4 RADIAL DONUT PERCENTAGE GAUGES (From Image 2) */}
+          {/* Card 4: DEFENSE CLASSIFICATION RATIO (100% Pure English) */}
           <div className="p-4 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-2 select-none">
             <div className="flex items-center justify-between border-b border-white/[0.07] pb-2">
               <div className="flex items-center gap-2 text-white text-xs font-bold font-body-clean">
                 <Layers className="w-3.5 h-3.5 text-[#B2F601]" />
-                <span>防御分类占比</span>
-                <span className="text-[9px] text-slate-500 font-normal">Classification Ratio</span>
+                <span>DEFENSE CLASSIFICATION RATIO</span>
+                <span className="text-[9px] text-slate-500 font-normal">Subsystem Distribution</span>
               </div>
             </div>
 
             <div className="grid grid-cols-4 gap-2 pt-1 font-body-clean">
               {[
-                { pct: "9%", label: "丢包率", sub: "Packet Drop", col: "text-[#62C0F6]", stroke: "18, 100" },
-                { pct: "17%", label: "漂移率", sub: "BGP Drift", col: "text-[#B2F601]", stroke: "34, 100" },
-                { pct: "19%", label: "噪点率", sub: "PRNU Noise", col: "text-amber-400", stroke: "38, 100" },
-                { pct: "55%", label: "通过率", sub: "Auth Shield", col: "text-teal-300", stroke: "110, 100" }
+                { pct: "9%", label: "Packet Drop", sub: "Packet Drop", col: "text-[#62C0F6]", stroke: "18, 100" },
+                { pct: "17%", label: "BGP Drift", sub: "BGP Drift", col: "text-[#B2F601]", stroke: "34, 100" },
+                { pct: "19%", label: "PRNU Noise", sub: "PRNU Noise", col: "text-amber-400", stroke: "38, 100" },
+                { pct: "55%", label: "Auth Shield", sub: "Auth Shield", col: "text-teal-300", stroke: "110, 100" }
               ].map((d, didx) => (
                 <div key={didx} className="flex flex-col items-center">
                   <div className="relative w-12 h-12 flex items-center justify-center">
@@ -312,7 +316,7 @@ export default function CommandScreenHUD({
                     </svg>
                     <span className="absolute text-[10px] font-extrabold text-white">{d.pct}</span>
                   </div>
-                  <span className="text-[8px] font-bold text-slate-400 mt-1">{d.label}</span>
+                  <span className="text-[8px] font-bold text-slate-400 mt-1 text-center truncate w-full">{d.label}</span>
                 </div>
               ))}
             </div>

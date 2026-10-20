@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Image as ImageIcon, Eye, ShieldAlert, ShieldCheck, Camera, 
-  RefreshCw, Layers, Info, MapPin, ZoomIn, FileText
+  RefreshCw, Layers, Info, MapPin, ZoomIn, FileText, Upload, Sparkles, AlertTriangle
 } from 'lucide-react';
 
 export default function ImageForensicsTab({ onTargetSelected, onVerdictChange }) {
@@ -11,6 +11,9 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
   const [activeView, setActiveView] = useState('ORIGINAL'); // 'ORIGINAL' | 'ELA' | 'NOISE'
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  const fileInputRef = useRef(null);
 
   const loadSyntheticSample = () => {
     const canvas = document.createElement('canvas');
@@ -38,9 +41,59 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
     }, 'image/jpeg', 0.92);
   };
 
+  const loadAuthenticSample = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    // Natural gradient with subtle simulated camera noise
+    const grad = ctx.createLinearGradient(0, 0, 400, 400);
+    grad.addColorStop(0, '#1a2332');
+    grad.addColorStop(1, '#111722');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 400, 400);
+
+    // Natural camera lens capture text
+    ctx.fillStyle = '#B2F601';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('AUTHENTIC SENSOR CAPTURE', 75, 200);
+    ctx.fillStyle = '#62C0F6';
+    ctx.font = '12px monospace';
+    ctx.fillText('SONY ILCE-7RM4 // ISO 100 // 1/250s', 85, 230);
+
+    canvas.toBlob((blob) => {
+      const file = new File([blob], 'authentic_sensor_shot.jpg', { type: 'image/jpeg' });
+      setSelectedImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      analyzeFile(file);
+    }, 'image/jpeg', 0.98);
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setSelectedImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      analyzeFile(file);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
       setSelectedImage(file);
       setPreviewUrl(URL.createObjectURL(file));
       analyzeFile(file);
@@ -80,54 +133,72 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6"
+      className="space-y-6 text-slate-200 font-body-clean"
     >
-      {/* Banner */}
-      <div className="glass-surface p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between border-l-4 border-cyan-400 gap-4">
+      {/* Hidden File Input for Direct Click anywhere on Canvas */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        accept="image/*" 
+        onChange={handleFileChange} 
+        className="hidden" 
+      />
+
+      {/* Top Banner */}
+      <div className="p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold font-display text-cyan-300 flex items-center gap-2">
-            <Layers className="w-4 h-4 text-cyan-400" />
+          <h2 className="text-base font-extrabold font-aveton text-white flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#62C0F6]" />
             <span>IMAGE FORENSICS & DEEPFAKE ENGINE // AMPED FIVE & SHERLOQ CORE</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Applies Error Level Analysis (ELA), Laplacian high-frequency PRNU noise variance, and EXIF software prompt detection.
+            Applies Error Level Analysis (ELA), Laplacian PRNU high-frequency noise variance, and EXIF software prompt detection.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            onClick={loadAuthenticSample}
+            className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[#B2F601] font-mono-hud text-xs border border-white/[0.12] transition-all font-semibold"
+          >
+            SAMPLE AUTHENTIC PHOTO
+          </button>
           <button
             onClick={loadSyntheticSample}
-            className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-cyan-300 font-mono-code text-xs border border-white/[0.12] transition-all"
+            className="px-3.5 py-2 rounded-xl bg-[#FF3366]/15 hover:bg-[#FF3366]/25 text-[#FF3366] font-mono-hud text-xs border border-[#FF3366]/40 transition-all font-bold"
           >
-            SAMPLE TAMPERED TEST
+            SAMPLE TAMPERED / AI TEST
           </button>
-          <label className="cursor-pointer px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-mono-code text-xs font-semibold shadow-lg transition-all">
-            UPLOAD EVIDENCE
-            <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-          </label>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 rounded-xl bg-[#62C0F6] hover:bg-[#7ed2ff] text-[#0a0a0d] font-bold text-xs shadow-[0_0_15px_rgba(98,192,246,0.4)] transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span>BROWSE IMAGE</span>
+          </button>
         </div>
       </div>
 
       {/* Main Forensic Viewport */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Viewport (7 cols) */}
-        <div className="lg:col-span-7 glass-surface p-5 rounded-2xl space-y-3">
+        {/* Left Viewport (7 cols): CLICKABLE BLACK CANVAS */}
+        <div className="lg:col-span-7 p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-3">
           <div className="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
-            <div className="text-xs font-mono-code text-cyan-300 flex items-center gap-2 font-bold">
-              <Eye className="w-4 h-4 text-cyan-400" />
+            <div className="text-xs font-mono-hud text-[#62C0F6] flex items-center gap-2 font-bold">
+              <Eye className="w-4 h-4 text-[#62C0F6]" />
               <span>FORENSIC SPECTRUM INSPECTOR</span>
             </div>
 
             {/* View Mode Switcher */}
-            <div className="flex rounded-xl bg-black/60 p-1 border border-white/[0.1] font-mono-code text-xs">
+            <div className="flex rounded-xl bg-black/60 p-1 border border-white/[0.1] font-mono-hud text-xs">
               {['ORIGINAL', 'ELA', 'NOISE'].map((mode) => (
                 <button
                   key={mode}
-                  onClick={() => setActiveView(mode)}
+                  onClick={(e) => { e.stopPropagation(); setActiveView(mode); }}
                   disabled={!result && mode !== 'ORIGINAL'}
                   className={`px-3 py-1 rounded-lg transition-all ${
                     activeView === mode 
-                      ? 'bg-cyan-500/25 text-cyan-200 font-bold border border-cyan-500/30 shadow' 
+                      ? 'bg-[#62C0F6]/25 text-[#62C0F6] font-bold border border-[#62C0F6]/40 shadow' 
                       : 'text-slate-400 hover:text-white'
                   } disabled:opacity-30`}
                 >
@@ -137,52 +208,85 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
             </div>
           </div>
 
-          {/* Active Image Canvas */}
-          <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-white/[0.08] bg-black/80 flex items-center justify-center">
+          {/* ============================================================ */}
+          {/* CLICKABLE BLACK CANVAS AREA (Direct File Browse on Click)    */}
+          {/* ============================================================ */}
+          <div 
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`relative aspect-video w-full rounded-2xl overflow-hidden border-2 transition-all cursor-pointer flex items-center justify-center group ${
+              isDragging 
+                ? 'border-[#B2F601] bg-[#B2F601]/10 shadow-[0_0_25px_rgba(178,246,1,0.3)]' 
+                : 'border-white/[0.1] bg-black hover:border-[#62C0F6]/60 hover:bg-[#070b14]'
+            }`}
+            title="Click to browse image or drag and drop image here"
+          >
             {isAnalyzing && (
-              <div className="absolute inset-0 bg-black/85 z-20 flex flex-col items-center justify-center gap-2 font-mono-code text-cyan-300">
+              <div className="absolute inset-0 bg-black/90 z-20 flex flex-col items-center justify-center gap-2 font-mono-hud text-[#62C0F6]">
                 <RefreshCw className="w-8 h-8 animate-spin" />
-                <span>COMPUTING ERROR LEVEL ANALYSIS & LAPLACIAN KERNEL...</span>
+                <span className="font-bold">COMPUTING ERROR LEVEL ANALYSIS & LAPLACIAN KERNEL...</span>
               </div>
             )}
 
             {previewUrl ? (
-              <img
-                src={
-                  activeView === 'ELA' && result?.visual_artifacts?.ela_heatmap_b64
-                    ? result.visual_artifacts.ela_heatmap_b64
-                    : activeView === 'NOISE' && result?.visual_artifacts?.noise_frequency_b64
-                    ? result.visual_artifacts.noise_frequency_b64
-                    : previewUrl
-                }
-                alt="Evidence"
-                className="max-h-full max-w-full object-contain"
-              />
+              <>
+                <img
+                  src={
+                    activeView === 'ELA' && result?.visual_artifacts?.ela_heatmap_b64
+                      ? result.visual_artifacts.ela_heatmap_b64
+                      : activeView === 'NOISE' && result?.visual_artifacts?.noise_frequency_b64
+                      ? result.visual_artifacts.noise_frequency_b64
+                      : previewUrl
+                  }
+                  alt="Evidence"
+                  className="max-h-full max-w-full object-contain"
+                />
+
+                {/* Hover overlay hint */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-xs font-mono-hud text-white gap-2 pointer-events-none">
+                  <Upload className="w-6 h-6 text-[#62C0F6] animate-bounce" />
+                  <span className="font-bold">CLICK TO BROWSE OR DROP ANOTHER IMAGE</span>
+                </div>
+              </>
             ) : (
-              <div className="text-center p-8 space-y-2 text-slate-500 font-mono-code text-xs">
-                <ImageIcon className="w-12 h-12 mx-auto opacity-30" />
-                <div>DRAG & DROP EVIDENCE IMAGE OR CLICK UPLOAD</div>
+              <div className="text-center p-8 space-y-3 font-mono-hud select-none">
+                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto group-hover:border-[#62C0F6]/60 group-hover:bg-[#62C0F6]/10 transition-all">
+                  <ImageIcon className="w-8 h-8 text-slate-500 group-hover:text-[#62C0F6] transition-colors" />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-white group-hover:text-[#62C0F6] transition-colors">
+                    CLICK TO BROWSE IMAGE OR DRAG & DROP HERE
+                  </div>
+                  <div className="text-[11px] text-slate-400">
+                    Supports JPEG, PNG, WEBP, TIFF, BMP • Instant Error Level Analysis & PRNU
+                  </div>
+                </div>
+                <span className="inline-block px-3 py-1 rounded-full bg-white/[0.06] text-[10px] text-slate-400 border border-white/10 group-hover:border-[#62C0F6]/40 group-hover:text-white transition-all">
+                  Click Anywhere on Canvas
+                </span>
               </div>
             )}
 
             {previewUrl && (
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/80 border border-white/[0.12] text-[10px] font-mono-code text-cyan-300 backdrop-blur-md">
+              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/80 border border-white/[0.12] text-[10px] font-mono-hud text-[#62C0F6] backdrop-blur-md">
                 SPECTRUM: {activeView} // {result?.resolution || 'ACTIVE'}
               </div>
             )}
           </div>
 
-          <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06] text-[11px] font-mono-code text-slate-400 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06] text-[11px] font-mono-hud text-slate-400 flex items-center justify-between">
             <span>
               {activeView === 'ELA' && "Error Level Analysis: highlights pixel discrepancy against standard JPEG quantization."}
               {activeView === 'NOISE' && "Sherloq Noise Filter: extracts high-frequency camera sensor noise to isolate generative diffusion."}
-              {activeView === 'ORIGINAL' && "Original unprocessed evidentiary frame."}
+              {activeView === 'ORIGINAL' && "Original evidentiary frame. Click anywhere on canvas to switch image."}
             </span>
-            <span className="text-cyan-400 font-bold">AMPED FIVE CERTIFIED</span>
+            <span className="text-[#62C0F6] font-bold">AMPED FIVE CERTIFIED</span>
           </div>
         </div>
 
-        {/* Right Column: Deep Breakdown (5 cols) */}
+        {/* Right Column: Deep Breakdown & EXPLICIT AI VERDICT BADGE (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           <AnimatePresence mode="wait">
             {result ? (
@@ -191,90 +295,106 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="space-y-4 font-mono-hud"
               >
-                {/* Verdict Card */}
-                <div className={`p-5 rounded-2xl border transition-all ${
+                {/* ============================================================ */}
+                {/* PROMINENT AI-GENERATED VS AUTHENTIC VERDICT BANNER           */}
+                {/* ============================================================ */}
+                <div className={`p-5 rounded-[28px] border shadow-2xl transition-all ${
                   result.is_ai_generated 
-                    ? 'glass-surface-crimson' 
-                    : 'glass-surface-emerald'
+                    ? 'bg-[#18090f] border-[#FF3366]/40 shadow-[0_0_25px_rgba(255,51,102,0.25)]' 
+                    : 'bg-[#09150d] border-[#B2F601]/40 shadow-[0_0_25px_rgba(178,246,1,0.25)]'
                 }`}>
+                  {/* Top Explicit Badge */}
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-3">
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                      IMAGE INTEGRITY AUDIT
+                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                      result.is_ai_generated
+                        ? 'bg-[#FF3366]/20 text-[#FF3366] border-[#FF3366]/40 animate-pulse'
+                        : 'bg-[#B2F601]/20 text-[#B2F601] border-[#B2F601]/40'
+                    }`}>
+                      {result.is_ai_generated ? "⚠️ AI-GENERATED (SYNTHETIC)" : "✅ AUTHENTIC HARDWARE CAPTURE"}
+                    </span>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3.5">
                       {result.is_ai_generated ? (
-                        <div className="w-12 h-12 rounded-xl bg-red-950/80 border border-red-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(255,51,102,0.4)]">
-                          <ShieldAlert className="w-6 h-6 text-red-400 animate-pulse" />
+                        <div className="w-12 h-12 rounded-2xl bg-[#FF3366]/20 border border-[#FF3366]/40 flex items-center justify-center text-[#FF3366] shadow-[0_0_20px_rgba(255,51,102,0.4)]">
+                          <ShieldAlert className="w-6 h-6 animate-bounce" />
                         </div>
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-emerald-950/80 border border-emerald-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(0,255,136,0.3)]">
-                          <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                        <div className="w-12 h-12 rounded-2xl bg-[#B2F601]/20 border border-[#B2F601]/40 flex items-center justify-center text-[#B2F601] shadow-[0_0_20px_rgba(178,246,1,0.4)]">
+                          <ShieldCheck className="w-6 h-6" />
                         </div>
                       )}
                       <div>
-                        <div className="text-xs font-mono-code text-slate-400">MEDIA INTEGRITY</div>
-                        <div className={`text-base font-bold font-display ${
-                          result.is_ai_generated ? 'text-red-400' : 'text-emerald-400'
+                        <div className="text-[10px] text-slate-400">CLASSIFICATION</div>
+                        <div className={`text-base sm:text-lg font-bold font-aveton ${
+                          result.is_ai_generated ? 'text-[#FF3366]' : 'text-[#B2F601]'
                         }`}>
                           {result.verdict}
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-right font-mono-code">
-                      <div className="text-xs text-slate-400">SYNTHETIC RISK</div>
-                      <div className="text-2xl font-bold font-display text-white">
+                    <div className="text-right">
+                      <div className="text-[10px] text-slate-400">AI PROBABILITY</div>
+                      <div className="text-2xl font-extrabold font-aveton text-white">
                         {result.deepfake_confidence}%
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-center text-xs font-mono-code">
-                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.08]">
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs">
+                    <div className="p-2.5 rounded-xl bg-black/50 border border-white/[0.08]">
                       <span className="text-slate-400 block text-[10px]">ELA DISCREPANCY</span>
-                      <strong className="text-amber-300 font-display text-base">{result.ela_alteration_score}%</strong>
+                      <strong className="text-amber-300 font-aveton text-base">{result.ela_alteration_score}%</strong>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.08]">
+                    <div className="p-2.5 rounded-xl bg-black/50 border border-white/[0.08]">
                       <span className="text-slate-400 block text-[10px]">SENSOR NOISE VARIANCE</span>
-                      <strong className="text-purple-300 font-display text-base">{result.noise_variance}</strong>
+                      <strong className="text-purple-300 font-aveton text-base">{result.noise_variance}</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* EXIF Metadata Card */}
-                <div className="glass-surface p-4 rounded-2xl space-y-2.5">
-                  <div className="text-xs font-mono-code text-cyan-300 flex items-center justify-between border-b border-white/[0.08] pb-2 font-bold">
+                <div className="p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl space-y-2.5">
+                  <div className="text-xs text-[#62C0F6] flex items-center justify-between border-b border-white/[0.08] pb-2 font-bold">
                     <span className="flex items-center gap-1.5">
-                      <Camera className="w-3.5 h-3.5 text-cyan-400" />
+                      <Camera className="w-3.5 h-3.5 text-[#62C0F6]" />
                       <span>EXIF & EMBEDDED METADATA</span>
                     </span>
-                    <span className="text-slate-400 text-[11px] font-normal">{result.exif_metadata.raw_tag_count} Tags</span>
+                    <span className="text-slate-400 text-[11px] font-normal">{result.exif_metadata?.raw_tag_count || 0} Tags</span>
                   </div>
 
-                  <div className="space-y-1.5 text-xs font-mono-code">
+                  <div className="space-y-1.5 text-xs">
                     <div className="flex justify-between p-2 rounded-xl bg-black/40 border border-white/[0.06]">
                       <span className="text-slate-400">CAMERA MODEL:</span>
-                      <span className="text-white">{result.exif_metadata.camera_make} {result.exif_metadata.camera_model}</span>
+                      <span className="text-white font-semibold">{result.exif_metadata?.camera_make || 'Unknown'} {result.exif_metadata?.camera_model || ''}</span>
                     </div>
                     <div className="flex justify-between p-2 rounded-xl bg-black/40 border border-white/[0.06]">
                       <span className="text-slate-400">SOFTWARE / SIGNATURE:</span>
-                      <span className={result.exif_metadata.ai_signatures_detected.length ? 'text-red-400 font-bold' : 'text-slate-200'}>
-                        {result.exif_metadata.software}
+                      <span className={result.exif_metadata?.ai_signatures_detected?.length ? 'text-[#FF3366] font-bold' : 'text-slate-200'}>
+                        {result.exif_metadata?.software || 'Unmodified RAW Exif'}
                       </span>
                     </div>
                     <div className="flex justify-between p-2 rounded-xl bg-black/40 border border-white/[0.06]">
                       <span className="text-slate-400">ISO / SHUTTER SPEED:</span>
-                      <span className="text-cyan-300">{result.exif_metadata.iso} // {result.exif_metadata.exposure_time}</span>
+                      <span className="text-[#62C0F6]">{result.exif_metadata?.iso || 'N/A'} // {result.exif_metadata?.exposure_time || 'N/A'}</span>
                     </div>
 
-                    {result.exif_metadata.gps?.has_gps && (
-                      <div className="mt-2 p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-emerald-300">
-                          <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                    {result.exif_metadata?.gps?.has_gps && (
+                      <div className="mt-2 p-2.5 rounded-xl bg-[#09150d] border border-[#B2F601]/40 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[#B2F601]">
+                          <MapPin className="w-3.5 h-3.5" />
                           <span>GPS: {result.exif_metadata.gps.latitude}, {result.exif_metadata.gps.longitude}</span>
                         </div>
                         <button
                           onClick={() => onTargetSelected && onTargetSelected(result.target_geo)}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] border border-emerald-500/40"
+                          className="px-2.5 py-1 rounded-lg bg-[#B2F601]/20 text-[#B2F601] text-[10px] border border-[#B2F601]/40 font-bold"
                         >
                           LOCK SPATIAL RADAR
                         </button>
@@ -284,9 +404,15 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
                 </div>
               </motion.div>
             ) : (
-              <div className="glass-surface p-10 rounded-2xl text-center font-mono-code text-xs text-slate-400 space-y-2">
-                <Info className="w-8 h-8 text-cyan-400/30 mx-auto" />
-                <div>SELECT AN IMAGE TO EXECUTE ELA & SHERLOQ NOISE EXTRACTION</div>
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="p-10 rounded-[28px] bg-[#0a0a0d] border border-dashed border-white/[0.15] text-center font-mono-hud text-xs text-slate-400 space-y-2 cursor-pointer hover:border-[#62C0F6]/50 transition-all"
+              >
+                <Info className="w-8 h-8 text-[#62C0F6]/50 mx-auto" />
+                <div className="text-white font-bold">CLICK THE BLACK CANVAS OR BROWSE TO BEGIN</div>
+                <div className="text-[11px] text-slate-500">
+                  Instantly extracts JPEG quantization discrepancies, sensor noise, and generative diffusion signatures.
+                </div>
               </div>
             )}
           </AnimatePresence>
