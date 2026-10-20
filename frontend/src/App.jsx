@@ -14,6 +14,7 @@ import VideoForensicsTab from './components/VideoForensicsTab';
 import AudioForensicsTab from './components/AudioForensicsTab';
 import VirusTotalHexTab from './components/VirusTotalHexTab';
 import DossierExportTab from './components/DossierExportTab';
+import SpartanShieldLogo from './components/SpartanShieldLogo';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('ASTRALIS');
@@ -135,42 +136,46 @@ export default function App() {
       {/* FLOATING DYNAMIC ISLAND TOP NAVBAR                           */}
       {/* ============================================================ */}
       <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[96%] max-w-[1550px] pointer-events-auto">
-        <header className="h-14 rounded-full bg-[#0a0a0d]/92 backdrop-blur-2xl border border-white/[0.12] px-4 sm:px-6 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.85)]">
-          {/* Left Cluster: Spartan Shield Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <div 
-              onClick={() => { setActiveTab('ASTRALIS'); setThreatState('NEUTRAL'); }}
-              className="flex items-center gap-2.5 cursor-pointer group"
-            >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center p-0.5 transition-all duration-300">
-                <img 
-                  src={threatState === 'THREAT' ? "/kavach_logo_crimson.png" : "/kavach_logo_cyber.png"} 
-                  alt="Kavach Spartan Shield" 
-                  className="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(178,246,1,0.5)] group-hover:scale-105 transition-transform"
-                />
-              </div>
+        <header className="h-14 rounded-full bg-[#0a0a0d]/92 backdrop-blur-2xl border border-white/[0.12] px-3 sm:px-5 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.85)] gap-3">
+          {/* Left Cluster: Spartan Shield Logo & Brand (Strictly Single Line, Never Wraps) */}
+          <div 
+            onClick={() => { setActiveTab('ASTRALIS'); setThreatState('NEUTRAL'); }}
+            className="flex items-center gap-2.5 cursor-pointer group shrink-0 whitespace-nowrap select-none"
+          >
+            <SpartanShieldLogo 
+              className="w-8 h-8 sm:w-9 sm:h-9 group-hover:scale-105 transition-transform" 
+              isThreat={threatState === 'THREAT'} 
+            />
 
-              <div className="flex flex-col">
-                <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none flex items-center gap-1 font-aveton">
-                  KAVACH <span className="text-[#B2F601] font-semibold">// AURA 3D</span>
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="text-sm sm:text-base font-extrabold text-white tracking-wide font-aveton">
+                  KAVACH
                 </span>
-                <span className="text-[9px] font-mono-hud text-[#62C0F6] uppercase font-bold hidden sm:inline">
-                  DEFENSE WAR ROOM
+                <span className={`px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-mono-hud font-bold border tracking-wider ${
+                  threatState === 'THREAT'
+                    ? 'bg-[#FF3366]/15 text-[#FF3366] border-[#FF3366]/40 shadow-[0_0_8px_rgba(255,51,102,0.3)]'
+                    : 'bg-[#B2F601]/15 text-[#B2F601] border-[#B2F601]/40 shadow-[0_0_8px_rgba(178,246,1,0.3)]'
+                }`}>
+                  AURA 3D
                 </span>
               </div>
+              <span className="text-[8px] sm:text-[9px] font-mono-hud text-[#62C0F6] uppercase tracking-wider font-semibold mt-0.5">
+                DEFENSE WAR ROOM
+              </span>
             </div>
           </div>
 
           {/* Center: Dynamic Island Sliding Tab Pills (100% Pure English) */}
-          <div className="hidden lg:flex items-center p-1 rounded-full bg-black/60 border border-white/10 backdrop-blur-xl">
+          <div className="hidden lg:flex items-center p-1 rounded-full bg-black/60 border border-white/10 backdrop-blur-xl shrink-0">
             {[
-              { id: 'ASTRALIS', label: "AURA 3D WAR ROOM", icon: Globe },
+              { id: 'ASTRALIS', label: "AURA 3D", icon: Globe },
               { id: 'EMAIL', label: "EMAIL DEFENSE", icon: Mail },
               { id: 'IMAGE', label: "IMAGE FORENSICS", icon: ImageIcon },
               { id: 'VIDEO', label: "VIDEO FORENSICS", icon: Video },
               { id: 'AUDIO', label: "AUDIO FORENSICS", icon: Radio },
-              { id: 'VIRUSTOTAL', label: "VIRUSTOTAL HEX", icon: Binary },
-              { id: 'DOSSIER', label: "FORENSIC DOSSIER", icon: FileText }
+              { id: 'VIRUSTOTAL', label: "HEX SCAN", icon: Binary },
+              { id: 'DOSSIER', label: "DOSSIER", icon: FileText }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -178,7 +183,7 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`relative px-2.5 xl:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                     isActive
                       ? 'text-white shadow-lg'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
@@ -197,21 +202,21 @@ export default function App() {
                       transition={{ type: "spring", stiffness: 450, damping: 35 }}
                     />
                   )}
-                  <Icon className={`w-3.5 h-3.5 relative z-10 ${
+                  <Icon className={`w-3.5 h-3.5 relative z-10 shrink-0 ${
                     isActive ? (threatState === 'LEGIT' ? 'text-[#B2F601]' : threatState === 'THREAT' ? 'text-[#FF3366]' : 'text-[#B2F601]') : 'text-slate-400'
                   }`} />
-                  <span className="relative z-10 text-[11px] font-mono-hud">{tab.label}</span>
+                  <span className="relative z-10 text-[10px] xl:text-[11px] font-mono-hud whitespace-nowrap">{tab.label}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Right Trailing Cluster: Threat Level Switcher */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center rounded-full bg-black/60 p-1 border border-white/10 text-[10px] font-mono-hud">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center rounded-full bg-black/60 p-0.5 sm:p-1 border border-white/10 text-[9px] sm:text-[10px] font-mono-hud">
               <button
                 onClick={() => setThreatState('NEUTRAL')}
-                className={`px-2.5 py-0.5 rounded-full transition-all ${
+                className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
                   threatState === 'NEUTRAL' 
                     ? 'bg-white/15 text-white font-bold border border-white/20' 
                     : 'text-slate-400 hover:text-white'
@@ -221,7 +226,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setThreatState('LEGIT')}
-                className={`px-2.5 py-0.5 rounded-full transition-all ${
+                className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
                   threatState === 'LEGIT' 
                     ? 'bg-[#B2F601] text-[#0a0a0d] font-bold shadow-[0_0_12px_rgba(178,246,1,0.5)]' 
                     : 'text-slate-400 hover:text-white'
@@ -231,7 +236,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setThreatState('THREAT')}
-                className={`px-2.5 py-0.5 rounded-full transition-all ${
+                className={`px-2 sm:px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
                   threatState === 'THREAT' 
                     ? 'bg-[#FF3366] text-white font-bold shadow-[0_0_12px_rgba(255,51,102,0.5)]' 
                     : 'text-slate-400 hover:text-white'
