@@ -33,7 +33,7 @@ export default function App() {
   const [uptimeSeconds, setUptimeSeconds] = useState(0);
   const [telemetry, setTelemetry] = useState(null);
   const [terminalLogs, setTerminalLogs] = useState([
-    "[SYSTEM] KAVACH COMMAND SCREEN ENGAGED // AURA 3D WAR ROOM ACTIVE",
+    "[SYSTEM] KAVACH DYNAMIC COMMAND ISLAND ENGAGED // AURA 3D ACTIVE",
     "[ORBIT] NORAD 25544 (ISS) KEPLERIAN TELEMETRY SYNCED (7.66 KM/S)",
     "[RFC-5322] 100-EMAIL BASELINE MATRIX READY // RANDOM FOREST 100% ACCURACY",
     "[AMPED-5] MULTI-SPECTRAL ELA COMPRESSION DIFFERENTIAL CALIBRATED",
@@ -99,12 +99,12 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen font-tactical relative overflow-x-hidden selection:bg-[#B2F601] selection:text-[#0E111A] transition-colors duration-700 ${
+    <div className={`min-h-screen font-body-clean relative overflow-x-hidden selection:bg-[#B2F601] selection:text-[#0a0a0d] transition-colors duration-700 ${
       threatState === 'LEGIT' 
-        ? 'bg-[#08120c]' 
+        ? 'bg-[#06120a]' 
         : threatState === 'THREAT' 
-        ? 'bg-[#18070e]' 
-        : 'bg-[#0E111A]'
+        ? 'bg-[#16060c]' 
+        : 'bg-[#0a0a0d]'
     }`}>
       {/* Cyberpunk Ambiance Neon Glows (#B2F601, #62C0F6, #FF3366) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -130,148 +130,130 @@ export default function App() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(98,192,246,0.035),transparent_70%)]" />
       </div>
 
-      {/* INSTITUTIONAL TACTICAL TOP NAVBAR */}
-      <header className="fixed top-0 left-0 right-0 h-16 z-50 bg-[#0E111A]/90 backdrop-blur-2xl border-b border-[#343645] px-6 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.8)]">
-        {/* Left Cluster: Brand Badge */}
-        <div className="flex items-center gap-6">
-          <div 
-            onClick={() => { setActiveTab('ASTRALIS'); setThreatState('NEUTRAL'); }}
-            className="flex items-center gap-3.5 cursor-pointer group"
-          >
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all duration-300 shadow-xl ${
-              threatState === 'LEGIT'
-                ? 'bg-[#0a1f12] border-[#B2F601]/60 shadow-[0_0_22px_rgba(178,246,1,0.4)]'
-                : threatState === 'THREAT'
-                ? 'bg-[#220710] border-[#FF3366]/60 shadow-[0_0_22px_rgba(255,51,102,0.4)]'
-                : 'bg-[#181D2A] border-[#62C0F6]/40 shadow-[0_0_20px_rgba(98,192,246,0.25)]'
-            }`}>
-              <Shield className={`w-4 h-4 ${
-                threatState === 'LEGIT' ? 'text-[#B2F601]' : threatState === 'THREAT' ? 'text-[#FF3366]' : 'text-[#62C0F6]'
-              }`} />
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-lg font-bold font-tactical text-white tracking-tight leading-none flex items-center gap-1.5">
-                KAVACH <span className="text-[#B2F601] font-semibold">// AURA 3D</span>
-              </span>
-              <span className="text-[9px] font-mono-hud tracking-widest text-[#62C0F6] uppercase font-semibold mt-1">
-                AUTONOMOUS CYBER DEFENSE WAR ROOM
-              </span>
-            </div>
-          </div>
-
-          {/* Real Telemetry Strip */}
-          <div className="hidden xl:flex items-center gap-2 pl-4 border-l border-[#343645]">
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#141824]/90 border border-[#343645] font-mono-hud text-[11px]">
-              <span className="text-slate-400 text-[9px]">PING:</span>
-              <span className="text-[#B2F601] font-bold">{realPing} ms</span>
-            </div>
-
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#141824]/90 border border-[#343645] font-mono-hud text-[11px]">
-              <span className="text-slate-400 text-[9px]">BASELINE:</span>
-              <span className="text-[#62C0F6] font-bold">100 RFCs</span>
-            </div>
-
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#141824]/90 border border-[#343645] font-mono-hud text-[11px]">
-              <span className="text-slate-400 text-[9px]">DEFCON:</span>
-              <span className={`font-bold ${
-                threatState === 'THREAT' ? 'text-[#FF3366] animate-pulse' : threatState === 'LEGIT' ? 'text-[#B2F601]' : 'text-[#62C0F6]'
+      {/* FLOATING DYNAMIC ISLAND TOP NAVBAR (Exact from Apple / Fintech Reference) */}
+      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[96%] max-w-[1550px] pointer-events-auto">
+        <header className="h-14 rounded-full bg-[#0a0a0d]/92 backdrop-blur-2xl border border-white/[0.12] px-4 sm:px-6 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.85)]">
+          {/* Left Cluster: Brand Squircle Badge */}
+          <div className="flex items-center gap-3">
+            <div 
+              onClick={() => { setActiveTab('ASTRALIS'); setThreatState('NEUTRAL'); }}
+              className="flex items-center gap-2.5 cursor-pointer group"
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 shadow-md ${
+                threatState === 'LEGIT'
+                  ? 'bg-[#0a1f12] border-[#B2F601]/60 shadow-[0_0_18px_rgba(178,246,1,0.4)]'
+                  : threatState === 'THREAT'
+                  ? 'bg-[#220710] border-[#FF3366]/60 shadow-[0_0_18px_rgba(255,51,102,0.4)]'
+                  : 'bg-black border-white/20'
               }`}>
-                {threatState === 'THREAT' ? '1 (CRITICAL)' : threatState === 'LEGIT' ? '4 (NORMAL)' : '2 (ELEVATED)'}
+                <Shield className={`w-4 h-4 ${
+                  threatState === 'LEGIT' ? 'text-[#B2F601]' : threatState === 'THREAT' ? 'text-[#FF3366]' : 'text-[#B2F601]'
+                }`} />
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none flex items-center gap-1">
+                  KAVACH <span className="text-[#B2F601] font-semibold">// AURA 3D</span>
+                </span>
+                <span className="text-[9px] font-mono-hud text-[#62C0F6] uppercase font-bold hidden sm:inline">
+                  DEFENSE WAR ROOM
+                </span>
+              </div>
+            </div>
+
+            {/* Live Indicator Pill */}
+            <div className="hidden xl:flex items-center gap-2 pl-3 border-l border-white/10 text-xs font-mono-hud">
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#B2F601]/15 text-[#B2F601] font-bold text-[10px] border border-[#B2F601]/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B2F601] animate-ping" />
+                LIVE {realPing}ms
               </span>
             </div>
-
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#141824]/90 border border-[#343645] font-mono-hud text-[11px] text-slate-400">
-              <Clock className="w-3 h-3 text-[#62C0F6]" />
-              <span>UPTIME: {formatUptime(uptimeSeconds)}</span>
-            </div>
           </div>
-        </div>
 
-        {/* Center: Sliding Active Tab Navigation Pills */}
-        <div className="hidden lg:flex items-center p-1 rounded-2xl bg-[#141824]/90 border border-[#343645] backdrop-blur-xl">
-          {[
-            { id: 'ASTRALIS', label: "态势大屏 (AURA 3D)", icon: Globe },
-            { id: 'EMAIL', label: "邮件防御 (EMAIL)", icon: Mail },
-            { id: 'IMAGE', label: "图像取证 (IMAGE)", icon: ImageIcon },
-            { id: 'VIDEO', label: "视频真伪 (VIDEO)", icon: Video },
-            { id: 'AUDIO', label: "语音取证 (AUDIO)", icon: Radio },
-            { id: 'DOSSIER', label: "案卷取证 (DOSSIER)", icon: FileText }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
+          {/* Center: Dynamic Island Sliding Tab Pills */}
+          <div className="hidden lg:flex items-center p-1 rounded-full bg-black/60 border border-white/10 backdrop-blur-xl">
+            {[
+              { id: 'ASTRALIS', label: "态势大屏 (AURA 3D)", icon: Globe },
+              { id: 'EMAIL', label: "邮件防御 (EMAIL)", icon: Mail },
+              { id: 'IMAGE', label: "图像取证 (IMAGE)", icon: ImageIcon },
+              { id: 'VIDEO', label: "视频真伪 (VIDEO)", icon: Video },
+              { id: 'AUDIO', label: "语音取证 (AUDIO)", icon: Radio },
+              { id: 'DOSSIER', label: "案卷取证 (DOSSIER)", icon: FileText }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    isActive
+                      ? 'text-white shadow-lg'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTabPill"
+                      className={`absolute inset-0 rounded-full ${
+                        threatState === 'LEGIT'
+                          ? 'bg-[#B2F601]/25 border border-[#B2F601]/60 shadow-[0_0_18px_rgba(178,246,1,0.4)]'
+                          : threatState === 'THREAT'
+                          ? 'bg-[#FF3366]/25 border border-[#FF3366]/60 shadow-[0_0_18px_rgba(255,51,102,0.4)]'
+                          : 'bg-white/10 border border-white/20 shadow-[0_0_16px_rgba(255,255,255,0.15)]'
+                      }`}
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <Icon className={`w-3.5 h-3.5 relative z-10 ${
+                    isActive ? (threatState === 'LEGIT' ? 'text-[#B2F601]' : threatState === 'THREAT' ? 'text-[#FF3366]' : 'text-[#B2F601]') : 'text-slate-400'
+                  }`} />
+                  <span className="relative z-10 text-[11px]">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right Trailing Cluster: State Switcher & Ring Pill */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center rounded-full bg-black/60 p-1 border border-white/10 text-[10px] font-mono-hud">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative px-3.5 py-1.5 rounded-xl text-xs font-mono-hud font-semibold transition-all flex items-center gap-1.5 ${
-                  isActive
-                    ? 'text-white shadow-lg'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                onClick={() => setThreatState('NEUTRAL')}
+                className={`px-2 py-0.5 rounded-full transition-all ${
+                  threatState === 'NEUTRAL' 
+                    ? 'bg-white/15 text-white font-bold border border-white/20' 
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTabPill"
-                    className={`absolute inset-0 rounded-xl ${
-                      threatState === 'LEGIT'
-                        ? 'bg-[#B2F601]/25 border border-[#B2F601]/60 shadow-[0_0_18px_rgba(178,246,1,0.4)]'
-                        : threatState === 'THREAT'
-                        ? 'bg-[#FF3366]/25 border border-[#FF3366]/60 shadow-[0_0_18px_rgba(255,51,102,0.4)]'
-                        : 'bg-[#62C0F6]/20 border border-[#62C0F6]/50 shadow-[0_0_18px_rgba(98,192,246,0.35)]'
-                    }`}
-                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                  />
-                )}
-                <Icon className={`w-3.5 h-3.5 relative z-10 ${
-                  isActive ? (threatState === 'LEGIT' ? 'text-[#B2F601]' : threatState === 'THREAT' ? 'text-[#FF3366]' : 'text-[#B2F601]') : 'text-slate-400'
-                }`} />
-                <span className="relative z-10">{tab.label}</span>
+                NEUTRAL
               </button>
-            );
-          })}
-        </div>
-
-        {/* Right Trailing Cluster: Interactive Threat State Switcher */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center rounded-2xl bg-[#141824]/90 p-1 border border-[#343645] text-[10px] font-mono-hud">
-            <span className="px-2 text-slate-400 font-bold hidden sm:inline">STATE:</span>
-            <button
-              onClick={() => setThreatState('NEUTRAL')}
-              className={`px-2.5 py-1 rounded-xl transition-all ${
-                threatState === 'NEUTRAL' 
-                  ? 'bg-[#62C0F6]/25 text-[#62C0F6] font-bold border border-[#62C0F6]/40 shadow' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              NEUTRAL
-            </button>
-            <button
-              onClick={() => setThreatState('LEGIT')}
-              className={`px-2.5 py-1 rounded-xl transition-all ${
-                threatState === 'LEGIT' 
-                  ? 'bg-[#B2F601]/25 text-[#B2F601] font-bold border border-[#B2F601]/50 shadow' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              LEGIT (GREEN)
-            </button>
-            <button
-              onClick={() => setThreatState('THREAT')}
-              className={`px-2.5 py-1 rounded-xl transition-all ${
-                threatState === 'THREAT' 
-                  ? 'bg-[#FF3366]/25 text-[#FF3366] font-bold border border-[#FF3366]/50 shadow' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              THREAT (RED)
-            </button>
+              <button
+                onClick={() => setThreatState('LEGIT')}
+                className={`px-2 py-0.5 rounded-full transition-all ${
+                  threatState === 'LEGIT' 
+                    ? 'bg-[#B2F601] text-[#0a0a0d] font-bold shadow-[0_0_12px_rgba(178,246,1,0.5)]' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                LEGIT
+              </button>
+              <button
+                onClick={() => setThreatState('THREAT')}
+                className={`px-2 py-0.5 rounded-full transition-all ${
+                  threatState === 'THREAT' 
+                    ? 'bg-[#FF3366] text-white font-bold shadow-[0_0_12px_rgba(255,51,102,0.5)]' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                THREAT
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {/* MOBILE NAV STRIP */}
-      <div className="lg:hidden fixed top-16 left-0 right-0 z-40 bg-[#0E111A]/95 backdrop-blur-xl border-b border-[#343645] px-4 py-2 overflow-x-auto flex gap-1.5 font-mono-hud text-xs">
+      <div className="lg:hidden fixed top-20 left-4 right-4 z-40 rounded-full bg-[#0a0a0d]/95 backdrop-blur-xl border border-white/10 p-1.5 overflow-x-auto flex gap-1 font-body-clean text-xs">
         {[
           { id: 'ASTRALIS', label: "态势大屏", icon: Globe },
           { id: 'EMAIL', label: "邮件防御", icon: Mail },
@@ -286,13 +268,13 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl shrink-0 border ${
+              className={`flex items-center gap-1 px-3 py-1 rounded-full shrink-0 border ${
                 isActive 
-                  ? 'bg-[#B2F601]/20 border-[#B2F601] text-[#B2F601] font-bold' 
+                  ? 'bg-[#B2F601] text-[#0a0a0d] font-bold border-transparent' 
                   : 'border-transparent text-slate-400'
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
+              <Icon className="w-3 h-3" />
               <span>{tab.label}</span>
             </button>
           );
@@ -300,7 +282,7 @@ export default function App() {
       </div>
 
       {/* MAIN VIEWPORT CONTAINER (Full-Width Panoramic War Room Layout) */}
-      <main className="relative z-10 max-w-[1800px] mx-auto pt-20 pb-8 px-3 sm:px-6 space-y-4">
+      <main className="relative z-10 max-w-[1800px] mx-auto pt-22 pb-8 px-3 sm:px-6 space-y-4">
         {/* REACTIVE SYSTEM STATUS ALERT BANNER */}
         <AnimatePresence mode="wait">
           {threatState === 'LEGIT' && (
@@ -308,7 +290,7 @@ export default function App() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="p-3.5 rounded-2xl hud-glass-lime flex items-center justify-between text-xs font-mono-hud text-[#B2F601]"
+              className="p-3.5 rounded-full hud-glass-lime flex items-center justify-between text-xs font-mono-hud text-[#B2F601] px-6"
             >
               <div className="flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 text-[#B2F601] animate-pulse" />
@@ -316,7 +298,7 @@ export default function App() {
                   DEFENSE STATUS: VERIFIED AUTHENTIC // ZERO THREATS DETECTED // DIGITAL SIGNATURES INTACT
                 </span>
               </div>
-              <span className="px-3 py-1 rounded-xl bg-[#B2F601]/20 text-[#B2F601] text-[10px] font-bold border border-[#B2F601]/40">
+              <span className="px-3 py-0.5 rounded-full bg-[#B2F601]/20 text-[#B2F601] text-[10px] font-bold border border-[#B2F601]/40">
                 100% SECURE
               </span>
             </motion.div>
@@ -327,7 +309,7 @@ export default function App() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="p-3.5 rounded-2xl hud-glass-crimson flex items-center justify-between text-xs font-mono-hud text-[#FF3366]"
+              className="p-3.5 rounded-full hud-glass-crimson flex items-center justify-between text-xs font-mono-hud text-[#FF3366] px-6"
             >
               <div className="flex items-center gap-3">
                 <ShieldAlert className="w-5 h-5 text-[#FF3366] animate-bounce" />
@@ -335,7 +317,7 @@ export default function App() {
                   DEFCON 1 CRITICAL ALERT: MALICIOUS INTRUSION OR SYNTHETIC DEEPFAKE WARPING DETECTED
                 </span>
               </div>
-              <span className="px-3 py-1 rounded-xl bg-[#FF3366]/20 text-[#FF3366] text-[10px] font-bold border border-[#FF3366]/40 animate-pulse">
+              <span className="px-3 py-0.5 rounded-full bg-[#FF3366]/20 text-[#FF3366] text-[10px] font-bold border border-[#FF3366]/40 animate-pulse">
                 HOSTILE COMPROMISE
               </span>
             </motion.div>
@@ -350,7 +332,7 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              {/* EXACT ALIBABA 20 & GLOBAL BIG DATA WAR ROOM COMMAND SCREEN */}
+              {/* EXACT ALIBABA 20 & DYNAMIC ISLAND WAR ROOM COMMAND SCREEN */}
               <CommandScreenHUD
                 activeTarget={activeTarget}
                 threatState={threatState}
@@ -389,8 +371,8 @@ export default function App() {
         </div>
 
         {/* REAL-TIME TERMINAL LOG STRIP (CYBER HUD FOOTER) */}
-        <div className="hud-glass-panel p-4 rounded-2xl font-mono-hud text-xs space-y-2">
-          <div className="flex items-center justify-between border-b border-[#343645] pb-2">
+        <div className="p-4 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl font-mono-hud text-xs space-y-2 select-none">
+          <div className="flex items-center justify-between border-b border-white/[0.07] pb-2">
             <span className="flex items-center gap-2 text-[#62C0F6] font-bold text-xs">
               <Terminal className="w-3.5 h-3.5 text-[#B2F601]" />
               <span>REAL-TIME AUDIT BUFFER & TELEMETRY STREAM</span>
@@ -410,7 +392,7 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="relative z-20 border-t border-[#343645] bg-[#0E111A]/95 py-4 px-6 text-center text-xs font-mono-hud text-slate-500">
+      <footer className="relative z-20 border-t border-white/[0.08] bg-[#0a0a0d]/95 py-4 px-6 text-center text-xs font-body-clean text-slate-500">
         <div className="text-slate-400 font-medium">
           KAVACH (THE PROTECTOR) // AUTONOMOUS CYBER DEFENSE WAR ROOM
         </div>
