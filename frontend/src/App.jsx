@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Shield, Globe, Mail, Image as ImageIcon, Video, Radio, FileText, 
+  Shield, Globe, Mail, Image as ImageIcon, Video, Radio, 
   Satellite, Terminal, Activity, Wifi, ShieldAlert, ShieldCheck, 
   RefreshCw, Cpu, Clock, CheckCircle2, AlertOctagon, Sparkles,
   ArrowUpRight, Compass, Layers, Zap, Crosshair, Radar, Binary
@@ -13,7 +13,6 @@ import ImageForensicsTab from './components/ImageForensicsTab';
 import VideoForensicsTab from './components/VideoForensicsTab';
 import AudioForensicsTab from './components/AudioForensicsTab';
 import VirusTotalHexTab from './components/VirusTotalHexTab';
-import DossierExportTab from './components/DossierExportTab';
 import SpartanShieldLogo from './components/SpartanShieldLogo';
 import ForensicAuditHistory from './components/ForensicAuditHistory';
 
@@ -286,8 +285,7 @@ export default function App() {
               { id: 'IMAGE', label: "IMAGE FORENSICS", icon: ImageIcon },
               { id: 'VIDEO', label: "VIDEO FORENSICS", icon: Video },
               { id: 'AUDIO', label: "AUDIO FORENSICS", icon: Radio },
-              { id: 'VIRUSTOTAL', label: "HEX SCAN", icon: Binary },
-              { id: 'DOSSIER', label: "DOSSIER", icon: FileText }
+              { id: 'VIRUSTOTAL', label: "HEX SCAN", icon: Binary }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -363,8 +361,7 @@ export default function App() {
           { id: 'IMAGE', label: "IMAGE", icon: ImageIcon },
           { id: 'VIDEO', label: "VIDEO", icon: Video },
           { id: 'AUDIO', label: "AUDIO", icon: Radio },
-          { id: 'VIRUSTOTAL', label: "HEX SCAN", icon: Binary },
-          { id: 'DOSSIER', label: "DOSSIER", icon: FileText }
+          { id: 'VIRUSTOTAL', label: "HEX SCAN", icon: Binary }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -484,10 +481,6 @@ export default function App() {
               onVerdictChange={setThreatState} 
               onLogAudit={handleLogAudit}
             />
-          )}
-
-          {activeTab === 'DOSSIER' && (
-            <DossierExportTab />
           )}
         </div>
 
