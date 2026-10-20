@@ -124,22 +124,22 @@ export default function VideoForensicsTab({ onVerdictChange }) {
                 : 'bg-[#09150d] border-[#B2F601]/40 shadow-[0_0_20px_rgba(178,246,1,0.2)]'
             }`}>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-mono-hud uppercase">INTEGRITY VERDICT</span>
+                <span className="text-[10px] text-slate-400 font-mono-hud uppercase font-bold">IS THIS VIDEO AI-GENERATED?</span>
                 <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold font-mono-hud border ${
                   result.is_ai_generated
                     ? 'bg-[#FF3366]/20 text-[#FF3366] border-[#FF3366]/40'
                     : 'bg-[#B2F601]/20 text-[#B2F601] border-[#B2F601]/40'
                 }`}>
-                  {result.is_ai_generated ? "⚠️ AI SYNTHETIC" : "✅ AUTHENTIC"}
+                  {result.is_ai_generated ? "⚠️ AI-GENERATED (DEEPFAKE)" : "✅ NOT AI-GENERATED (AUTHENTIC)"}
                 </span>
               </div>
               <div className={`text-base font-extrabold font-aveton mt-1 ${
                 result.is_ai_generated ? 'text-[#FF3366]' : 'text-[#B2F601]'
               }`}>
-                {result.verdict}
+                {result.is_ai_generated ? "YES — AI-GENERATED DEEPFAKE" : "NO — NOT AI-GENERATED (AUTHENTIC)"}
               </div>
               <div className="text-[11px] text-slate-400 font-mono-hud">
-                AI Confidence: <strong className="text-white">{result.deepfake_confidence}%</strong>
+                AI Deepfake Likelihood: <strong className="text-white">{result.deepfake_confidence}%</strong>
               </div>
             </div>
 

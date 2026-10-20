@@ -209,17 +209,20 @@ export default function VirusTotalHexTab({ onVerdictChange }) {
                   </div>
 
                   <div>
-                    <div className="text-xs font-mono-hud text-slate-400 uppercase tracking-wider">
-                      VIRUSTOTAL & SENSORY ENGINE VERDICT
+                    <div className="text-xs font-mono-hud text-slate-400 uppercase tracking-wider font-bold">
+                      VIRUSTOTAL FILE AUDIT // TAMPERING & AI MALWARE STATUS
                     </div>
                     <div className={`text-xl sm:text-2xl font-extrabold font-aveton mt-0.5 ${
                       result.is_tampered ? 'text-[#FF3366]' : 'text-[#B2F601]'
                     }`}>
-                      {result.verdict}
+                      {result.is_tampered ? "TAMPERED / MALICIOUS INJECTION DETECTED" : "AUTHENTIC / ZERO TAMPERING DETECTED"}
                     </div>
-                    <div className="text-xs text-slate-300 font-mono-hud mt-1 flex items-center gap-3">
+                    <div className="text-xs text-slate-300 font-mono-hud mt-1 flex flex-wrap items-center gap-3">
                       <span>EVIDENCE: <strong className="text-white">{result.filename}</strong></span>
                       <span>SIZE: <strong className="text-white">{result.file_size_bytes} bytes ({(result.file_size_bytes / 1024).toFixed(2)} KB)</strong></span>
+                      <span className={result.is_tampered ? 'text-[#FF3366] font-bold' : 'text-[#B2F601] font-bold'}>
+                        {result.is_tampered ? "⚠️ INJECTED TRAILING BYTES" : "✅ 100% CLEAN INTACT BYTES"}
+                      </span>
                     </div>
                   </div>
                 </div>

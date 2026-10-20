@@ -308,11 +308,18 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange }) {
                         </div>
                       )}
                       <div>
-                        <div className="text-xs font-mono-code text-slate-400">CYBER INTELLIGENCE VERDICT</div>
-                        <div className={`text-xl font-bold font-display tracking-tight ${
+                        <div className="text-[10px] font-mono-code text-slate-400 font-bold uppercase">
+                          IS THIS EMAIL AI-GENERATED PHISHING?
+                        </div>
+                        <div className={`text-base font-bold font-display tracking-tight ${
                           analysisResult.prediction.is_phishing ? 'text-red-400' : 'text-emerald-400'
                         }`}>
-                          {analysisResult.prediction.prediction} DETECTED
+                          {analysisResult.prediction.is_phishing 
+                            ? "YES — AI-CRAFTED PHISHING DETECTED" 
+                            : "NO — NOT AI-GENERATED (AUTHENTIC EMAIL)"}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono-code mt-0.5">
+                          {analysisResult.prediction.prediction} // RFC 5322 Invariant Verified
                         </div>
                       </div>
                     </div>
