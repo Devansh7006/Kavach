@@ -112,7 +112,10 @@ async def analyze_email(
 
 @app.get("/api/email/dataset")
 def get_dataset_info():
-    return dataset_manager.get_summary()
+    return {
+        "counts": dataset_manager.get_counts(),
+        "metrics": kavach_model.metrics
+    }
 
 @app.post("/api/email/retrain")
 def retrain_model(req: RetrainRequest):

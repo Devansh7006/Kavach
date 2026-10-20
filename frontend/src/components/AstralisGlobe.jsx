@@ -4,7 +4,8 @@ import {
   Crosshair, Satellite, Compass, RotateCcw, Flame, ShieldAlert, 
   ShieldCheck, Eye, Layers, Maximize2, Radio, Globe as GlobeIcon,
   Mic, Sliders, Volume2, ArrowRight, Plane, MapPin, Activity,
-  CheckCircle2, AlertTriangle, EyeOff, Terminal, SlidersHorizontal
+  CheckCircle2, AlertTriangle, EyeOff, Terminal, SlidersHorizontal,
+  ZoomIn, ZoomOut
 } from 'lucide-react';
 
 function latLonToVector3(lat, lon, radius) {
@@ -55,6 +56,8 @@ export default function AstralisGlobe({
   const [flirMode, setFlirMode] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
   const [projectedCities, setProjectedCities] = useState([]);
+  const [zoomLevel, setZoomLevel] = useState(46);
+  
   const [selectedEntity, setSelectedEntity] = useState({
     callsign: "NB521",
     model: "PC21 QA353",
@@ -66,8 +69,8 @@ export default function AstralisGlobe({
 
   const [hudCoords, setHudCoords] = useState({
     mgrs: "13R FN 1726 7282",
-    latLon: `29°34'47.05"N 103°47'21.57"W`,
-    sector: "SECTOR 31.50N 101.79W | RECON ACTIVE"
+    latLon: `28°38'12.4"N 77°13'44.2"E`,
+    sector: "GOD'S EYE // SECTOR DELTA-7 ORBITAL RECON ACTIVE"
   });
 
   const [flirSensitivity, setFlirSensitivity] = useState(75);
@@ -76,7 +79,6 @@ export default function AstralisGlobe({
   // Theme Accent Colors
   const isThreat = threatState === 'THREAT';
   const isLegit = threatState === 'LEGIT';
-  
   const accentColor = isThreat ? '#FF3366' : isLegit ? '#B2F601' : '#62C0F6';
 
   // Smoothly rotate globe towards target when activeTarget changes
@@ -85,10 +87,25 @@ export default function AstralisGlobe({
     const targetLonRad = THREE.MathUtils.degToRad(-activeTarget.lon - 90);
     const targetLatRad = THREE.MathUtils.degToRad(activeTarget.lat * 0.4);
     
-    // Smooth target orientation
     globeGroupRef.current.rotation.y = targetLonRad;
     globeGroupRef.current.rotation.x = targetLatRad;
   }, [activeTarget]);
+
+  // Zoom handlers
+  const handleZoom = (delta) => {
+    if (!cameraRef.current) return;
+    const newDist = Math.max(26, Math.min(80, cameraRef.current.position.z + delta));
+    cameraRef.current.position.z = newDist;
+    setZoomLevel(newDist);
+  };
+
+  const handleResetCamera = () => {
+    if (!cameraRef.current || !globeGroupRef.current) return;
+    cameraRef.current.position.set(0, 0, 46);
+    cameraRef.current.lookAt(0, 0, 0);
+    globeGroupRef.current.rotation.set(0.1, 1.85, THREE.MathUtils.degToRad(-15));
+    setZoomLevel(46);
+  };
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -97,8 +114,11 @@ export default function AstralisGlobe({
 
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 2000);
-    camera.position.set(0, 14, 62);
+    
+    // Perfectly centered perspective camera looking directly at (0, 0, 0)
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1500);
+    camera.position.set(0, 0, 46);
+    camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({ 
@@ -109,11 +129,12 @@ export default function AstralisGlobe({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.3;
+    renderer.toneMappingExposure = 1.35;
+    mountRef.current.innerHTML = '';
     mountRef.current.appendChild(renderer.domElement);
 
     // Deep Space Starfield (Subtle Cyber Lime & Cyan Stardust)
-    const starCount = 1800;
+    const starCount = 1400;
     const starGeo = new THREE.BufferGeometry();
     const starPos = new Float32Array(starCount * 3);
     const starCol = new Float32Array(starCount * 3);
@@ -125,7 +146,7 @@ export default function AstralisGlobe({
     ];
 
     for (let i = 0; i < starCount; i++) {
-      const r = 380 + Math.random() * 450;
+      const r = 260 + Math.random() * 320;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
@@ -139,65 +160,73 @@ export default function AstralisGlobe({
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
     starGeo.setAttribute('color', new THREE.BufferAttribute(starCol, 3));
-    const starMat = new THREE.PointsMaterial({ size: 1.2, vertexColors: true, transparent: true, opacity: 0.75 });
+    const starMat = new THREE.PointsMaterial({ size: 1.1, vertexColors: true, transparent: true, opacity: 0.75 });
     scene.add(new THREE.Points(starGeo, starMat));
 
     // Globe Group with Natural Axial Tilt
     const globeGroup = new THREE.Group();
-    globeGroup.rotation.z = THREE.MathUtils.degToRad(-18);
+    globeGroup.rotation.z = THREE.MathUtils.degToRad(-15);
     globeGroup.rotation.y = 1.85;
     scene.add(globeGroup);
     globeGroupRef.current = globeGroup;
 
-    // 2. Tactical Sun & Ambient Light
-    const sunLight = new THREE.DirectionalLight(0xffffff, 2.6);
-    sunLight.position.set(70, 30, 45);
+    // 2. High-Precision Tactical Lighting (Sun, Ambient, Rim)
+    const sunLight = new THREE.DirectionalLight(0xffffff, 2.8);
+    sunLight.position.set(45, 25, 45);
     scene.add(sunLight);
 
-    const ambientLight = new THREE.AmbientLight(0x202636, 0.85);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
     scene.add(ambientLight);
 
-    const rimLight = new THREE.DirectionalLight(new THREE.Color(accentColor), 0.8);
-    rimLight.position.set(-60, -20, -40);
+    const fillLight = new THREE.DirectionalLight(0x62C0F6, 1.2);
+    fillLight.position.set(-45, -15, 30);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(new THREE.Color(accentColor), 1.4);
+    rimLight.position.set(0, -35, -30);
     scene.add(rimLight);
 
-    // 3. Realistic NASA Earth Spheres
+    // 3. Realistic NASA Earth Spheres (RADIUS = 15.8 fits full globe in 720px)
     const textureLoader = new THREE.TextureLoader();
-    const RADIUS = 24.5;
+    const RADIUS = 15.8;
 
     const dayTexture = textureLoader.load('/textures/earth_day.jpg');
     const normalTexture = textureLoader.load('/textures/earth_normal.jpg');
     const specularTexture = textureLoader.load('/textures/earth_specular.jpg');
     const cloudsTexture = textureLoader.load('/textures/earth_clouds.png');
+    const lightsTexture = textureLoader.load('/textures/earth_lights.png');
 
-    // Earth Sphere
+    // Primary Earth Sphere with Day Texture & Night Emissive City Lights
     const earthGeo = new THREE.SphereGeometry(RADIUS, 64, 64);
-    const earthMat = new THREE.MeshPhongMaterial({
+    const earthMat = new THREE.MeshStandardMaterial({
       map: dayTexture,
       normalMap: normalTexture,
-      normalScale: new THREE.Vector2(0.9, 0.9),
-      specularMap: specularTexture,
-      specular: new THREE.Color(0x334466),
-      shininess: 25
+      normalScale: new THREE.Vector2(0.85, 0.85),
+      roughness: 0.55,
+      metalness: 0.1,
+      emissiveMap: lightsTexture,
+      emissive: new THREE.Color(0xffbb55),
+      emissiveIntensity: 0.75
     });
     const earthMesh = new THREE.Mesh(earthGeo, earthMat);
     globeGroup.add(earthMesh);
     earthMeshRef.current = earthMesh;
 
-    // Atmospheric Cloud Layer
+    // Atmospheric Cloud Layer with Real Alpha Transparency
     const cloudsGeo = new THREE.SphereGeometry(RADIUS * 1.016, 64, 64);
-    const cloudsMat = new THREE.MeshPhongMaterial({
+    const cloudsMat = new THREE.MeshStandardMaterial({
       map: cloudsTexture,
       transparent: true,
-      opacity: 0.68,
-      blending: THREE.AdditiveBlending
+      opacity: 0.52,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
     });
     const cloudsMesh = new THREE.Mesh(cloudsGeo, cloudsMat);
     globeGroup.add(cloudsMesh);
     cloudsMeshRef.current = cloudsMesh;
 
     // Atmospheric Rayleigh Limb Scattering Halo
-    const atmosphereGeo = new THREE.SphereGeometry(RADIUS * 1.13, 48, 48);
+    const atmosphereGeo = new THREE.SphereGeometry(RADIUS * 1.14, 64, 64);
     const atmosphereMat = new THREE.ShaderMaterial({
       uniforms: {
         glowColor: { value: new THREE.Color(accentColor) }
@@ -213,8 +242,8 @@ export default function AstralisGlobe({
         varying vec3 vNormal;
         uniform vec3 glowColor;
         void main() {
-          float intensity = pow(0.7 - dot(vNormal, vec3(0, 0, 1.0)), 2.2);
-          gl_FragColor = vec4(glowColor, 1.0) * intensity * 0.95;
+          float intensity = pow(0.68 - dot(vNormal, vec3(0, 0, 1.0)), 2.4);
+          gl_FragColor = vec4(glowColor, 1.0) * intensity * 1.1;
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -225,15 +254,15 @@ export default function AstralisGlobe({
     globeGroup.add(atmosphereMesh);
     atmosphereMeshRef.current = atmosphereMesh;
 
-    // 4. City Markers with 3D Leader Pins (From Image 1 Alibaba 20 Screen)
+    // 4. City Markers with 3D Leader Pins (Alibaba 20 Screen)
     const cityObjects = PINNED_CITIES.map((city) => {
       const surfacePos = latLonToVector3(city.lat, city.lon, RADIUS);
-      const hoverPos = latLonToVector3(city.lat, city.lon, RADIUS + 2.5);
+      const hoverPos = latLonToVector3(city.lat, city.lon, RADIUS + 1.8);
 
       // Base dot on earth surface
       const baseMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.32, 10, 10),
-        new THREE.MeshBasicMaterial({ color: city.risk > 70 ? 0xFF3366 : 0xB2F601 })
+        new THREE.SphereGeometry(0.24, 10, 10),
+        new THREE.MeshBasicMaterial({ color: city.risk > 70 ? 0xFF3366 : city.risk > 30 ? 0x62C0F6 : 0xB2F601 })
       );
       baseMesh.position.copy(surfacePos);
       globeGroup.add(baseMesh);
@@ -251,7 +280,7 @@ export default function AstralisGlobe({
 
       // Top pin ring
       const topRing = new THREE.Mesh(
-        new THREE.RingGeometry(0.2, 0.35, 12),
+        new THREE.RingGeometry(0.15, 0.28, 12),
         new THREE.MeshBasicMaterial({ color: 0x62C0F6, side: THREE.DoubleSide })
       );
       topRing.position.copy(hoverPos);
@@ -265,14 +294,14 @@ export default function AstralisGlobe({
       };
     });
 
-    // 5. Tactical Asset & Flight Vectors
-    const flightCount = 280;
+    // 5. Tactical Asset & Flight Vectors (Swirling Signal Dots)
+    const flightCount = 200;
     const flightGeo = new THREE.BufferGeometry();
     const flightPos = new Float32Array(flightCount * 3);
     for (let i = 0; i < flightCount; i++) {
       const lat = (Math.random() * 80) - 20;
       const lon = (Math.random() * 360) - 180;
-      const vec = latLonToVector3(lat, lon, RADIUS + 0.22);
+      const vec = latLonToVector3(lat, lon, RADIUS + 0.18);
       flightPos[i * 3] = vec.x;
       flightPos[i * 3 + 1] = vec.y;
       flightPos[i * 3 + 2] = vec.z;
@@ -280,14 +309,14 @@ export default function AstralisGlobe({
     flightGeo.setAttribute('position', new THREE.BufferAttribute(flightPos, 3));
     const flightMat = new THREE.PointsMaterial({
       color: 0xffffff,
-      size: 0.7,
+      size: 0.6,
       transparent: true,
       opacity: 0.85
     });
     const flightsPoints = new THREE.Points(flightGeo, flightMat);
     globeGroup.add(flightsPoints);
 
-    // 6. Real Tactical Route Arcs
+    // 6. Tactical Route Arcs (Glowing Parabolic Bezier Curves)
     const TACTICAL_ROUTES = [
       { from: "California LAX", to: "Texas DFW", src: { lat: 34.05, lon: -118.24 }, dst: { lat: 32.77, lon: -96.79 }, dist: "1983 km", col: 0x62C0F6 },
       { from: "Moscow SVO", to: "New Delhi DEL", src: { lat: 55.75, lon: 37.61 }, dst: { lat: 28.61, lon: 77.20 }, dist: "4340 km", col: 0xFF3366 },
@@ -307,11 +336,11 @@ export default function AstralisGlobe({
       const curve = new THREE.QuadraticBezierCurve3(v1, mid, v2);
       const pts = curve.getPoints(45);
       const arcGeo = new THREE.BufferGeometry().setFromPoints(pts);
-      const arcMat = new THREE.LineBasicMaterial({ color: r.col, transparent: true, opacity: 0.8, linewidth: 2 });
+      const arcMat = new THREE.LineBasicMaterial({ color: r.col, transparent: true, opacity: 0.85, linewidth: 2 });
       globeGroup.add(new THREE.Line(arcGeo, arcMat));
 
       [v1, v2].forEach((v) => {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(0.35, 10, 10), new THREE.MeshBasicMaterial({ color: r.col }));
+        const b = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), new THREE.MeshBasicMaterial({ color: r.col }));
         b.position.copy(v);
         globeGroup.add(b);
       });
@@ -320,9 +349,9 @@ export default function AstralisGlobe({
     // 7. Orbital Satellites & Space Stations (ISS NORAD 25544)
     const satGroup = new THREE.Group();
     const REAL_ORBITALS = [
-      { name: "ISS (ZARYA) NORAD 25544", radius: RADIUS + 5.8, speed: 0.007, inc: 0.9, col: 0xB2F601, alt: "420 km", vel: "7.66 km/s" },
-      { name: "SENTINEL-1A NORAD 39634", radius: RADIUS + 9.5, speed: 0.005, inc: 1.15, col: 0x62C0F6, alt: "693 km", vel: "7.51 km/s" },
-      { name: "KH11-4180 DEFENSE ORBIT", radius: RADIUS + 15.0, speed: 0.002, inc: 0.45, col: 0xFF3366, alt: "12,400 km", vel: "4.82 km/s" }
+      { name: "ISS (ZARYA) NORAD 25544", radius: RADIUS + 3.8, speed: 0.007, inc: 0.85, col: 0xB2F601, alt: "420 km", vel: "7.66 km/s" },
+      { name: "SENTINEL-1A SAR RADAR", radius: RADIUS + 6.2, speed: 0.005, inc: 1.25, col: 0x62C0F6, alt: "693 km", vel: "7.51 km/s" },
+      { name: "KH11-4180 DEFENSE ORBIT", radius: RADIUS + 9.8, speed: 0.0025, inc: 0.45, col: 0xFF3366, alt: "12,400 km", vel: "4.82 km/s" }
     ];
 
     const satItems = REAL_ORBITALS.map((s) => {
@@ -335,14 +364,14 @@ export default function AstralisGlobe({
       satGroup.add(line);
 
       const craft = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.4, 0.9), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9 }));
-      const wings = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.06, 0.7), new THREE.MeshBasicMaterial({ color: s.col }));
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.6), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9 }));
+      const wings = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.04, 0.5), new THREE.MeshBasicMaterial({ color: s.col }));
       craft.add(body, wings);
       satGroup.add(craft);
 
       const cone = new THREE.Mesh(
-        new THREE.ConeGeometry(3.2, s.radius - RADIUS, 16, 1, true),
-        new THREE.MeshBasicMaterial({ color: s.col, transparent: true, opacity: 0.06, wireframe: true })
+        new THREE.ConeGeometry(2.2, s.radius - RADIUS, 16, 1, true),
+        new THREE.MeshBasicMaterial({ color: s.col, transparent: true, opacity: 0.07, wireframe: true })
       );
       satGroup.add(cone);
 
@@ -372,7 +401,7 @@ export default function AstralisGlobe({
       setHudCoords({
         mgrs: `13R ${Math.abs(cLat * 14 + 10)} ${Math.abs(cLon * 19 + 20)}`,
         latLon: `${Math.abs(cLat)}°${Math.abs(cLat * 3 % 60)}'N ${Math.abs(cLon)}°${Math.abs(cLon * 5 % 60)}'W`,
-        sector: `GLOBAL SECTOR ${Math.abs(cLat)}.50N ${Math.abs(cLon)}.79W | RECON ACTIVE`
+        sector: `GOD'S EYE // SECTOR ${Math.abs(cLat)}.50N ${Math.abs(cLon)}.79W | RECON ACTIVE`
       });
     };
 
@@ -391,10 +420,10 @@ export default function AstralisGlobe({
       animationFrameRef.current = requestAnimationFrame(animate);
 
       if (autoRotate && !isDragging) {
-        globeGroup.rotation.y += 0.0012;
+        globeGroup.rotation.y += 0.0015;
       }
       if (cloudsMeshRef.current) {
-        cloudsMeshRef.current.rotation.y += 0.0004;
+        cloudsMeshRef.current.rotation.y += 0.0006;
       }
 
       // Update Satellites
@@ -410,7 +439,7 @@ export default function AstralisGlobe({
         sat.cone.lookAt(x, y, z);
       });
 
-      // Project 2D City Labels (update every 2 frames for smooth performance)
+      // Project 2D City Labels
       frameCount++;
       if (frameCount % 2 === 0 && mountRef.current) {
         camera.getWorldPosition(cameraWorldPos);
@@ -421,7 +450,6 @@ export default function AstralisGlobe({
           tempVec.copy(city.hoverPos);
           tempVec.applyMatrix4(globeGroup.matrixWorld);
 
-          // Dot product between surface normal and camera vector to check front hemisphere
           const surfaceWorld = city.surfacePos.clone().applyMatrix4(globeGroup.matrixWorld);
           const dirToCamera = cameraWorldPos.clone().sub(surfaceWorld).normalize();
           const normal = surfaceWorld.clone().normalize();
@@ -448,6 +476,7 @@ export default function AstralisGlobe({
     };
     animate();
 
+    // Resize Handler
     const handleResize = () => {
       if (!mountRef.current) return;
       const w = mountRef.current.clientWidth;
@@ -461,23 +490,30 @@ export default function AstralisGlobe({
     return () => {
       cancelAnimationFrame(animationFrameRef.current);
       window.removeEventListener('resize', handleResize);
-      domElem.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      if (domElem) domElem.removeEventListener('mousedown', onMouseDown);
       if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
+        mountRef.current.innerHTML = '';
       }
       renderer.dispose();
     };
-  }, [accentColor, autoRotate]);
+  }, [flirMode, accentColor]);
 
   // Handle City Pin Click
-  const handleCityPinClick = useCallback((city) => {
+  const handleCityPinClick = (city) => {
+    if (globeGroupRef.current) {
+      const targetLonRad = THREE.MathUtils.degToRad(-city.lon - 90);
+      const targetLatRad = THREE.MathUtils.degToRad(city.lat * 0.4);
+      globeGroupRef.current.rotation.y = targetLonRad;
+      globeGroupRef.current.rotation.x = targetLatRad;
+    }
+
     setSelectedEntity({
-      callsign: `${city.id}-NODE`,
+      callsign: `${city.code}-GATE`,
       model: city.org,
-      status: `THREAT RISK: ${city.risk}% // ${city.sector}`,
-      route: `${city.name} [${city.code}] — ROUTING GATEWAY`,
+      status: `THREAT RISK: ${city.risk}% · SECTOR ${city.sector}`,
+      route: `${city.name.toUpperCase()} HUB -> GLOBAL BACKBONE`,
       lat: `${city.lat}° N`,
       lon: `${city.lon}° E`
     });
@@ -487,19 +523,19 @@ export default function AstralisGlobe({
         city: city.name,
         lat: city.lat,
         lon: city.lon,
-        country: city.name,
+        country: "Global Infrastructure",
         org: city.org,
         threat_risk: city.risk
       });
     }
-  }, [onSelectNode]);
+  };
 
   return (
-    <div className="relative w-full h-full min-h-[680px] rounded-3xl overflow-hidden hud-glass-panel border border-[#62C0F6]/25 select-none">
-      {/* Three.js Canvas Container */}
+    <div className="relative w-full h-full min-h-[720px] rounded-[28px] overflow-hidden bg-[#06080d] border border-white/[0.09] shadow-2xl select-none">
+      {/* 3D WebGL Canvas Viewport */}
       <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing z-0" />
 
-      {/* FLOATING 2D PINNED CITY LABELS OVER 3D GLOBE (Matching Alibaba 20 Screen) */}
+      {/* FLOATING 2D PINNED CITY LABELS OVER 3D GLOBE */}
       <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
         {projectedCities.map((city) => {
           if (!city.visible || city.screenX < 20 || city.screenY < 20) return null;
@@ -514,7 +550,7 @@ export default function AstralisGlobe({
                 transform: 'translate(-50%, -100%)'
               }}
             >
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#0E111A]/90 border border-white/20 hover:border-[#B2F601] shadow-2xl backdrop-blur-md">
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#0a0a0d]/90 border border-white/20 hover:border-[#B2F601] shadow-2xl backdrop-blur-md">
                 <span 
                   className="w-1.5 h-1.5 rounded-full shrink-0" 
                   style={{ backgroundColor: city.risk > 70 ? '#FF3366' : city.risk > 30 ? '#62C0F6' : '#B2F601' }}
@@ -526,7 +562,6 @@ export default function AstralisGlobe({
                   [{city.code}]
                 </span>
               </div>
-              {/* Leader tick indicator */}
               <div className="w-px h-2.5 bg-[#62C0F6]/60 mx-auto" />
             </div>
           );
@@ -546,104 +581,88 @@ export default function AstralisGlobe({
         </div>
 
         <div className="flex items-center gap-3 text-[11px] font-bold">
-          <span className="text-[#62C0F6] tracking-wider hidden md:inline">TOP SECRET // SI-TK // NOFORN</span>
+          <span className="text-[#62C0F6] tracking-wider hidden md:inline">GOD'S EYE // SI-TK // ORBITAL RECON</span>
           <span className="px-2 py-0.5 rounded bg-[#343645]/80 text-[#B2F601] border border-[#B2F601]/30">
             KH11-4180
           </span>
         </div>
       </div>
 
-      {/* TOP RIGHT: RECORDING STATUS & CONTROLS */}
+      {/* TOP RIGHT: CONTROLS & ZOOM BUTTONS */}
       <div className="absolute top-12 right-6 z-20 pointer-events-none flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2 text-[11px] font-bold">
+        <div className="flex items-center gap-2 text-[11px] font-bold font-mono-hud">
           <span className="w-2 h-2 rounded-full bg-[#FF3366] animate-pulse" />
-          <span className="text-slate-300">REC 2026-10-20 18:22 UTC</span>
+          <span className="text-slate-300">ORBITAL REC: LIVE</span>
         </div>
 
-        <div className="flex items-center gap-2 pt-1 pointer-events-auto">
+        <div className="flex items-center gap-1.5 pt-1 pointer-events-auto font-mono-hud">
+          {/* Zoom In */}
+          <button
+            onClick={() => handleZoom(-4)}
+            className="p-1.5 rounded-xl bg-black/70 hover:bg-white/[0.1] text-white border border-white/10 transition-all cursor-pointer shadow-lg"
+            title="Zoom In"
+          >
+            <ZoomIn className="w-3.5 h-3.5 text-[#62C0F6]" />
+          </button>
+
+          {/* Zoom Out */}
+          <button
+            onClick={() => handleZoom(4)}
+            className="p-1.5 rounded-xl bg-black/70 hover:bg-white/[0.1] text-white border border-white/10 transition-all cursor-pointer shadow-lg"
+            title="Zoom Out"
+          >
+            <ZoomOut className="w-3.5 h-3.5 text-[#62C0F6]" />
+          </button>
+
+          {/* Reset Camera */}
+          <button
+            onClick={handleResetCamera}
+            className="p-1.5 rounded-xl bg-black/70 hover:bg-white/[0.1] text-white border border-white/10 transition-all cursor-pointer shadow-lg"
+            title="Reset Perspective"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-[#B2F601]" />
+          </button>
+
+          {/* FLIR Mode Toggle */}
           <button
             onClick={() => setFlirMode(!flirMode)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-lg ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-lg cursor-pointer ${
               flirMode 
-                ? 'bg-[#FF3366] text-white border-red-400 glow-crimson animate-pulse' 
-                : 'bg-[#343645]/80 text-[#B2F601] border-[#B2F601]/40 hover:bg-[#B2F601]/20'
+                ? 'bg-[#FF3366] text-white border-red-400 animate-pulse' 
+                : 'bg-black/70 text-[#B2F601] border-white/10 hover:border-[#B2F601]/40'
             }`}
           >
             <Flame className="w-3.5 h-3.5" />
-            <span>{flirMode ? "FLIR ON (THERMAL)" : "FLIR MODE"}</span>
+            <span>{flirMode ? "THERMAL ON" : "FLIR"}</span>
           </button>
 
+          {/* Auto Rotate Toggle */}
           <button
             onClick={() => setAutoRotate(!autoRotate)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
               autoRotate 
                 ? 'bg-[#62C0F6]/20 border-[#62C0F6]/50 text-[#62C0F6]' 
-                : 'bg-[#343645]/80 border-white/[0.1] text-slate-400'
+                : 'bg-black/70 border-white/10 text-slate-400'
             }`}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            ROTATION
           </button>
         </div>
       </div>
 
-      {/* FLIR PARAMETERS SIDEBAR */}
-      {flirMode && (
-        <div className="absolute right-6 top-32 z-20 p-4 rounded-2xl hud-glass-panel border-red-500/40 text-xs text-slate-200 space-y-3 w-56 pointer-events-auto">
-          <div className="flex items-center justify-between text-[#FF3366] font-bold border-b border-red-500/20 pb-1.5">
-            <span className="flex items-center gap-1.5">
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>FLIR PARAMETERS</span>
-            </span>
-            <span className="text-[10px]">INFRARED</span>
-          </div>
-
-          <div className="space-y-2 text-[11px]">
-            <div>
-              <div className="flex justify-between text-slate-400 mb-1">
-                <span>Sensitivity:</span>
-                <span className="text-white font-bold">{flirSensitivity}%</span>
-              </div>
-              <input
-                type="range"
-                min="20"
-                max="100"
-                value={flirSensitivity}
-                onChange={(e) => setFlirSensitivity(e.target.value)}
-                className="w-full accent-red-500"
-              />
-            </div>
-
-            <div>
-              <div className="flex justify-between text-slate-400 mb-1">
-                <span>Thermal Bloom:</span>
-                <span className="text-white font-bold">{flirBloom}%</span>
-              </div>
-              <input
-                type="range"
-                min="10"
-                max="100"
-                value={flirBloom}
-                onChange={(e) => setFlirBloom(e.target.value)}
-                className="w-full accent-red-500"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* CENTER COCKPIT RETICLE CROSSHAIR */}
       <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
-        <div className="relative w-64 h-64 border border-white/[0.07] rounded-full flex items-center justify-center">
-          <div className="absolute inset-4 border border-dashed border-[#62C0F6]/20 rounded-full" />
-          <Crosshair className="w-8 h-8 text-[#62C0F6]/30" />
-          <div className="absolute bottom-4 text-[9px] font-bold text-[#B2F601] tracking-widest uppercase">
-            TARGET SECTOR LOCKED // NORMAL
+        <div className="relative w-72 h-72 border border-white/[0.08] rounded-full flex items-center justify-center">
+          <div className="absolute inset-6 border border-dashed border-[#62C0F6]/20 rounded-full animate-spin-slow" />
+          <Crosshair className="w-10 h-10 text-[#62C0F6]/30" />
+          <div className="absolute bottom-5 text-[9px] font-bold text-[#B2F601] tracking-widest uppercase font-mono-hud">
+            GOD'S EYE // TARGET SECTOR LOCKED
           </div>
         </div>
       </div>
 
       {/* SELECTED ENTITY TOOLTIP */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-12 z-20 p-2.5 rounded-xl bg-[#0E111A]/90 border border-[#62C0F6]/40 text-xs text-white backdrop-blur-xl shadow-2xl pointer-events-auto">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-16 z-20 p-3 rounded-2xl bg-[#0a0a0d]/92 border border-[#62C0F6]/40 text-xs text-white backdrop-blur-xl shadow-2xl pointer-events-auto font-mono-hud">
         <div className="font-extrabold text-[#B2F601] flex items-center gap-1.5">
           <Plane className="w-3.5 h-3.5 text-[#62C0F6]" />
           <span>{selectedEntity.callsign}</span>
@@ -654,25 +673,28 @@ export default function AstralisGlobe({
       </div>
 
       {/* BOTTOM LEFT: MGRS & EXACT COORDINATES */}
-      <div className="absolute bottom-16 left-6 z-20 pointer-events-none space-y-1">
-        <div className="text-xs font-bold text-[#62C0F6] flex items-center gap-1.5 font-mono-hud">
+      <div className="absolute bottom-16 left-6 z-20 pointer-events-none space-y-1 font-mono-hud">
+        <div className="text-xs font-bold text-[#62C0F6] flex items-center gap-1.5">
           <Compass className="w-3.5 h-3.5 text-[#B2F601]" />
           <span>MGRS: {hudCoords.mgrs}</span>
         </div>
-        <div className="text-[11px] text-slate-300 font-bold font-mono-hud">{hudCoords.latLon}</div>
-        <div className="text-[9px] text-slate-500 font-mono-hud">[High-Precision Geodesic Grid]</div>
+        <div className="text-[11px] text-slate-300 font-bold">{hudCoords.latLon}</div>
+        <div className="text-[9px] text-slate-500">{hudCoords.sector}</div>
       </div>
 
-      {/* CENTER BOTTOM: AI CONSOLE MIC PILL */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 p-1.5 rounded-2xl bg-[#0E111A]/90 border border-white/[0.12] backdrop-blur-2xl shadow-2xl">
-        <button className="px-3 py-1.5 rounded-xl bg-[#343645]/70 hover:bg-[#62C0F6]/20 text-[11px] font-bold text-slate-200 transition-all flex items-center gap-1">
-          <MapPin className="w-3.5 h-3.5 text-[#B2F601]" />
-          <span>LOCATION</span>
+      {/* CENTER BOTTOM: GOD'S EYE RECON STATUS PILL */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 p-1.5 rounded-2xl bg-[#0a0a0d]/92 border border-white/[0.12] backdrop-blur-2xl shadow-2xl font-mono-hud text-xs">
+        <button 
+          onClick={handleResetCamera}
+          className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-[#62C0F6]/20 text-[11px] font-bold text-slate-200 transition-all flex items-center gap-1 cursor-pointer"
+        >
+          <GlobeIcon className="w-3.5 h-3.5 text-[#B2F601]" />
+          <span>GLOBAL RECON</span>
         </button>
 
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#62C0F6]/15 border border-[#62C0F6]/30 text-xs font-bold text-[#62C0F6]">
-          <Mic className="w-3.5 h-3.5 text-[#B2F601] animate-pulse" />
-          <span className="tracking-wider">AI RECON ACTIVE // LISTENING</span>
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#62C0F6]/15 border border-[#62C0F6]/30 font-bold text-[#62C0F6]">
+          <Eye className="w-3.5 h-3.5 text-[#B2F601] animate-pulse" />
+          <span className="tracking-wider">GOD'S EYE 3D // SATELLITE RADAR LOCK</span>
           <div className="flex items-center gap-0.5 h-3">
             <span className="w-0.5 h-full bg-[#B2F601] animate-pulse" />
             <span className="w-0.5 h-2 bg-[#62C0F6]" />
@@ -680,9 +702,12 @@ export default function AstralisGlobe({
           </div>
         </div>
 
-        <button className="px-3 py-1.5 rounded-xl bg-[#343645]/70 hover:bg-[#62C0F6]/20 text-[11px] font-bold text-slate-200 transition-all flex items-center gap-1">
-          <Eye className="w-3.5 h-3.5 text-[#62C0F6]" />
-          <span>PRESETS</span>
+        <button 
+          onClick={() => setFlirMode(!flirMode)}
+          className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-[#62C0F6]/20 text-[11px] font-bold text-slate-200 transition-all flex items-center gap-1 cursor-pointer"
+        >
+          <Flame className="w-3.5 h-3.5 text-[#FF3366]" />
+          <span>THERMAL</span>
         </button>
       </div>
     </div>
