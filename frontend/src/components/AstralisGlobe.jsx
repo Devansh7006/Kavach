@@ -56,7 +56,7 @@ export default function AstralisGlobe({
   const [flirMode, setFlirMode] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
   const [projectedCities, setProjectedCities] = useState([]);
-  const [zoomLevel, setZoomLevel] = useState(46);
+  const [zoomLevel, setZoomLevel] = useState(40);
   
   const [selectedEntity, setSelectedEntity] = useState({
     callsign: "NB521",
@@ -94,17 +94,17 @@ export default function AstralisGlobe({
   // Zoom handlers
   const handleZoom = (delta) => {
     if (!cameraRef.current) return;
-    const newDist = Math.max(26, Math.min(80, cameraRef.current.position.z + delta));
+    const newDist = Math.max(22, Math.min(75, cameraRef.current.position.z + delta));
     cameraRef.current.position.z = newDist;
     setZoomLevel(newDist);
   };
 
   const handleResetCamera = () => {
     if (!cameraRef.current || !globeGroupRef.current) return;
-    cameraRef.current.position.set(0, 0, 46);
+    cameraRef.current.position.set(0, 0, 40);
     cameraRef.current.lookAt(0, 0, 0);
     globeGroupRef.current.rotation.set(0.1, 1.85, THREE.MathUtils.degToRad(-15));
-    setZoomLevel(46);
+    setZoomLevel(40);
   };
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function AstralisGlobe({
     
     // Perfectly centered perspective camera looking directly at (0, 0, 0)
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1500);
-    camera.position.set(0, 0, 46);
+    camera.position.set(0, 0, 40);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -172,23 +172,23 @@ export default function AstralisGlobe({
 
     // 2. High-Precision Tactical Lighting (Sun, Ambient, Rim)
     const sunLight = new THREE.DirectionalLight(0xffffff, 2.8);
-    sunLight.position.set(45, 25, 45);
+    sunLight.position.set(35, 20, 35);
     scene.add(sunLight);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
     scene.add(ambientLight);
 
     const fillLight = new THREE.DirectionalLight(0x62C0F6, 1.2);
-    fillLight.position.set(-45, -15, 30);
+    fillLight.position.set(-35, -12, 25);
     scene.add(fillLight);
 
     const rimLight = new THREE.DirectionalLight(new THREE.Color(accentColor), 1.4);
-    rimLight.position.set(0, -35, -30);
+    rimLight.position.set(0, -25, -25);
     scene.add(rimLight);
 
-    // 3. Realistic NASA Earth Spheres (RADIUS = 15.8 fits full globe in 720px)
+    // 3. Realistic NASA Earth Spheres (RADIUS = 10.0 perfectly scaled inside viewport)
     const textureLoader = new THREE.TextureLoader();
-    const RADIUS = 15.8;
+    const RADIUS = 10.0;
 
     const dayTexture = textureLoader.load('/textures/earth_day.jpg');
     const normalTexture = textureLoader.load('/textures/earth_normal.jpg');
@@ -213,7 +213,7 @@ export default function AstralisGlobe({
     earthMeshRef.current = earthMesh;
 
     // Atmospheric Cloud Layer with Real Alpha Transparency
-    const cloudsGeo = new THREE.SphereGeometry(RADIUS * 1.016, 64, 64);
+    const cloudsGeo = new THREE.SphereGeometry(RADIUS * 1.018, 64, 64);
     const cloudsMat = new THREE.MeshStandardMaterial({
       map: cloudsTexture,
       transparent: true,
@@ -226,7 +226,7 @@ export default function AstralisGlobe({
     cloudsMeshRef.current = cloudsMesh;
 
     // Atmospheric Rayleigh Limb Scattering Halo
-    const atmosphereGeo = new THREE.SphereGeometry(RADIUS * 1.14, 64, 64);
+    const atmosphereGeo = new THREE.SphereGeometry(RADIUS * 1.15, 64, 64);
     const atmosphereMat = new THREE.ShaderMaterial({
       uniforms: {
         glowColor: { value: new THREE.Color(accentColor) }
@@ -242,7 +242,7 @@ export default function AstralisGlobe({
         varying vec3 vNormal;
         uniform vec3 glowColor;
         void main() {
-          float intensity = pow(0.68 - dot(vNormal, vec3(0, 0, 1.0)), 2.4);
+          float intensity = pow(0.68 - dot(vNormal, vec3(0, 0, 1.0)), 2.2);
           gl_FragColor = vec4(glowColor, 1.0) * intensity * 1.1;
         }
       `,
@@ -257,11 +257,11 @@ export default function AstralisGlobe({
     // 4. City Markers with 3D Leader Pins (Alibaba 20 Screen)
     const cityObjects = PINNED_CITIES.map((city) => {
       const surfacePos = latLonToVector3(city.lat, city.lon, RADIUS);
-      const hoverPos = latLonToVector3(city.lat, city.lon, RADIUS + 1.8);
+      const hoverPos = latLonToVector3(city.lat, city.lon, RADIUS + 1.25);
 
       // Base dot on earth surface
       const baseMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.24, 10, 10),
+        new THREE.SphereGeometry(0.18, 10, 10),
         new THREE.MeshBasicMaterial({ color: city.risk > 70 ? 0xFF3366 : city.risk > 30 ? 0x62C0F6 : 0xB2F601 })
       );
       baseMesh.position.copy(surfacePos);
@@ -280,7 +280,7 @@ export default function AstralisGlobe({
 
       // Top pin ring
       const topRing = new THREE.Mesh(
-        new THREE.RingGeometry(0.15, 0.28, 12),
+        new THREE.RingGeometry(0.12, 0.22, 12),
         new THREE.MeshBasicMaterial({ color: 0x62C0F6, side: THREE.DoubleSide })
       );
       topRing.position.copy(hoverPos);
@@ -301,7 +301,7 @@ export default function AstralisGlobe({
     for (let i = 0; i < flightCount; i++) {
       const lat = (Math.random() * 80) - 20;
       const lon = (Math.random() * 360) - 180;
-      const vec = latLonToVector3(lat, lon, RADIUS + 0.18);
+      const vec = latLonToVector3(lat, lon, RADIUS + 0.12);
       flightPos[i * 3] = vec.x;
       flightPos[i * 3 + 1] = vec.y;
       flightPos[i * 3 + 2] = vec.z;
@@ -309,7 +309,7 @@ export default function AstralisGlobe({
     flightGeo.setAttribute('position', new THREE.BufferAttribute(flightPos, 3));
     const flightMat = new THREE.PointsMaterial({
       color: 0xffffff,
-      size: 0.6,
+      size: 0.45,
       transparent: true,
       opacity: 0.85
     });
@@ -331,7 +331,7 @@ export default function AstralisGlobe({
       const v2 = latLonToVector3(r.dst.lat, r.dst.lon, RADIUS);
       const mid = new THREE.Vector3().addVectors(v1, v2).multiplyScalar(0.5);
       const dist = v1.distanceTo(v2);
-      mid.normalize().multiplyScalar(RADIUS + dist * 0.35);
+      mid.normalize().multiplyScalar(RADIUS + dist * 0.26);
 
       const curve = new THREE.QuadraticBezierCurve3(v1, mid, v2);
       const pts = curve.getPoints(45);
@@ -340,7 +340,7 @@ export default function AstralisGlobe({
       globeGroup.add(new THREE.Line(arcGeo, arcMat));
 
       [v1, v2].forEach((v) => {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), new THREE.MeshBasicMaterial({ color: r.col }));
+        const b = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), new THREE.MeshBasicMaterial({ color: r.col }));
         b.position.copy(v);
         globeGroup.add(b);
       });
@@ -349,9 +349,9 @@ export default function AstralisGlobe({
     // 7. Orbital Satellites & Space Stations (ISS NORAD 25544)
     const satGroup = new THREE.Group();
     const REAL_ORBITALS = [
-      { name: "ISS (ZARYA) NORAD 25544", radius: RADIUS + 3.8, speed: 0.007, inc: 0.85, col: 0xB2F601, alt: "420 km", vel: "7.66 km/s" },
-      { name: "SENTINEL-1A SAR RADAR", radius: RADIUS + 6.2, speed: 0.005, inc: 1.25, col: 0x62C0F6, alt: "693 km", vel: "7.51 km/s" },
-      { name: "KH11-4180 DEFENSE ORBIT", radius: RADIUS + 9.8, speed: 0.0025, inc: 0.45, col: 0xFF3366, alt: "12,400 km", vel: "4.82 km/s" }
+      { name: "ISS (ZARYA) NORAD 25544", radius: RADIUS + 2.4, speed: 0.007, inc: 0.85, col: 0xB2F601, alt: "420 km", vel: "7.66 km/s" },
+      { name: "SENTINEL-1A SAR RADAR", radius: RADIUS + 4.0, speed: 0.005, inc: 1.25, col: 0x62C0F6, alt: "693 km", vel: "7.51 km/s" },
+      { name: "KH11-4180 DEFENSE ORBIT", radius: RADIUS + 6.2, speed: 0.0025, inc: 0.45, col: 0xFF3366, alt: "12,400 km", vel: "4.82 km/s" }
     ];
 
     const satItems = REAL_ORBITALS.map((s) => {
@@ -364,13 +364,13 @@ export default function AstralisGlobe({
       satGroup.add(line);
 
       const craft = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.6), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9 }));
-      const wings = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.04, 0.5), new THREE.MeshBasicMaterial({ color: s.col }));
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.22, 0.42), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9 }));
+      const wings = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.03, 0.35), new THREE.MeshBasicMaterial({ color: s.col }));
       craft.add(body, wings);
       satGroup.add(craft);
 
       const cone = new THREE.Mesh(
-        new THREE.ConeGeometry(2.2, s.radius - RADIUS, 16, 1, true),
+        new THREE.ConeGeometry(1.6, s.radius - RADIUS, 16, 1, true),
         new THREE.MeshBasicMaterial({ color: s.col, transparent: true, opacity: 0.07, wireframe: true })
       );
       satGroup.add(cone);
@@ -531,7 +531,7 @@ export default function AstralisGlobe({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[720px] rounded-[28px] overflow-hidden bg-[#06080d] border border-white/[0.09] shadow-2xl select-none">
+    <div className="relative w-full h-full min-h-[520px] max-h-[620px] rounded-[28px] overflow-hidden bg-[#06080d] border border-white/[0.09] shadow-2xl select-none">
       {/* 3D WebGL Canvas Viewport */}
       <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing z-0" />
 
@@ -652,10 +652,10 @@ export default function AstralisGlobe({
 
       {/* CENTER COCKPIT RETICLE CROSSHAIR */}
       <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
-        <div className="relative w-72 h-72 border border-white/[0.08] rounded-full flex items-center justify-center">
+        <div className="relative w-56 h-56 border border-white/[0.08] rounded-full flex items-center justify-center">
           <div className="absolute inset-6 border border-dashed border-[#62C0F6]/20 rounded-full animate-spin-slow" />
-          <Crosshair className="w-10 h-10 text-[#62C0F6]/30" />
-          <div className="absolute bottom-5 text-[9px] font-bold text-[#B2F601] tracking-widest uppercase font-mono-hud">
+          <Crosshair className="w-8 h-8 text-[#62C0F6]/30" />
+          <div className="absolute bottom-4 text-[9px] font-bold text-[#B2F601] tracking-widest uppercase font-mono-hud">
             GOD'S EYE // TARGET SECTOR LOCKED
           </div>
         </div>

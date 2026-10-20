@@ -275,9 +275,9 @@ export default function App() {
       </div>
 
       {/* ============================================================ */}
-      {/* MAIN VIEWPORT CONTAINER (pt-36 prevents any header overlap)   */}
+      {/* MAIN VIEWPORT CONTAINER (pt-20 gives exact 12px clearance below floating navbar) */}
       {/* ============================================================ */}
-      <main className="relative z-10 max-w-[1800px] mx-auto pt-36 pb-8 px-3 sm:px-6 space-y-5">
+      <main className="relative z-10 max-w-[1800px] mx-auto pt-20 pb-4 px-3 sm:px-6 space-y-3">
         {/* REACTIVE SYSTEM STATUS ALERT BANNER */}
         <AnimatePresence mode="wait">
           {threatState === 'LEGIT' && (

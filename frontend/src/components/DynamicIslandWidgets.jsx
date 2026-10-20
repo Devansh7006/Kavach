@@ -14,44 +14,52 @@ import {
  * - Large number: "48,304" with green tag "+1,240 / 1.24%"
  * - Glowing neon green sparkline wave with dashed baseline
  */
-export function ThreatSparklineCard({ totalSignals = "48,304", delta = "+1,240", pct = "1.24%", onExplore = null }) {
+export function ThreatSparklineCard({ 
+  totalSignals = "89,412", 
+  delta = "+1,429", 
+  pct = "11.8 ms", 
+  title = "KAVACH SENTINEL",
+  subtitle = "Neural Defense Matrix",
+  updatedText = "Live Telemetry",
+  onExplore = null 
+}) {
   return (
     <div 
       onClick={onExplore}
-      className="p-5 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl hover:border-[#B2F601]/40 transition-all cursor-pointer relative overflow-hidden group select-none"
+      className="p-4 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl hover:border-[#B2F601]/40 transition-all cursor-pointer relative overflow-hidden group select-none"
     >
       {/* Top Header */}
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#FF3366]/15 border border-[#FF3366]/40 flex items-center justify-center text-[#FF3366]">
-            <Shield className="w-4 h-4 fill-current" />
+      <div className="flex items-start justify-between mb-1.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-[#FF3366]/15 border border-[#FF3366]/40 flex items-center justify-center text-[#FF3366]">
+            <Shield className="w-3.5 h-3.5 fill-current" />
           </div>
           <div>
-            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">KAVACH SENTINEL</div>
-            <div className="text-xs font-bold text-white font-body-clean">Neural Defense Matrix</div>
+            <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{title}</div>
+            <div className="text-xs font-bold text-white font-body-clean">{subtitle}</div>
           </div>
         </div>
 
         <div className="text-right">
-          <div className="text-[9px] text-slate-500">updated</div>
-          <div className="text-[10px] font-bold text-slate-400">2m ago</div>
+          <div className="text-[8px] text-slate-500">status</div>
+          <div className="text-[9px] font-bold text-[#B2F601]">{updatedText}</div>
         </div>
       </div>
 
       {/* Primary Value & Green Growth Pill */}
-      <div className="flex items-baseline gap-3 my-2">
-        <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-aveton">
+      <div className="flex items-baseline gap-2.5 my-1.5">
+        <span className="text-xl sm:text-2xl font-extrabold text-white tracking-tight font-aveton">
           {totalSignals}
         </span>
-        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#B2F601]/15 text-[#B2F601] text-[10px] font-bold border border-[#B2F601]/30">
-          <TrendingUp className="w-3 h-3" />
+        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#B2F601]/15 text-[#B2F601] text-[9px] font-bold border border-[#B2F601]/30">
+          <TrendingUp className="w-2.5 h-2.5" />
           <span>{delta}</span>
-          <span className="text-[9px] opacity-80">({pct})</span>
+          <span className="text-[8px] opacity-80">({pct})</span>
         </div>
       </div>
 
       {/* Glowing Neon Green Sparkline Wave (Exact from Reference) */}
-      <div className="relative h-14 w-full mt-1">
+      <div className="relative h-12 w-full mt-1">
         {/* Subtle Horizontal Dashed Baseline */}
         <div className="absolute top-1/2 left-0 right-0 border-b border-dashed border-white/10" />
 
