@@ -6,7 +6,7 @@ import {
   FileSearch, Download, ExternalLink, Cpu, Eye, BookOpen, Layers
 } from 'lucide-react';
 
-export default function VirusTotalHexTab({ onVerdictChange }) {
+export default function VirusTotalHexTab({ onVerdictChange, onLogAudit }) {
   const [file, setFile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
@@ -75,10 +75,35 @@ export default function VirusTotalHexTab({ onVerdictChange }) {
       if (onVerdictChange) {
         onVerdictChange(data.is_tampered ? 'THREAT' : 'LEGIT');
       }
+
+      if (onLogAudit) {
+        onLogAudit({
+          module: "HEX/VT",
+          action: "INSPECTED",
+          target: targetFile.name,
+          verdict: data.is_tampered ? "⚠️ MALICIOUS / STEGANOGRAPHY DETECTED" : "✅ CLEAN FILE INTEGRITY VERIFIED",
+          status: data.is_tampered ? "THREAT" : "LEGIT",
+          details: `SHA-256: ${data.hashes?.sha256?.slice(0, 16)}... | Magic Bytes: ${data.magic_bytes} | VT Engine Ratio: ${data.virustotal_ratio}`
+        });
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleHexSearchChange = (val) => {
+    setHexFilter(val);
+    if (val.trim().length >= 2 && onLogAudit) {
+      onLogAudit({
+        module: "HEX/VT",
+        action: "SEARCH QUERY",
+        target: `Hex Query: "${val}"`,
+        verdict: `BYTE PATTERN FILTER APPLIED`,
+        status: "INFO",
+        details: `Inspecting 512-byte raw hex stream & ASCII translation`
+      });
     }
   };
 
@@ -419,7 +444,7 @@ export default function VirusTotalHexTab({ onVerdictChange }) {
                         type="text"
                         placeholder="Search byte hex or ASCII..."
                         value={hexFilter}
-                        onChange={(e) => setHexFilter(e.target.value)}
+                        onChange={(e) => handleHexSearchChange(e.target.value)}
                         className="w-full bg-black/60 border border-white/10 rounded-xl pl-8 pr-3 py-1 text-xs font-mono-hud text-white placeholder-slate-500 focus:outline-none focus:border-[#62C0F6]"
                       />
                     </div>

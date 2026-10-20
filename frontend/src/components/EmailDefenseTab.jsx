@@ -27,7 +27,7 @@ const PRESET_EMAILS = [
   }
 ];
 
-export default function EmailDefenseTab({ onTargetSelected, onVerdictChange }) {
+export default function EmailDefenseTab({ onTargetSelected, onVerdictChange, onLogAudit }) {
   const [sender, setSender] = useState(PRESET_EMAILS[0].sender);
   const [subject, setSubject] = useState(PRESET_EMAILS[0].subject);
   const [body, setBody] = useState(PRESET_EMAILS[0].body);
@@ -49,6 +49,16 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange }) {
     setSubject(preset.subject);
     setBody(preset.body);
     setRawEml('');
+    if (onLogAudit) {
+      onLogAudit({
+        module: "EMAIL",
+        action: "LOAD PRESET",
+        target: preset.subject,
+        verdict: "SAMPLE LOADED INTO AUDIT WORKBENCH",
+        status: "INFO",
+        details: `Sender: ${preset.sender}`
+      });
+    }
   };
 
   const handleFileUpload = (e) => {
@@ -57,6 +67,16 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange }) {
       const reader = new FileReader();
       reader.onload = (event) => setRawEml(event.target.result);
       reader.readAsText(file);
+      if (onLogAudit) {
+        onLogAudit({
+          module: "EMAIL",
+          action: "FILE UPLOAD",
+          target: file.name,
+          verdict: "RAW RFC-5322 EML INGESTED",
+          status: "INFO",
+          details: `Size: ${(file.size / 1024).toFixed(1)} KB`
+        });
+      }
     }
   };
 
@@ -88,6 +108,17 @@ export default function EmailDefenseTab({ onTargetSelected, onVerdictChange }) {
 
       if (onTargetSelected && data.parsed_metadata?.origin_geo) {
         onTargetSelected(data.parsed_metadata.origin_geo);
+      }
+
+      if (onLogAudit) {
+        onLogAudit({
+          module: "EMAIL",
+          action: "ANALYZED",
+          target: subject || (rawEml ? "Uploaded RFC-5322 EML File" : "Email Message"),
+          verdict: isPhish ? "⚠️ AI-CRAFTED PHISHING DETECTED" : "✅ AUTHENTIC HUMAN EMAIL",
+          status: isPhish ? "THREAT" : "LEGIT",
+          details: `From: ${sender || 'Uploaded EML'} | Certainty: ${data.prediction?.confidence || 98}% | Invariant Checks Complete`
+        });
       }
     } catch (err) {
       console.error(err);

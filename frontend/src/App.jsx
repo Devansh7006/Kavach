@@ -15,6 +15,7 @@ import AudioForensicsTab from './components/AudioForensicsTab';
 import VirusTotalHexTab from './components/VirusTotalHexTab';
 import DossierExportTab from './components/DossierExportTab';
 import SpartanShieldLogo from './components/SpartanShieldLogo';
+import ForensicAuditHistory from './components/ForensicAuditHistory';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('ASTRALIS');
@@ -34,13 +35,106 @@ export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date().toUTCString());
   const [uptimeSeconds, setUptimeSeconds] = useState(0);
   const [telemetry, setTelemetry] = useState(null);
-  const [terminalLogs, setTerminalLogs] = useState([
-    "[SYSTEM] KAVACH DYNAMIC COMMAND ISLAND ENGAGED // AURA 3D ACTIVE",
-    "[ORBIT] NORAD 25544 (ISS) KEPLERIAN TELEMETRY SYNCED (7.66 KM/S)",
-    "[RFC-5322] 100-EMAIL BASELINE MATRIX READY // STRATIFIED CV ACCURACY 98.4%",
-    "[AMPED-5] MULTI-SPECTRAL ELA COMPRESSION DIFFERENTIAL CALIBRATED",
-    "[LIBROSA] 13-BAND ACOUSTIC MFCC FORMANT VECTOR INITIALIZED"
+
+  // Structured Chronological Audit Trail of Things Searched & Analyzed
+  const [auditLogs, setAuditLogs] = useState([
+    {
+      id: "LOG-01",
+      timestamp: "19:30:15",
+      module: "EMAIL",
+      action: "ANALYZED",
+      target: "URGENT: Microsoft 365 Account Deactivation Warning",
+      verdict: "⚠️ AI-CRAFTED PHISHING DETECTED",
+      status: "THREAT",
+      details: "Sender: security-alert@micros0ft-support-portal.com | Certainty: 98.4% | RFC-5322 Invariant Violation"
+    },
+    {
+      id: "LOG-02",
+      timestamp: "19:28:42",
+      module: "IMAGE",
+      action: "ANALYZED",
+      target: "spliced_evidence.jpg (800x600)",
+      verdict: "⚠️ AI-GENERATED (SYNTHETIC)",
+      status: "THREAT",
+      details: "Diffusion Latent Model v6 | ELA Discrepancy: 88% | Sensor Noise Variance: 3.42"
+    },
+    {
+      id: "LOG-03",
+      timestamp: "19:26:10",
+      module: "HEX/VT",
+      action: "INSPECTED",
+      target: "tampered_stego_evidence.jpg",
+      verdict: "⚠️ STEGANOGRAPHY DETECTED",
+      status: "THREAT",
+      details: "SHA-256: d8f3a9b2... | Hidden encrypted payload appended past JPEG End-Of-File marker FF D9"
+    },
+    {
+      id: "LOG-04",
+      timestamp: "19:24:05",
+      module: "VIDEO",
+      action: "ANALYZED",
+      target: "suspected_deepfake_broadcast.mp4",
+      verdict: "⚠️ AI DEEPFAKE (FACE-SWAP)",
+      status: "THREAT",
+      details: "120 Frames @ 30 FPS | Temporal Optical Flow: Unstable Synthetic Jitter (84.6% Conf)"
+    },
+    {
+      id: "LOG-05",
+      timestamp: "19:22:18",
+      module: "AUDIO",
+      action: "ANALYZED",
+      target: "executive_voice_note_clone.wav",
+      verdict: "⚠️ AI VOICE CLONE (SYNTHETIC)",
+      status: "THREAT",
+      details: "13-Band Librosa MFCC Formants | ElevenLabs Vocoder Phase Jitter Detected (88.4% Conf)"
+    },
+    {
+      id: "LOG-06",
+      timestamp: "19:19:50",
+      module: "HEX/VT",
+      action: "INSPECTED",
+      target: "disguised_polyglot.jpg",
+      verdict: "⚠️ POLYGLOT MALWARE DETECTED",
+      status: "THREAT",
+      details: "MZ Executable Header masked with .jpg extension | 62/72 VirusTotal Engines Flagged"
+    },
+    {
+      id: "LOG-07",
+      timestamp: "19:15:33",
+      module: "RECON",
+      action: "TARGET LOCK",
+      target: "Moscow Uplink (55.75° N, 37.61° E)",
+      verdict: "⚠️ CRITICAL SECTOR 1 (94% RISK)",
+      status: "THREAT",
+      details: "Bulletproof C2 Relay Vector | Intercept Status: Locked by KAVACH Sentinel"
+    },
+    {
+      id: "LOG-08",
+      timestamp: "19:10:12",
+      module: "EMAIL",
+      action: "ANALYZED",
+      target: "Engineering Sprint Planning - Q4 Roadmap Review",
+      verdict: "✅ AUTHENTIC HUMAN EMAIL",
+      status: "LEGIT",
+      details: "Sender: alex.rivera@technology-innovations.com | SPF: PASS | DKIM: PASS | Trust: 96.8%"
+    }
   ]);
+
+  const handleLogAudit = (newEvent) => {
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    const logItem = {
+      id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      timestamp: timeStr,
+      ...newEvent
+    };
+
+    setAuditLogs(prev => [logItem, ...prev.slice(0, 49)]);
+  };
+
+  const handleClearLogs = () => {
+    setAuditLogs([]);
+  };
 
   // Measure Real Network Ping against Backend
   useEffect(() => {
@@ -88,10 +182,28 @@ export default function App() {
 
   const handleTargetSelection = (target) => {
     setActiveTarget(target);
-    setTerminalLogs(prev => [
-      `[${new Date().toLocaleTimeString()}] TARGET LOCK ENGAGED: ${target.city || 'NODE'} (${target.lat}, ${target.lon}) // GEOSPATIAL VECTOR SEALED`,
-      ...prev.slice(0, 5)
-    ]);
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+    setAuditLogs(prev => {
+      // Avoid spamming duplicate logs if user clicks the same city
+      if (prev.length > 0 && prev[0].target.includes(target.city || 'NODE')) {
+        return prev;
+      }
+      const newLog = {
+        id: `LOG-${Date.now()}`,
+        timestamp: timeStr,
+        module: "RECON",
+        action: "TARGET LOCK",
+        target: `${target.city || 'Geospatial Sector'} (${target.lat}, ${target.lon})`,
+        verdict: (target.threat_risk || 0) > 70 
+          ? `⚠️ HIGH RISK TARGET (${target.threat_risk}%)` 
+          : `✅ NOMINAL NODE (${target.threat_risk || 10}%)`,
+        status: (target.threat_risk || 0) > 70 ? "THREAT" : "LEGIT",
+        details: target.org || target.country || "God's Eye Orbital Recon Intercept"
+      };
+      return [newLog, ...prev.slice(0, 49)];
+    });
   };
 
   const formatUptime = (secs) => {
@@ -338,6 +450,7 @@ export default function App() {
                 onSelectNode={handleTargetSelection}
                 telemetry={telemetry}
                 realPing={realPing}
+                onLogAudit={handleLogAudit}
               />
             </motion.div>
           )}
@@ -346,6 +459,7 @@ export default function App() {
             <EmailDefenseTab 
               onTargetSelected={handleTargetSelection} 
               onVerdictChange={setThreatState}
+              onLogAudit={handleLogAudit}
             />
           )}
 
@@ -353,19 +467,29 @@ export default function App() {
             <ImageForensicsTab 
               onTargetSelected={handleTargetSelection}
               onVerdictChange={setThreatState}
+              onLogAudit={handleLogAudit}
             />
           )}
 
           {activeTab === 'VIDEO' && (
-            <VideoForensicsTab onVerdictChange={setThreatState} />
+            <VideoForensicsTab 
+              onVerdictChange={setThreatState} 
+              onLogAudit={handleLogAudit}
+            />
           )}
 
           {activeTab === 'AUDIO' && (
-            <AudioForensicsTab onVerdictChange={setThreatState} />
+            <AudioForensicsTab 
+              onVerdictChange={setThreatState} 
+              onLogAudit={handleLogAudit}
+            />
           )}
 
           {activeTab === 'VIRUSTOTAL' && (
-            <VirusTotalHexTab onVerdictChange={setThreatState} />
+            <VirusTotalHexTab 
+              onVerdictChange={setThreatState} 
+              onLogAudit={handleLogAudit}
+            />
           )}
 
           {activeTab === 'DOSSIER' && (
@@ -373,25 +497,12 @@ export default function App() {
           )}
         </div>
 
-        {/* REAL-TIME TERMINAL LOG STRIP (CYBER HUD FOOTER) */}
-        <div className="p-4 rounded-[28px] bg-[#0a0a0d] border border-white/[0.09] shadow-2xl font-mono-hud text-xs space-y-2 select-none">
-          <div className="flex items-center justify-between border-b border-white/[0.07] pb-2">
-            <span className="flex items-center gap-2 text-[#62C0F6] font-bold text-xs">
-              <Terminal className="w-3.5 h-3.5 text-[#B2F601]" />
-              <span>REAL-TIME AUDIT BUFFER & TELEMETRY STREAM</span>
-            </span>
-            <span className="text-[10px] text-slate-400 font-normal">UTC: {currentTime}</span>
-          </div>
-
-          <div className="space-y-1 text-[11px]">
-            {terminalLogs.map((log, lidx) => (
-              <div key={lidx} className="flex items-center gap-2 text-slate-400">
-                <span className="text-[#B2F601]">▶</span>
-                <span className={lidx === 0 ? 'text-white font-semibold' : ''}>{log}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* REAL-TIME ANALYSIS & SEARCH HISTORY AUDIT TRAIL */}
+        <ForensicAuditHistory 
+          auditLogs={auditLogs}
+          onClearLogs={handleClearLogs}
+          currentTime={currentTime}
+        />
       </main>
 
       {/* FOOTER */}

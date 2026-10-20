@@ -19,7 +19,8 @@ export default function CommandScreenHUD({
   threatState = 'NEUTRAL',
   onSelectNode,
   telemetry,
-  realPing = 11.8
+  realPing = 11.8,
+  onLogAudit = null
 }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedRouteIndex, setSelectedRouteIndex] = useState(0);
@@ -83,6 +84,16 @@ export default function CommandScreenHUD({
         country: row.route,
         org: `${row.code} (${row.attack_type || 'Hostile Trajectory'})`,
         threat_risk: row.risk
+      });
+    }
+    if (onLogAudit) {
+      onLogAudit({
+        module: "RECON",
+        action: "VECTOR LOCK",
+        target: `${row.code}: ${row.route}`,
+        verdict: row.risk > 70 ? `⚠️ HOSTILE ATTACK ARC (${row.risk}% RISK)` : `✅ NOMINAL VECTOR (${row.risk}%)`,
+        status: row.risk > 70 ? "THREAT" : "LEGIT",
+        details: `${row.attack_type || 'Active Trajectory'} | Inbound to: ${row.city}`
       });
     }
   };
@@ -210,13 +221,27 @@ export default function CommandScreenHUD({
             title={primarySat.name} 
             subtitle={`${primarySat.sensor_type} • ${primarySat.altitude_km} km`} 
             actionLabel="Lock Orbit" 
-            onClick={() => onSelectNode && onSelectNode({ 
-              city: primarySat.name, 
-              lat: 42.76, 
-              lon: 115.36, 
-              threat_risk: 10,
-              country: "Keplerian LEO Track" 
-            })}
+            onClick={() => {
+              if (onSelectNode) {
+                onSelectNode({ 
+                  city: primarySat.name, 
+                  lat: 42.76, 
+                  lon: 115.36, 
+                  threat_risk: 10,
+                  country: "Keplerian LEO Track" 
+                });
+              }
+              if (onLogAudit) {
+                onLogAudit({
+                  module: "ORBIT",
+                  action: "SATELLITE LOCK",
+                  target: primarySat.name,
+                  verdict: "✅ ORBITAL KEPLERIAN TRACK LOCKED",
+                  status: "LEGIT",
+                  details: `${primarySat.sensor_type} • Altitude: ${primarySat.altitude_km} km`
+                });
+              }
+            }}
           />
 
           {/* Card 3: THREAT & ATTACK VECTORS TABLE */}

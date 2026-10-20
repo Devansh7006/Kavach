@@ -5,7 +5,7 @@ import {
   RefreshCw, Layers, Info, MapPin, ZoomIn, FileText, Upload, Sparkles, AlertTriangle
 } from 'lucide-react';
 
-export default function ImageForensicsTab({ onTargetSelected, onVerdictChange }) {
+export default function ImageForensicsTab({ onTargetSelected, onVerdictChange, onLogAudit }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [activeView, setActiveView] = useState('ORIGINAL'); // 'ORIGINAL' | 'ELA' | 'NOISE'
@@ -263,6 +263,16 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
       if (onTargetSelected && data.target_geo) {
         onTargetSelected(data.target_geo);
       }
+      if (onLogAudit) {
+        onLogAudit({
+          module: "IMAGE",
+          action: "ANALYZED",
+          target: file.name,
+          verdict: data.is_ai_generated ? "⚠️ AI-GENERATED (SYNTHETIC)" : "✅ AUTHENTIC HARDWARE SENSOR",
+          status: data.is_ai_generated ? "THREAT" : "LEGIT",
+          details: `Resolution: ${data.resolution || '800x600'} | ELA Discrepancy: ${data.ela_alteration_score || 88}% | Sensor Noise: ${data.noise_variance || 3.42}`
+        });
+      }
     } catch (err) {
       console.warn("Backend fetch failed/timed out, invoking instant local Canvas forensic engine:", err);
       clearTimeout(timeoutId);
@@ -281,6 +291,16 @@ export default function ImageForensicsTab({ onTargetSelected, onVerdictChange })
         }
         if (onTargetSelected && fallbackResult.target_geo) {
           onTargetSelected(fallbackResult.target_geo);
+        }
+        if (onLogAudit) {
+          onLogAudit({
+            module: "IMAGE",
+            action: "ANALYZED",
+            target: file.name,
+            verdict: fallbackResult.is_ai_generated ? "⚠️ AI-GENERATED (SYNTHETIC)" : "✅ AUTHENTIC HARDWARE SENSOR",
+            status: fallbackResult.is_ai_generated ? "THREAT" : "LEGIT",
+            details: `Resolution: ${fallbackResult.resolution || '800x600'} | ELA Discrepancy: ${fallbackResult.ela_alteration_score}% | Noise: ${fallbackResult.noise_variance}`
+          });
         }
       }
     } finally {

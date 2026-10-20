@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Video, Film, RefreshCw, BarChart2, ShieldCheck, ShieldAlert, Upload, CheckCircle2, AlertTriangle } from 'lucide-react';
 
-export default function VideoForensicsTab({ onVerdictChange }) {
+export default function VideoForensicsTab({ onVerdictChange, onLogAudit }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [selectedFrame, setSelectedFrame] = useState(0);
@@ -43,6 +43,16 @@ export default function VideoForensicsTab({ onVerdictChange }) {
       };
       setResult(res);
       if (onVerdictChange) onVerdictChange(isSynthetic ? 'THREAT' : 'LEGIT');
+      if (onLogAudit) {
+        onLogAudit({
+          module: "VIDEO",
+          action: "ANALYZED",
+          target: res.filename,
+          verdict: isSynthetic ? "⚠️ AI DEEPFAKE (FACE-SWAP WARPING)" : "✅ AUTHENTIC HUMAN FOOTAGE",
+          status: isSynthetic ? "THREAT" : "LEGIT",
+          details: `${res.timeline.length} Keyframes @ ${res.fps} FPS | Temporal: ${res.temporal_consistency} | Deepfake Conf: ${res.deepfake_confidence}%`
+        });
+      }
       setIsAnalyzing(false);
     }, 1000);
   };
@@ -64,6 +74,16 @@ export default function VideoForensicsTab({ onVerdictChange }) {
       data.is_ai_generated = data.deepfake_confidence > 50;
       setResult(data);
       if (onVerdictChange) onVerdictChange(data.is_ai_generated ? 'THREAT' : 'LEGIT');
+      if (onLogAudit) {
+        onLogAudit({
+          module: "VIDEO",
+          action: "ANALYZED",
+          target: file.name,
+          verdict: data.is_ai_generated ? "⚠️ AI DEEPFAKE (FACE-SWAP WARPING)" : "✅ AUTHENTIC CAMERA FOOTAGE",
+          status: data.is_ai_generated ? "THREAT" : "LEGIT",
+          details: `FPS: ${data.fps || 30} | Duration: ${data.duration || 'N/A'} | Deepfake Conf: ${data.deepfake_confidence || 80}%`
+        });
+      }
     } catch (err) {
       console.error(err);
       loadTestVideoAnalysis('DEEPFAKE');

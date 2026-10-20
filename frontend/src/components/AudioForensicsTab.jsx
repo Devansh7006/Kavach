@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Radio, ShieldCheck, ShieldAlert, Activity, RefreshCw, BarChart3, Upload } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-export default function AudioForensicsTab({ onVerdictChange }) {
+export default function AudioForensicsTab({ onVerdictChange, onLogAudit }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
 
@@ -54,6 +54,16 @@ export default function AudioForensicsTab({ onVerdictChange }) {
       };
       setResult(res);
       if (onVerdictChange) onVerdictChange(isSynthetic ? 'THREAT' : 'LEGIT');
+      if (onLogAudit) {
+        onLogAudit({
+          module: "AUDIO",
+          action: "ANALYZED",
+          target: res.filename,
+          verdict: isSynthetic ? "⚠️ AI VOICE CLONE (SYNTHETIC)" : "✅ AUTHENTIC HUMAN VOICE",
+          status: isSynthetic ? "THREAT" : "LEGIT",
+          details: `13-Band Librosa MFCC | Rate: ${res.sample_rate} | Flatness: ${res.spectral_metrics.spectral_flatness} | Confidence: ${res.deepfake_confidence}%`
+        });
+      }
       setIsAnalyzing(false);
     }, 1000);
   };
@@ -81,6 +91,16 @@ export default function AudioForensicsTab({ onVerdictChange }) {
       data.is_ai_generated = data.deepfake_confidence > 50;
       setResult(data);
       if (onVerdictChange) onVerdictChange(data.is_ai_generated ? 'THREAT' : 'LEGIT');
+      if (onLogAudit) {
+        onLogAudit({
+          module: "AUDIO",
+          action: "ANALYZED",
+          target: file.name,
+          verdict: data.is_ai_generated ? "⚠️ AI VOICE CLONE (SYNTHETIC)" : "✅ AUTHENTIC HUMAN VOICE",
+          status: data.is_ai_generated ? "THREAT" : "LEGIT",
+          details: `Sample Rate: ${data.sample_rate || '16 kHz'} | Confidence: ${data.deepfake_confidence || 85}%`
+        });
+      }
     } catch (err) {
       console.error(err);
       loadTestAudioAnalysis('SYNTHETIC');
