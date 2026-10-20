@@ -346,7 +346,7 @@ export default function App() {
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-slate-300 font-mono-hud text-[10px] font-bold shadow-sm"
               >
                 <span className="w-2 h-2 rounded-full bg-[#62C0F6] animate-pulse" />
-                <span className="tracking-wider">SENTINEL MONITORING ACTIVE</span>
+                <span className="tracking-wider">SENTINEL STANDBY // NEUTRAL</span>
               </div>
             )}
           </div>

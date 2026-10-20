@@ -44,7 +44,11 @@ export default function CommandScreenHUD({
   const phishCount = telemetry?.summary?.phishing_campaigns_blocked || 1420;
   const deepfakesCount = telemetry?.summary?.deepfakes_quarantined || 381;
   const nodesOnline = telemetry?.summary?.kavach_nodes_online || 48;
-  const defconLevel = telemetry?.summary?.defcon_level || (threatState === 'THREAT' ? 'DEFCON 1 // BREACH' : 'DEFCON 2 // HIGH ALERT');
+  const defconLevel = threatState === 'THREAT' 
+    ? 'DEFCON 1 // BREACH' 
+    : threatState === 'LEGIT' 
+    ? 'DEFCON 5 // SECURE' 
+    : (telemetry?.summary?.defcon_level || 'DEFCON 4 // NOMINAL STANDBY');
 
   // Dynamic threat vectors from authentic backend attack arcs
   const flightVectorRows = (telemetry?.attack_arcs && telemetry.attack_arcs.length > 0)
