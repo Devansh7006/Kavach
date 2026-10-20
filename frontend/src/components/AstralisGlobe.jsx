@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { 
   Crosshair, Satellite, Compass, RotateCcw, Flame, ShieldAlert, 
@@ -18,6 +18,26 @@ function latLonToVector3(lat, lon, radius) {
   return new THREE.Vector3(x, y, z);
 }
 
+// 16 Pinned Global Cities (Matching Alibaba 20 & Big Data War Room reference)
+export const PINNED_CITIES = [
+  { id: 'MOW', name: 'Moscow', cn: '莫斯科', lat: 55.75, lon: 37.61, risk: 94, org: 'Bulletproof C2 Relay', sector: 'SEC-1' },
+  { id: 'ISB', name: 'Islamabad', cn: '伊斯兰堡', lat: 33.68, lon: 73.04, risk: 65, org: 'Autonomous Subnet', sector: 'SEC-2' },
+  { id: 'THR', name: 'Tehran', cn: '德黑兰', lat: 35.68, lon: 51.38, risk: 88, org: 'Sandworm Mirror', sector: 'SEC-1' },
+  { id: 'DXB', name: 'Dubai', cn: '迪拜', lat: 25.20, lon: 55.27, risk: 32, org: 'Gulf Interconnect', sector: 'SEC-2' },
+  { id: 'LON', name: 'London', cn: '伦敦', lat: 51.50, lon: -0.12, risk: 14, org: 'LINX Exchange', sector: 'SEC-3' },
+  { id: 'FRA', name: 'Frankfurt', cn: '法兰克福', lat: 50.11, lon: 8.68, risk: 18, org: 'DE-CIX Core', sector: 'SEC-2' },
+  { id: 'DEL', name: 'New Delhi', cn: '新德里', lat: 28.61, lon: 77.20, risk: 42, org: 'NIXI Routing Hub', sector: 'SEC-1' },
+  { id: 'WUH', name: 'Wuhan', cn: '武汉', lat: 30.59, lon: 114.30, risk: 54, org: 'Optical Backbone', sector: 'SEC-1' },
+  { id: 'CAN', name: 'Guangzhou', cn: '广州', lat: 23.12, lon: 113.26, risk: 29, org: 'Subsea Terminal', sector: 'SEC-2' },
+  { id: 'HKG', name: 'Hong Kong', cn: '香港', lat: 22.31, lon: 114.16, risk: 22, org: 'HKIX Transit', sector: 'SEC-2' },
+  { id: 'SIN', name: 'Singapore', cn: '新加坡', lat: 1.35, lon: 103.81, risk: 12, org: 'Equinix SG1 Hub', sector: 'SEC-1' },
+  { id: 'JKT', name: 'Jakarta', cn: '雅加达', lat: -6.20, lon: 106.84, risk: 45, org: 'APNIC Regional Node', sector: 'SEC-2' },
+  { id: 'SYD', name: 'Sydney', cn: '悉尼', lat: -33.86, lon: 151.20, risk: 10, org: 'Pacific Gateway', sector: 'SEC-3' },
+  { id: 'SFO', name: 'San Francisco', cn: '旧金山', lat: 37.77, lon: -122.41, risk: 15, org: 'Bay Area Transit', sector: 'SEC-3' },
+  { id: 'NYC', name: 'New York', cn: '纽约', lat: 40.71, lon: -74.00, risk: 19, org: 'JFK Teleport', sector: 'SEC-3' },
+  { id: 'TYO', name: 'Tokyo', cn: '东京', lat: 35.67, lon: 139.65, risk: 11, org: 'JPIX Otari Center', sector: 'SEC-2' }
+];
+
 export default function AstralisGlobe({
   activeTarget = null,
   threatState = 'NEUTRAL', // 'NEUTRAL' | 'LEGIT' | 'THREAT'
@@ -29,11 +49,12 @@ export default function AstralisGlobe({
   const cloudsMeshRef = useRef(null);
   const atmosphereMeshRef = useRef(null);
   const animationFrameRef = useRef(null);
+  const cameraRef = useRef(null);
 
-  // States mirroring the exact God's Eye console in screenshots
+  // States
   const [flirMode, setFlirMode] = useState(false);
-  const [activeLayer, setActiveLayer] = useState('ALL'); // 'ALL' | 'FLIGHTS' | 'SATELLITES' | 'CYBER'
   const [autoRotate, setAutoRotate] = useState(true);
+  const [projectedCities, setProjectedCities] = useState([]);
   const [selectedEntity, setSelectedEntity] = useState({
     callsign: "NB521",
     model: "PC21 QA353",
@@ -46,18 +67,28 @@ export default function AstralisGlobe({
   const [hudCoords, setHudCoords] = useState({
     mgrs: "13R FN 1726 7282",
     latLon: `29°34'47.05"N 103°47'21.57"W`,
-    sector: "SECTOR 31.50N 101.79W | NORTH AMERICA"
+    sector: "SECTOR 31.50N 101.79W | RECON ACTIVE"
   });
 
   const [flirSensitivity, setFlirSensitivity] = useState(75);
   const [flirBloom, setFlirBloom] = useState(60);
 
-  // Theme Accent Colors from Image 4 (#B2F601, #62C0F6, #343645)
+  // Theme Accent Colors
   const isThreat = threatState === 'THREAT';
   const isLegit = threatState === 'LEGIT';
   
   const accentColor = isThreat ? '#FF3366' : isLegit ? '#B2F601' : '#62C0F6';
-  const secondaryColor = isThreat ? '#FF1744' : isLegit ? '#62C0F6' : '#B2F601';
+
+  // Smoothly rotate globe towards target when activeTarget changes
+  useEffect(() => {
+    if (!activeTarget || !globeGroupRef.current) return;
+    const targetLonRad = THREE.MathUtils.degToRad(-activeTarget.lon - 90);
+    const targetLatRad = THREE.MathUtils.degToRad(activeTarget.lat * 0.4);
+    
+    // Smooth target orientation
+    globeGroupRef.current.rotation.y = targetLonRad;
+    globeGroupRef.current.rotation.x = targetLatRad;
+  }, [activeTarget]);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -67,8 +98,8 @@ export default function AstralisGlobe({
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 2000);
-    // Elevated perspective framing the globe like the satellite recon console
     camera.position.set(0, 14, 62);
+    cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({ 
       antialias: true, 
@@ -114,7 +145,6 @@ export default function AstralisGlobe({
     // Globe Group with Natural Axial Tilt
     const globeGroup = new THREE.Group();
     globeGroup.rotation.z = THREE.MathUtils.degToRad(-18);
-    // Face North America & Europe towards camera initially
     globeGroup.rotation.y = 1.85;
     scene.add(globeGroup);
     globeGroupRef.current = globeGroup;
@@ -195,12 +225,51 @@ export default function AstralisGlobe({
     globeGroup.add(atmosphereMesh);
     atmosphereMeshRef.current = atmosphereMesh;
 
-    // 4. Hundreds of Tactical Asset & Flight Vectors (from Image 1 & 2)
-    const flightCount = 380;
+    // 4. City Markers with 3D Leader Pins (From Image 1 Alibaba 20 Screen)
+    const cityObjects = PINNED_CITIES.map((city) => {
+      const surfacePos = latLonToVector3(city.lat, city.lon, RADIUS);
+      const hoverPos = latLonToVector3(city.lat, city.lon, RADIUS + 2.5);
+
+      // Base dot on earth surface
+      const baseMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.32, 10, 10),
+        new THREE.MeshBasicMaterial({ color: city.risk > 70 ? 0xFF3366 : 0xB2F601 })
+      );
+      baseMesh.position.copy(surfacePos);
+      globeGroup.add(baseMesh);
+
+      // Vertical 3D leader line from surface to hover
+      const lineGeo = new THREE.BufferGeometry().setFromPoints([surfacePos, hoverPos]);
+      const lineMat = new THREE.LineBasicMaterial({ 
+        color: 0x62C0F6, 
+        transparent: true, 
+        opacity: 0.75,
+        linewidth: 1
+      });
+      const leaderLine = new THREE.Line(lineGeo, lineMat);
+      globeGroup.add(leaderLine);
+
+      // Top pin ring
+      const topRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.2, 0.35, 12),
+        new THREE.MeshBasicMaterial({ color: 0x62C0F6, side: THREE.DoubleSide })
+      );
+      topRing.position.copy(hoverPos);
+      topRing.lookAt(0, 0, 0);
+      globeGroup.add(topRing);
+
+      return {
+        ...city,
+        surfacePos,
+        hoverPos
+      };
+    });
+
+    // 5. Tactical Asset & Flight Vectors
+    const flightCount = 280;
     const flightGeo = new THREE.BufferGeometry();
     const flightPos = new Float32Array(flightCount * 3);
     for (let i = 0; i < flightCount; i++) {
-      // Density distributed across North America, Europe, Asia
       const lat = (Math.random() * 80) - 20;
       const lon = (Math.random() * 360) - 180;
       const vec = latLonToVector3(lat, lon, RADIUS + 0.22);
@@ -218,12 +287,14 @@ export default function AstralisGlobe({
     const flightsPoints = new THREE.Points(flightGeo, flightMat);
     globeGroup.add(flightsPoints);
 
-    // 5. Real Tactical Route Arcs (e.g. LAX to DFW 1983 km, SVO to DEL 4340 km)
+    // 6. Real Tactical Route Arcs
     const TACTICAL_ROUTES = [
       { from: "California LAX", to: "Texas DFW", src: { lat: 34.05, lon: -118.24 }, dst: { lat: 32.77, lon: -96.79 }, dist: "1983 km", col: 0x62C0F6 },
       { from: "Moscow SVO", to: "New Delhi DEL", src: { lat: 55.75, lon: 37.61 }, dst: { lat: 28.61, lon: 77.20 }, dist: "4340 km", col: 0xFF3366 },
       { from: "Shanghai SHA", to: "San Francisco SFO", src: { lat: 31.23, lon: 121.47 }, dst: { lat: 37.77, lon: -122.41 }, dist: "9880 km", col: 0xB2F601 },
-      { from: "Frankfurt FRA", to: "New York JFK", src: { lat: 50.11, lon: 8.68 }, dst: { lat: 40.71, lon: -74.00 }, dist: "6200 km", col: 0x62C0F6 }
+      { from: "Frankfurt FRA", to: "New York JFK", src: { lat: 50.11, lon: 8.68 }, dst: { lat: 40.71, lon: -74.00 }, dist: "6200 km", col: 0x62C0F6 },
+      { from: "London LINX", to: "Moscow C2", src: { lat: 51.50, lon: -0.12 }, dst: { lat: 55.75, lon: 37.61 }, dist: "2500 km", col: 0xFF3366 },
+      { from: "Singapore SG1", to: "Sydney GATE", src: { lat: 1.35, lon: 103.81 }, dst: { lat: -33.86, lon: 151.20 }, dist: "6300 km", col: 0xB2F601 }
     ];
 
     TACTICAL_ROUTES.forEach((r) => {
@@ -239,15 +310,14 @@ export default function AstralisGlobe({
       const arcMat = new THREE.LineBasicMaterial({ color: r.col, transparent: true, opacity: 0.8, linewidth: 2 });
       globeGroup.add(new THREE.Line(arcGeo, arcMat));
 
-      // Endpoint beacons
       [v1, v2].forEach((v) => {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), new THREE.MeshBasicMaterial({ color: r.col }));
+        const b = new THREE.Mesh(new THREE.SphereGeometry(0.35, 10, 10), new THREE.MeshBasicMaterial({ color: r.col }));
         b.position.copy(v);
         globeGroup.add(b);
       });
     });
 
-    // 6. Orbital Satellites & Space Stations (ISS NORAD 25544)
+    // 7. Orbital Satellites & Space Stations (ISS NORAD 25544)
     const satGroup = new THREE.Group();
     const REAL_ORBITALS = [
       { name: "ISS (ZARYA) NORAD 25544", radius: RADIUS + 5.8, speed: 0.007, inc: 0.9, col: 0xB2F601, alt: "420 km", vel: "7.66 km/s" },
@@ -259,19 +329,17 @@ export default function AstralisGlobe({
       const orbitCurve = new THREE.EllipseCurve(0, 0, s.radius, s.radius, 0, 2 * Math.PI, false, 0);
       const pts = orbitCurve.getPoints(64);
       const geo = new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p.x, 0, p.y)));
-      const mat = new THREE.LineBasicMaterial({ color: s.col, transparent: true, opacity: 0.3 });
+      const mat = new THREE.LineBasicMaterial({ color: s.col, transparent: true, opacity: 0.35 });
       const line = new THREE.Line(geo, mat);
       line.rotation.x = s.inc;
       satGroup.add(line);
 
-      // Satellite mesh
       const craft = new THREE.Group();
       const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.4, 0.9), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9 }));
       const wings = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.06, 0.7), new THREE.MeshBasicMaterial({ color: s.col }));
       craft.add(body, wings);
       satGroup.add(craft);
 
-      // Sensor cone
       const cone = new THREE.Mesh(
         new THREE.ConeGeometry(3.2, s.radius - RADIUS, 16, 1, true),
         new THREE.MeshBasicMaterial({ color: s.col, transparent: true, opacity: 0.06, wireframe: true })
@@ -282,7 +350,7 @@ export default function AstralisGlobe({
     });
     globeGroup.add(satGroup);
 
-    // 7. Interactive Mouse Orbit Controls
+    // 8. Interactive Mouse Orbit Controls
     let isDragging = false;
     let prevMouse = { x: 0, y: 0 };
 
@@ -314,7 +382,11 @@ export default function AstralisGlobe({
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
 
-    // 8. Animation Loop
+    // 9. Animation Loop with Screen-Projected City Labels
+    let frameCount = 0;
+    const tempVec = new THREE.Vector3();
+    const cameraWorldPos = new THREE.Vector3();
+
     const animate = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
 
@@ -338,6 +410,40 @@ export default function AstralisGlobe({
         sat.cone.lookAt(x, y, z);
       });
 
+      // Project 2D City Labels (update every 2 frames for smooth performance)
+      frameCount++;
+      if (frameCount % 2 === 0 && mountRef.current) {
+        camera.getWorldPosition(cameraWorldPos);
+        const w = mountRef.current.clientWidth;
+        const h = mountRef.current.clientHeight;
+
+        const updated = cityObjects.map((city) => {
+          tempVec.copy(city.hoverPos);
+          tempVec.applyMatrix4(globeGroup.matrixWorld);
+
+          // Dot product between surface normal and camera vector to check front hemisphere
+          const surfaceWorld = city.surfacePos.clone().applyMatrix4(globeGroup.matrixWorld);
+          const dirToCamera = cameraWorldPos.clone().sub(surfaceWorld).normalize();
+          const normal = surfaceWorld.clone().normalize();
+          const dot = normal.dot(dirToCamera);
+
+          if (dot > 0.08) {
+            tempVec.project(camera);
+            const screenX = (tempVec.x * 0.5 + 0.5) * w;
+            const screenY = (-(tempVec.y * 0.5) + 0.5) * h;
+            return {
+              ...city,
+              screenX,
+              screenY,
+              visible: tempVec.z < 1.0
+            };
+          } else {
+            return { ...city, visible: false };
+          }
+        });
+        setProjectedCities(updated);
+      }
+
       renderer.render(scene, camera);
     };
     animate();
@@ -355,121 +461,106 @@ export default function AstralisGlobe({
     return () => {
       cancelAnimationFrame(animationFrameRef.current);
       window.removeEventListener('resize', handleResize);
+      domElem.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
-      domElem.removeEventListener('mousedown', onMouseDown);
-      if (renderer.domElement && domElem.contains(renderer.domElement)) {
-        domElem.removeChild(renderer.domElement);
+      if (mountRef.current && renderer.domElement) {
+        mountRef.current.removeChild(renderer.domElement);
       }
       renderer.dispose();
     };
-  }, []);
+  }, [accentColor, autoRotate]);
 
-  // Update Atmosphere Color on Threat State Change
-  useEffect(() => {
-    if (atmosphereMeshRef.current && atmosphereMeshRef.current.material.uniforms) {
-      atmosphereMeshRef.current.material.uniforms.glowColor.value.setHex(new THREE.Color(accentColor).getHex());
-    }
-  }, [threatState]);
+  // Handle City Pin Click
+  const handleCityPinClick = useCallback((city) => {
+    setSelectedEntity({
+      callsign: `${city.id}-NODE`,
+      model: city.org,
+      status: `THREAT RISK: ${city.risk}% // ${city.sector}`,
+      route: `${city.name} (${city.cn}) — ROUTING GATEWAY`,
+      lat: `${city.lat}° N`,
+      lon: `${city.lon}° E`
+    });
 
-  // Handle FLIR Mode switch
-  useEffect(() => {
-    if (!earthMeshRef.current) return;
-    if (flirMode) {
-      // Thermal FLIR Shader Material (Image 3)
-      earthMeshRef.current.material.color.setHex(0xff3300);
-      earthMeshRef.current.material.wireframe = false;
-      if (atmosphereMeshRef.current) {
-        atmosphereMeshRef.current.material.uniforms.glowColor.value.setHex(0xff0044);
-      }
-    } else {
-      earthMeshRef.current.material.color.setHex(0xffffff);
-      if (atmosphereMeshRef.current) {
-        atmosphereMeshRef.current.material.uniforms.glowColor.value.setHex(new THREE.Color(accentColor).getHex());
-      }
+    if (onSelectNode) {
+      onSelectNode({
+        city: city.name,
+        lat: city.lat,
+        lon: city.lon,
+        country: city.cn,
+        org: city.org,
+        threat_risk: city.risk
+      });
     }
-  }, [flirMode]);
+  }, [onSelectNode]);
 
   return (
-    <div className={`relative w-full h-[680px] overflow-hidden rounded-3xl border border-white/[0.12] bg-[#0b0e17] shadow-[0_24px_70px_rgba(0,0,0,0.85)] font-mono-hud transition-all duration-500 ${
-      flirMode ? 'ring-2 ring-red-500/50' : ''
-    }`}>
-      {/* 3D WebGL Canvas */}
-      <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+    <div className="relative w-full h-full min-h-[680px] rounded-3xl overflow-hidden hud-glass-panel border border-[#62C0F6]/25 select-none">
+      {/* Three.js Canvas Container */}
+      <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing z-0" />
 
-      {/* TOP STREAM TELEMETRY BAR (Exact from Image 2: E VIS:5049 SRC:5723 DENS:75% ELASTIC 3.1ms) */}
-      <div className="absolute top-3 left-6 right-6 z-20 pointer-events-none flex items-center justify-between text-[11px] text-[#62C0F6]/80 font-bold border-b border-white/[0.08] pb-1.5">
-        <div className="flex items-center gap-4">
-          <span className="text-[#B2F601] tracking-widest font-black">E VIS: 5049</span>
-          <span>SRC: 5723</span>
-          <span>DENS: 75%</span>
-          <span className="text-white">ELASTIC: 3.1ms</span>
-          <span className="text-slate-400 hidden md:inline">| BUFFER: 100% OK</span>
+      {/* FLOATING 2D PINNED CITY LABELS OVER 3D GLOBE (Matching Alibaba 20 Screen) */}
+      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+        {projectedCities.map((city) => {
+          if (!city.visible || city.screenX < 20 || city.screenY < 20) return null;
+          return (
+            <div
+              key={city.id}
+              onClick={() => handleCityPinClick(city)}
+              className="absolute pointer-events-auto cursor-pointer transition-transform duration-100 hover:scale-110 group"
+              style={{
+                left: `${city.screenX}px`,
+                top: `${city.screenY}px`,
+                transform: 'translate(-50%, -100%)'
+              }}
+            >
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#0E111A]/90 border border-white/20 hover:border-[#B2F601] shadow-2xl backdrop-blur-md">
+                <span 
+                  className="w-1.5 h-1.5 rounded-full shrink-0" 
+                  style={{ backgroundColor: city.risk > 70 ? '#FF3366' : city.risk > 30 ? '#62C0F6' : '#B2F601' }}
+                />
+                <span className="text-[11px] font-bold text-white tracking-wide font-tactical">
+                  {city.cn}
+                </span>
+                <span className="text-[9px] text-slate-400 font-mono-hud hidden sm:inline">
+                  {city.name}
+                </span>
+              </div>
+              {/* Leader tick indicator */}
+              <div className="w-px h-2.5 bg-[#62C0F6]/60 mx-auto" />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* TOP RECON TELEMETRY BAR */}
+      <div className="absolute top-3 left-6 right-6 z-20 pointer-events-none flex items-center justify-between font-mono-hud text-xs border-b border-white/[0.08] pb-2">
+        <div className="flex items-center gap-4 text-slate-300">
+          <span className="flex items-center gap-1.5 text-[#B2F601] font-bold">
+            <span className="w-2 h-2 rounded-full bg-[#B2F601] animate-ping" />
+            E VIS: 5049
+          </span>
+          <span className="text-slate-400">SRC: <strong className="text-white">5723</strong></span>
+          <span className="text-slate-400">DENS: <strong className="text-[#62C0F6]">75%</strong></span>
+          <span className="text-slate-400 hidden sm:inline">ELASTIC: <strong className="text-[#B2F601]">3.1ms</strong></span>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="w-2 h-2 rounded-full bg-[#B2F601] animate-ping" />
-          <span className="text-[#B2F601] font-extrabold uppercase tracking-wider">
-            {flirMode ? "SPECTRUM: FLIR THERMAL ACTIVE" : "SPECTRUM: OPTICAL SATELLITE RADAR"}
+
+        <div className="flex items-center gap-3 text-[11px] font-bold">
+          <span className="text-[#62C0F6] tracking-wider hidden md:inline">TOP SECRET // SI-TK // NOFORN</span>
+          <span className="px-2 py-0.5 rounded bg-[#343645]/80 text-[#B2F601] border border-[#B2F601]/30">
+            KH11-4180
           </span>
         </div>
       </div>
 
-      {/* TOP LEFT: MILITARY INTELLIGENCE HEADER (Exact layout from Images 1 & 2) */}
-      <div className="absolute top-10 left-6 z-20 pointer-events-none flex flex-col gap-2.5 max-w-sm">
-        {/* Title & Glowing Recon Eye */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#62C0F6]/20 border border-[#62C0F6]/50 flex items-center justify-center glow-cyan">
-            <Radio className="w-4 h-4 text-[#62C0F6] animate-pulse" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold font-tactical text-white tracking-wider flex items-center gap-1.5">
-              AURA <span className="text-[#62C0F6] font-light">// SPATIAL RECON</span>
-            </h1>
-            <div className="text-[10px] text-slate-400 font-bold tracking-widest">0 PLACE LEFT BEHIND</div>
-          </div>
-        </div>
-
-        {/* TOP SECRET Header Stamp */}
-        <div className="space-y-1">
-          <div className="text-[10px] tracking-widest font-extrabold text-[#62C0F6]">
-            TOP SECRET // SI-TK // NOFORN
-          </div>
-          <div className="text-[11px] text-slate-400">KH11-4180 OPS-4127</div>
-          <div className={`text-xl font-black tracking-tight font-tactical ${
-            isThreat ? 'text-[#FF3366]' : 'text-[#B2F601]'
-          }`}>
-            {isThreat ? "CRITICAL THREAT" : "NORMAL"}
-          </div>
-          <div className="text-[11px] text-slate-300 leading-snug">
-            SUMMARY: {hudCoords.sector}
-          </div>
-        </div>
-
-        {/* Tactical Buttons [DATA LAYERS +] [MAP STACK +] [SCENES +] */}
-        <div className="flex items-center gap-2 pt-1 pointer-events-auto">
-          {["DATA LAYERS +", "MAP STACK +", "SCENES +"].map((btn, idx) => (
-            <button
-              key={idx}
-              className="px-2.5 py-1 rounded bg-[#343645]/70 hover:bg-[#62C0F6]/20 text-[10px] font-bold text-slate-200 border border-white/[0.1] hover:border-[#62C0F6]/40 transition-all shadow-md backdrop-blur-md"
-            >
-              {btn}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* TOP RIGHT: RECORDING STATUS & SATELLITE PASS (Exact from Images 1 & 2) */}
-      <div className="absolute top-10 right-6 z-20 pointer-events-none flex flex-col items-end gap-2">
+      {/* TOP RIGHT: RECORDING STATUS & CONTROLS */}
+      <div className="absolute top-12 right-6 z-20 pointer-events-none flex flex-col items-end gap-2">
         <div className="flex items-center gap-2 text-[11px] font-bold">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#FF3366] animate-pulse" />
-          <span className="text-slate-300">REC 2026-10-20 18:25:00 UTC</span>
-        </div>
-        <div className="text-[10px] text-slate-400 tracking-wider">
-          ORB: 47920 PASS: DESCENDING
+          <span className="w-2 h-2 rounded-full bg-[#FF3366] animate-pulse" />
+          <span className="text-slate-300">REC 2026-10-20 18:22 UTC</span>
         </div>
 
-        {/* FLIR Mode Toggle & Reset Controls */}
-        <div className="flex items-center gap-2 pt-2 pointer-events-auto">
+        <div className="flex items-center gap-2 pt-1 pointer-events-auto">
           <button
             onClick={() => setFlirMode(!flirMode)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-lg ${
@@ -495,9 +586,9 @@ export default function AstralisGlobe({
         </div>
       </div>
 
-      {/* FLIR PARAMETERS SIDEBAR (Appears when FLIR mode is engaged - Image 3) */}
+      {/* FLIR PARAMETERS SIDEBAR */}
       {flirMode && (
-        <div className="absolute right-6 top-32 z-20 p-4 rounded-2xl hud-glass-panel border-red-500/40 text-xs text-slate-200 space-y-3 w-60 animate-in fade-in slide-in-from-right-2">
+        <div className="absolute right-6 top-32 z-20 p-4 rounded-2xl hud-glass-panel border-red-500/40 text-xs text-slate-200 space-y-3 w-56 pointer-events-auto">
           <div className="flex items-center justify-between text-[#FF3366] font-bold border-b border-red-500/20 pb-1.5">
             <span className="flex items-center gap-1.5">
               <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -536,28 +627,23 @@ export default function AstralisGlobe({
                 className="w-full accent-red-500"
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-1.5 pt-1">
-              <button className="py-1 rounded bg-black/60 border border-red-500/30 text-[10px] text-white">WHOT</button>
-              <button className="py-1 rounded bg-red-950/80 border border-red-500 text-[10px] text-red-200 font-bold">BHOT</button>
-            </div>
           </div>
         </div>
       )}
 
-      {/* CENTER COCKPIT CROSSHAIR RETICLE */}
+      {/* CENTER COCKPIT RETICLE CROSSHAIR */}
       <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
-        <div className="relative w-72 h-72 border border-white/[0.08] rounded-full flex items-center justify-center">
-          <div className="absolute inset-4 border border-dashed border-[#62C0F6]/25 rounded-full" />
-          <Crosshair className="w-10 h-10 text-[#62C0F6]/30" />
-          <div className="absolute bottom-5 text-[9px] font-bold text-[#B2F601] tracking-widest uppercase">
+        <div className="relative w-64 h-64 border border-white/[0.07] rounded-full flex items-center justify-center">
+          <div className="absolute inset-4 border border-dashed border-[#62C0F6]/20 rounded-full" />
+          <Crosshair className="w-8 h-8 text-[#62C0F6]/30" />
+          <div className="absolute bottom-4 text-[9px] font-bold text-[#B2F601] tracking-widest uppercase">
             TARGET SECTOR LOCKED // NORMAL
           </div>
         </div>
       </div>
 
-      {/* INTERACTIVE FLIGHT / ASSET TOOLTIP (Exact from Image 2: NB521 · Operator unknown · 10475 ft · 229 kt) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-12 z-20 p-2.5 rounded-xl bg-black/85 border border-[#62C0F6]/40 text-xs text-white backdrop-blur-xl shadow-2xl pointer-events-auto">
+      {/* SELECTED ENTITY TOOLTIP */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-12 z-20 p-2.5 rounded-xl bg-[#0E111A]/90 border border-[#62C0F6]/40 text-xs text-white backdrop-blur-xl shadow-2xl pointer-events-auto">
         <div className="font-extrabold text-[#B2F601] flex items-center gap-1.5">
           <Plane className="w-3.5 h-3.5 text-[#62C0F6]" />
           <span>{selectedEntity.callsign}</span>
@@ -567,18 +653,18 @@ export default function AstralisGlobe({
         <div className="text-[10px] text-[#62C0F6] font-bold mt-1">{selectedEntity.route}</div>
       </div>
 
-      {/* BOTTOM LEFT: MGRS & EXACT LAT/LON COORDINATES (Exact from Images 1 & 2) */}
+      {/* BOTTOM LEFT: MGRS & EXACT COORDINATES */}
       <div className="absolute bottom-16 left-6 z-20 pointer-events-none space-y-1">
-        <div className="text-xs font-bold text-[#62C0F6] flex items-center gap-1.5">
+        <div className="text-xs font-bold text-[#62C0F6] flex items-center gap-1.5 font-mono-hud">
           <Compass className="w-3.5 h-3.5 text-[#B2F601]" />
           <span>MGRS: {hudCoords.mgrs}</span>
         </div>
-        <div className="text-[11px] text-slate-300 font-bold">{hudCoords.latLon}</div>
-        <div className="text-[9px] text-slate-500">[CESIUM ion High-Precision Geodesic Grid]</div>
+        <div className="text-[11px] text-slate-300 font-bold font-mono-hud">{hudCoords.latLon}</div>
+        <div className="text-[9px] text-slate-500 font-mono-hud">[High-Precision Geodesic Grid]</div>
       </div>
 
-      {/* CENTER BOTTOM: AI CONSOLE MIC PILL (Exact from Images 1, 2, 3) */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 p-1.5 rounded-2xl bg-black/85 border border-white/[0.12] backdrop-blur-2xl shadow-2xl">
+      {/* CENTER BOTTOM: AI CONSOLE MIC PILL */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 p-1.5 rounded-2xl bg-[#0E111A]/90 border border-white/[0.12] backdrop-blur-2xl shadow-2xl">
         <button className="px-3 py-1.5 rounded-xl bg-[#343645]/70 hover:bg-[#62C0F6]/20 text-[11px] font-bold text-slate-200 transition-all flex items-center gap-1">
           <MapPin className="w-3.5 h-3.5 text-[#B2F601]" />
           <span>LOCATION</span>
@@ -596,7 +682,7 @@ export default function AstralisGlobe({
 
         <button className="px-3 py-1.5 rounded-xl bg-[#343645]/70 hover:bg-[#62C0F6]/20 text-[11px] font-bold text-slate-200 transition-all flex items-center gap-1">
           <Eye className="w-3.5 h-3.5 text-[#62C0F6]" />
-          <span>VISUAL PRESETS</span>
+          <span>PRESETS</span>
         </button>
       </div>
     </div>
