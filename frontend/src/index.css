@@ -1,30 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @layer base {
   :root {
-    /* Exact Palette from Vasil Enev Cyber Pastel / Protocol Noir */
-    --protocol-noir: #171836;
-    --protocol-deep: #0d0e20;
-    --protocol-surface: #1e1f42;
-    --fluxberry: #B853CF;
-    --blossom: #F9A1F8;
-    --light-peach: #FFD8AD;
+    /* Exact Cyberpunk Tactical Palette from User Reference */
+    --neon-lime: #B2F601;       /* Toxic Cyber Lime - Primary Accent & Legit status */
+    --electric-cyan: #62C0F6;   /* Electric Sky Cyan - Telemetry, Links & Subheaders */
+    --tactical-slate: #343645;  /* Dark Cyber Graphite - Cards, Borders & Dividers */
+    --tactical-deep: #0E111A;   /* Pitch Tactical Obsidian - Command Viewport Base */
+    --tactical-card: rgba(52, 54, 69, 0.65);
     
-    /* Functional Alert Accents */
-    --cyber-emerald: #00ff9f;
-    --cyber-crimson: #ff3366;
-    --cyber-cyan: #00f5ff;
+    /* Emergency Alert Threat Colors */
+    --threat-crimson: #FF3366;  /* High-Alert Compromise / Deepfake / Phishing */
+    --alert-amber: #FFB703;
     
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-main: #f1f5f9;
+    --text-dim: #94a3b8;
   }
 
   body {
-    background-color: var(--protocol-deep);
-    color: var(--text-primary);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--tactical-deep);
+    color: var(--text-main);
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
     margin: 0;
     padding: 0;
@@ -33,153 +30,155 @@
   }
 }
 
-/* Typography Hierarchy */
-.font-display {
+/* Typography Tokens */
+.font-tactical {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.font-mono-hud {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.font-body-clean {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+/* Aliases for backwards compatibility */
 .font-heading {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
 }
-
+.font-display {
+  font-family: 'Space Grotesk', sans-serif;
+}
 .font-mono-code {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* 21st.dev Style Ultra-Refined Glassmorphism Surfaces */
-.cyber-glass {
-  background: rgba(23, 24, 54, 0.68);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(249, 161, 248, 0.14);
-  box-shadow: 0 12px 40px 0 rgba(7, 8, 20, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+/* Military / Cockpit Glassmorphism (from God's Eye View & Big Data Center Reference) */
+.hud-glass-panel, .cyber-glass, .glass-surface {
+  background: rgba(20, 24, 36, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(98, 192, 246, 0.2);
+  box-shadow: 0 14px 40px 0 rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.cyber-glass:hover {
-  border-color: rgba(249, 161, 248, 0.28);
-  box-shadow: 0 16px 48px 0 rgba(7, 8, 20, 0.65), 0 0 25px rgba(184, 83, 207, 0.15);
+.hud-glass-panel:hover, .cyber-glass:hover, .glass-surface:hover {
+  border-color: rgba(178, 246, 1, 0.4);
+  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.8), 0 0 24px rgba(178, 246, 1, 0.12);
 }
 
-.cyber-glass-interactive {
-  background: rgba(23, 24, 54, 0.6);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  transition: all 0.25s ease;
+.hud-glass-card {
+  background: rgba(52, 54, 69, 0.45);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.cyber-glass-interactive:hover {
-  background: rgba(30, 31, 66, 0.8);
-  border-color: rgba(249, 161, 248, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(184, 83, 207, 0.22);
+.hud-glass-card:hover {
+  background: rgba(52, 54, 69, 0.7);
+  border-color: rgba(98, 192, 246, 0.4);
 }
 
 /* Reactive Ambiance Surface Tokens */
-.cyber-glass-emerald {
-  background: rgba(8, 38, 26, 0.72);
-  backdrop-filter: blur(28px);
-  border: 1px solid rgba(0, 255, 159, 0.4);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 35px rgba(0, 255, 159, 0.22), inset 0 1px 0 rgba(0, 255, 159, 0.2);
+.hud-glass-lime, .cyber-glass-emerald {
+  background: rgba(18, 36, 20, 0.82);
+  backdrop-filter: blur(22px);
+  border: 1px solid rgba(178, 246, 1, 0.5);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7), 0 0 35px rgba(178, 246, 1, 0.25);
 }
 
-.cyber-glass-crimson {
-  background: rgba(46, 12, 24, 0.75);
-  backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 51, 102, 0.45);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 51, 102, 0.25), inset 0 1px 0 rgba(255, 51, 102, 0.2);
+.hud-glass-crimson, .cyber-glass-crimson {
+  background: rgba(45, 14, 24, 0.85);
+  backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 51, 102, 0.55);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 51, 102, 0.3);
 }
 
-/* 21st.dev Style Gradient Glow Borders */
-.gradient-border-neon {
-  position: relative;
-  border-radius: 1rem;
+/* Glowing Neon Elements */
+.glow-lime {
+  box-shadow: 0 0 20px rgba(178, 246, 1, 0.45);
 }
 
-.gradient-border-neon::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, #B853CF 0%, #F9A1F8 45%, #FFD8AD 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(98, 192, 246, 0.45);
 }
 
-/* Cyber Pastel Text Gradients */
-.text-gradient-cyber {
-  background: linear-gradient(135deg, #F9A1F8 0%, #B853CF 50%, #FFD8AD 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.glow-crimson {
+  box-shadow: 0 0 22px rgba(255, 51, 102, 0.5);
 }
 
-.text-gradient-peach {
-  background: linear-gradient(135deg, #ffffff 0%, #FFD8AD 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.text-glow-lime {
+  text-shadow: 0 0 12px rgba(178, 246, 1, 0.7);
 }
 
-/* Pill Arch with 4-Point Star Badge (Matching Image 2 Reference) */
+.text-glow-cyan {
+  text-shadow: 0 0 12px rgba(98, 192, 246, 0.7);
+}
+
+/* Star Arch Badge & Bubble (Cyberpunk Style) */
 .star-arch-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.85rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(52, 54, 69, 0.55);
+  border: 1px solid rgba(98, 192, 246, 0.3);
+  backdrop-filter: blur(12px);
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #FFD8AD;
 }
 
 .star-icon-bubble {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 9999px;
-  background: rgba(249, 161, 248, 0.15);
-  border: 1px solid rgba(249, 161, 248, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 12px rgba(249, 161, 248, 0.3);
+  background: rgba(178, 246, 1, 0.2);
+  border: 1px solid rgba(178, 246, 1, 0.5);
 }
 
 /* Custom Tactical Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(13, 14, 32, 0.8);
+  background: rgba(14, 17, 26, 0.9);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(184, 83, 207, 0.35);
-  border-radius: 4px;
+  background: rgba(98, 192, 246, 0.35);
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(249, 161, 248, 0.6);
+  background: rgba(178, 246, 1, 0.7);
 }
 
-/* Keyframes for Ambient Motion */
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(1deg); }
+/* Radar Scanline & FLIR Animations */
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.animate-float {
-  animation: float-slow 7s ease-in-out infinite;
+.animate-radar-sweep {
+  animation: radar-sweep 8s linear infinite;
+}
+
+@keyframes flir-flicker {
+  0%, 100% { opacity: 0.95; }
+  50% { opacity: 0.82; }
+}
+
+.animate-flir-pulse {
+  animation: flir-flicker 4s ease-in-out infinite;
 }
 
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.05); }
+  50% { opacity: 0.95; transform: scale(1.05); }
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 9s ease-in-out infinite;
+  animation: pulse-glow 6s ease-in-out infinite;
 }
